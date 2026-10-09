@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Employee app — Leads</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&amp;family=Instrument+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0;background:#F7F5F0}
+a{text-decoration:none}
+.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.seal circle,.seal rect{fill:none;stroke:#C9A96E;stroke-width:1.1}
+@keyframes tilt{0%,100%{transform:perspective(1200px) rotateY(-8deg) rotateX(6deg)}50%{transform:perspective(1200px) rotateY(6deg) rotateX(3deg)}}
+.tilt{animation:tilt 8s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){.tilt{animation:none}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; overflow: hidden; background: #F7F5F0; color: #17171B; font-family: 'Instrument Sans', 'Helvetica Neue', Helvetica, sans-serif; display: flex; flex-direction: column">
+  <main style="flex: 1; min-height: 0; padding: 56px 20px 16px; display: flex; flex-direction: column; gap: 16px; overflow: hidden">
+    <div style="display: flex; justify-content: space-between; align-items: center">
+      <h1 style="margin: 0; font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-weight: 500; font-size: 34px">Leads</h1>
+      <button type="button" style="height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid #D9D2C4; background: #FFFFFF; color: #17171B; font-family: inherit; font-size: 13px; display: flex; gap: 6px; align-items: center"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 17px; height: 17px; color: #876A33"><path d="M4 8V5h3M17 5h3v3M20 16v3h-3M7 19H4v-3M7 12h10"></path></svg>Scan paper card</button>
+    </div>
+    <div style="display: flex; gap: 8px">
+      <span style="font-size: 13px; padding: 8px 14px; border-radius: 999px; background: #17171B; color: #FFFFFF">To follow up · 3</span>
+      <span style="font-size: 13px; padding: 8px 14px; border-radius: 999px; border: 1px solid #E0D9CC; background: #FFFFFF">All · 41</span>
+    </div>
+    <section style="background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 16px; overflow: hidden">
+      <sc-for list="{{leads}}" as="l" hint-placeholder-count="5">
+        <div style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-top: 1px solid {{l.top}}">
+          <span style="width: 42px; height: 42px; border-radius: 50%; background: #F2EEE6; color: #876A33; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex: none">{{l.ini}}</span>
+          <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-weight: 600; font-size: 14.5px">{{l.name}}</span><span style="font-size: 12.5px; color: #5E5952; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{l.co}}</span><span style="font-size: 11.5px; color: #6E685F">{{l.via}} · {{l.when}}</span></span>
+          <span style="width: 9px; height: 9px; border-radius: 50%; background: {{l.dot}}; flex: none"></span>
+        </div>
+      </sc-for>
+    </section>
+    <section style="background: #FBF6EC; border: 1px solid #EBDDC0; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; align-items: center; gap: 8px; font-size: 10.5px; letter-spacing: 0.2em; color: #876A33; font-weight: 600"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 16px; height: 16px"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>DRAFT FOR FAISAL</div>
+      <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: #2A2A30">It was a pleasure meeting you this evening. You mentioned succession planning — would a call on Tuesday suit you?</p>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px"><button type="button" style="height: 44px; border-radius: 12px; border: none; background: #17171B; color: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 600">Send email</button><button type="button" style="height: 44px; border-radius: 12px; border: 1px solid #D9D2C4; background: #FFFFFF; color: #17171B; font-family: inherit; font-size: 14px">Edit</button></div>
+    </section>
+  </main>
+  <nav aria-label="App" style="height: 84px; flex: none; border-top: 1px solid #E6E0D5; background: #FFFFFF; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); padding-bottom: 20px; box-sizing: border-box">
+    <sc-for list="{{tabs}}" as="t" hint-placeholder-count="5">
+      <a href="{{t.href}}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 10.5px; color: {{t.color}}; font-weight: {{t.weight}}"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{t.d}}"></path></svg>{{t.name}}</a>
+    </sc-for>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const active = 'leads';
+    const tabs = [
+      ['card', 'My card', 'MyCard.dc.html', 'M5 5.5h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2zM7 14.5h5'],
+      ['share', 'Share', 'Share.dc.html', 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM20 14v1M14 20h1M18 18h3v3'],
+      ['leads', 'Leads', 'MobileLeads.dc.html', 'M3 13l3-8h12l3 8v6H3zM3 13h5l1.5 2.5h5L16 13h5'],
+      ['insights', 'Insights', 'MobileInsights.dc.html', 'M4 20V10M10 20V4M16 20v-7M22 20H2'],
+      ['settings', 'Settings', '#', 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1']
+    ].map(([id, name, href, d]) => ({ name, href, d, color: id === active ? '#876A33' : '#6E685F', weight: id === active ? '600' : '400' }));
+
+    const leads = [
+      ['FA', 'Faisal Al-Rashid', 'Principal · Family office, Abu Dhabi', 'NFC tap', 'Today', '#B08D4F'],
+      ['EW', 'Elena Ward', 'Founder · Lumen Health', 'QR scan', 'Yesterday', '#B08D4F'],
+      ['RB', 'Rashid Bukhari', 'Director · Gulf Ports', 'NFC tap', '29 Sep', '#B08D4F'],
+      ['KS', 'Kenji Sato', 'CFO · Orbis Logistics', 'Wallet', '2 Oct', '#E6E0D5'],
+      ['NM', 'Nadia Malik', 'Partner · Malik & Co', 'Link', '30 Sep', '#E6E0D5']
+    ].map(([ini, name, co, via, when, dot], i) => ({ ini, name, co, via, when, dot, top: i === 0 ? 'transparent' : '#F0EBE2' }));
+    return { tabs, leads };
+  }
+}
+</script>
+</body>
+</html>

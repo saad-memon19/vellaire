@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Company dashboard — Analytics</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&amp;family=Instrument+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0;background:#F7F5F0}
+a{color:#876A33;text-decoration:none}a:hover{color:#17171B}
+.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.seal circle,.seal rect{fill:none;stroke:#B08D4F;stroke-width:1.2}
+.nav-a:hover{background:#F7F3EA !important;color:#17171B !important}
+.tile:hover{border-color:#B08D4F !important;transform:translateY(-2px)}
+.tile{transition:transform 250ms cubic-bezier(.22,1,.36,1),border-color 250ms}
+.ink:hover{background:#2E2E35 !important}
+.row:hover{background:#FAF7F1}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F7F5F0; color: #17171B; font-family: 'Instrument Sans', 'Helvetica Neue', Helvetica, sans-serif; font-size: 14px">
+
+  <aside aria-label="Workspace navigation" style="flex: 1 1 248px; background: #FFFFFF; border-right: 1px solid #E6E0D5; padding: 22px 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 0 10px">
+      <svg class="seal" width="28" height="28" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18.5"></circle><rect x="17.6" y="8" width="4.8" height="21" rx="0.8" transform="rotate(-20 20 29)"></rect><rect x="17.6" y="8" width="4.8" height="21" rx="0.8" transform="rotate(20 20 29)"></rect></svg>
+      <span style="font-family: 'Cormorant Garamond', 'Times New Roman', serif; letter-spacing: 0.24em; font-size: 17px; font-weight: 500">VELLAIRE</span>
+    </div>
+    <button type="button" style="display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 10px; border: 1px solid #E6E0D5; background: #F7F5F0; color: #17171B; font-family: inherit; cursor: pointer; min-height: 52px">
+      <span style="width: 34px; height: 34px; border-radius: 8px; background: #17171B; display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 17px; color: #E6D3A3">M</span>
+      <span style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px; flex: 1"><span style="font-size: 14px; font-weight: 600">Meridian Capital</span><span style="font-size: 12px; color: #6E685F">Enterprise · 1,320 seats</span></span>
+      <svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #8E887E"><path d="M8 10l4-4 4 4M8 14l4 4 4-4"></path></svg>
+    </button>
+    <nav style="display: flex; flex-direction: column; gap: 16px">
+      <sc-for list="{{nav}}" as="grp" hint-placeholder-count="7">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <sc-if value="{{grp.g}}" hint-placeholder-val="{{ true }}"><div style="font-size: 10.5px; letter-spacing: 0.18em; color: #7A746A; padding: 0 12px 6px; font-weight: 500">{{grp.g}}</div></sc-if>
+          <sc-for list="{{grp.items}}" as="it" hint-placeholder-count="3">
+            <a href="{{it.href}}" class="nav-a" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 8px; font-size: 14px; min-height: 36px; box-sizing: border-box; background: {{it.bg}}; color: {{it.color}}; font-weight: {{it.weight}}">
+              <svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: {{it.iconColor}}"><path d="{{it.d}}"></path></svg>
+              <span style="flex: 1">{{it.label}}</span>
+              <sc-if value="{{it.badge}}" hint-placeholder-val="{{ false }}"><span style="font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #F6EFE1; color: #876A33; font-weight: 600">{{it.badge}}</span></sc-if>
+            </a>
+          </sc-for>
+        </div>
+      </sc-for>
+    </nav>
+  </aside>
+
+  <div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+    <header style="display: flex; align-items: center; gap: 16px; padding: 16px 40px; border-bottom: 1px solid #E6E0D5; background: #FFFFFF; flex-wrap: wrap">
+      <label for="q" style="flex: 1 1 320px; max-width: 520px; display: flex; align-items: center; gap: 10px; background: #F7F5F0; border: 1px solid #E6E0D5; border-radius: 8px; padding: 0 14px; height: 42px; color: #6E685F">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-3.5-3.5"></path></svg>
+        <input id="q" type="search" placeholder="Search people, cards, settings" style="flex: 1; background: transparent; border: none; outline: none; color: #17171B; font-family: inherit; font-size: 14px; min-width: 0">
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; border: 1px solid #E0D9CC; border-radius: 4px; padding: 2px 6px; background: #FFFFFF">⌘K</span>
+      </label>
+      <div style="margin-left: auto; display: flex; align-items: center; gap: 8px">
+        <button type="button" aria-label="Help" style="width: 42px; height: 42px; border-radius: 8px; border: 1px solid #E6E0D5; background: #FFFFFF; color: #4E4A44; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01"></path></svg></button>
+        <button type="button" aria-label="Notifications, 3 unread" style="position: relative; width: 42px; height: 42px; border-radius: 8px; border: 1px solid #E6E0D5; background: #FFFFFF; color: #4E4A44; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20.5a2 2 0 0 0 4 0"></path></svg><span style="position: absolute; top: 9px; right: 10px; width: 7px; height: 7px; border-radius: 50%; background: #B08D4F"></span></button>
+        <button type="button" aria-label="Account menu" style="width: 42px; height: 42px; border-radius: 50%; border: 1px solid #D9C9A6; background: #F6EFE1; color: #876A33; font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 600; cursor: pointer">SK</button>
+      </div>
+    </header>
+
+    <main style="padding: 36px 40px 56px; display: flex; flex-direction: column; gap: 24px; max-width: 1320px; width: 100%; box-sizing: border-box">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap">
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <div style="font-size: 12px; letter-spacing: 0.2em; color: #876A33; font-weight: 500">INSIGHTS</div>
+          <h1 style="margin: 0; font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-weight: 400; font-size: 46px; line-height: 1.05">Analytics</h1>
+          <p style="margin: 0; color: #5E5952; font-size: 15px">How your people's cards turn introductions into business.</p>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap">
+          <button type="button" style="height: 44px; padding: 0 14px; border-radius: 8px; border: 1px solid #D9D2C4; background: #FFFFFF; color: #17171B; font-family: inherit; font-size: 14px; display: flex; gap: 8px; align-items: center; cursor: pointer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14a1.5 1.5 0 0 1 1.5 1.5v13a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5v-13A1.5 1.5 0 0 1 5 5zM3.5 10h17M8 3v4M16 3v4"></path></svg>Last 30 days</button>
+          <button type="button" style="height: 44px; padding: 0 14px; border-radius: 8px; border: 1px solid #D9D2C4; background: #FFFFFF; color: #17171B; font-family: inherit; font-size: 14px; cursor: pointer">All departments</button>
+          <button type="button" class="ink" style="height: 44px; padding: 0 18px; border-radius: 8px; border: none; background: #17171B; color: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 600; display: flex; gap: 8px; align-items: center; cursor: pointer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #E6D3A3"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path></svg>Export report</button>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr)); gap: 12px">
+        <sc-for list="{{kpis}}" as="k" hint-placeholder-count="5">
+          <div style="background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 8px">
+            <span style="font-size: 11px; letter-spacing: 0.16em; color: #6E685F; font-weight: 500">{{k.label}}</span>
+            <span style="font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-size: 38px; font-weight: 500; line-height: 1">{{k.value}}</span>
+            <span style="font-size: 12.5px; color: #1F7A55">{{k.delta}}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 16px">
+        <section style="flex: 2 1 560px; min-width: 0; background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 14px">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap">
+            <h2 style="margin: 0; font-size: 16px; font-weight: 600">Views and leads per day</h2>
+            <div style="display: flex; gap: 16px; font-size: 12.5px; color: #4E4A44"><span style="display: flex; gap: 6px; align-items: center"><span style="width: 16px; height: 2px; background: #B08D4F"></span>Card views</span><span style="display: flex; gap: 6px; align-items: center"><span style="width: 16px; height: 2px; background: #17171B"></span>Leads × 10</span></div>
+          </div>
+          <svg viewBox="0 0 720 240" preserveAspectRatio="none" style="width: 100%; height: 240px" aria-label="Views rise from about 420 to 780 a day; leads rise from about 6 to 15 a day">
+            <path d="M0 60H720M0 120H720M0 180H720" style="stroke: #EFEAE0; stroke-width: 1; fill: none"></path>
+            <path d="{{viewsArea}}" style="fill: rgba(176,141,79,0.10)"></path>
+            <path d="{{views}}" style="fill: none; stroke: #B08D4F; stroke-width: 2.2; stroke-linejoin: round"></path>
+            <path d="{{leads}}" style="fill: none; stroke: #17171B; stroke-width: 1.8; stroke-linejoin: round; stroke-dasharray: 5 4"></path>
+          </svg>
+          <div style="display: flex; justify-content: space-between; font-size: 12px; color: #6E685F"><span>6 Sep</span><span>13 Sep</span><span>20 Sep</span><span>27 Sep</span><span>5 Oct</span></div>
+        </section>
+        <section style="flex: 1 1 320px; min-width: 0; background: linear-gradient(170deg, #FBF6EC, #FFFFFF 70%); border: 1px solid #EBDDC0; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 14px">
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 11px; letter-spacing: 0.2em; color: #876A33; font-weight: 600"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>SUMMARY</div>
+          <p style="margin: 0; font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-size: 24px; line-height: 1.35">Leads grew faster than views this month — people who tap an NFC card are three times as likely to share their details.</p>
+          <div style="display: flex; flex-direction: column; gap: 10px; font-size: 13.5px; color: #4E4A44; line-height: 1.5">
+            <span style="display: flex; gap: 10px"><span style="color: #B08D4F">—</span>Private Clients produced 41% of all leads.</span>
+            <span style="display: flex; gap: 10px"><span style="color: #B08D4F">—</span>38 cards had no views in 30 days. Consider a reminder.</span>
+          </div>
+        </section>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr)); gap: 16px">
+        <section style="background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 14px">
+          <h2 style="margin: 0; font-size: 16px; font-weight: 600">By channel</h2>
+          <sc-for list="{{channels}}" as="c" hint-placeholder-count="4">
+            <div style="display: grid; grid-template-columns: 100px 1fr 44px; gap: 12px; align-items: center; font-size: 14px"><span>{{c.name}}</span><span style="height: 10px; border-radius: 999px; background: #F2EEE6"><span style="display: block; height: 10px; border-radius: 999px; background: #B08D4F; width: {{c.pct}}; opacity: {{c.op}}"></span></span><span style="text-align: right; color: #4E4A44">{{c.pct}}</span></div>
+          </sc-for>
+        </section>
+        <section style="background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 14px">
+          <h2 style="margin: 0; font-size: 16px; font-weight: 600">Where cards are opened</h2>
+          <sc-for list="{{cities}}" as="c" hint-placeholder-count="5">
+            <div style="display: grid; grid-template-columns: 100px 1fr 54px; gap: 12px; align-items: center; font-size: 14px"><span>{{c.name}}</span><span style="height: 10px; border-radius: 999px; background: #F2EEE6"><span style="display: block; height: 10px; border-radius: 999px; background: #17171B; width: {{c.w}}"></span></span><span style="text-align: right; color: #4E4A44">{{c.v}}</span></div>
+          </sc-for>
+        </section>
+        <section style="background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 14px; overflow: hidden">
+          <div style="padding: 20px 22px 8px; display: flex; justify-content: space-between; align-items: center"><h2 style="margin: 0; font-size: 16px; font-weight: 600">Top cards</h2><a href="Cards.dc.html" style="font-size: 13px; font-weight: 500">All cards</a></div>
+          <sc-for list="{{top}}" as="t" hint-placeholder-count="5">
+            <a href="Editor.dc.html" class="row" style="display: flex; align-items: center; gap: 12px; padding: 11px 22px; border-top: 1px solid #F0EBE2; color: #17171B">
+              <span style="width: 22px; font-family: 'Cormorant Garamond', serif; font-size: 18px; color: #876A33; font-weight: 600">{{t.rank}}</span>
+              <span style="flex: 1; display: flex; flex-direction: column"><span style="font-weight: 600">{{t.name}}</span><span style="font-size: 12.5px; color: #6E685F">{{t.dept}}</span></span>
+              <span style="display: flex; flex-direction: column; align-items: flex-end"><span>{{t.views}}</span><span style="font-size: 12px; color: #6E685F">{{t.leads}} leads</span></span>
+            </a>
+          </sc-for>
+        </section>
+      </div>
+
+      <section style="background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 14px; overflow: hidden">
+        <div style="padding: 20px 22px; display: flex; justify-content: space-between; align-items: center"><h2 style="margin: 0; font-size: 16px; font-weight: 600">By department</h2><span style="font-size: 13px; color: #6E685F">Last 30 days</span></div>
+        <div style="overflow-x: auto"><div style="min-width: 680px">
+          <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1.4fr; gap: 14px; padding: 10px 22px; font-size: 11px; letter-spacing: 0.14em; color: #6E685F; font-weight: 500; background: #FAF8F3"><span>DEPARTMENT</span><span>CARDS</span><span>VIEWS</span><span>SAVES</span><span>LEADS</span><span>LEAD RATE</span></div>
+          <sc-for list="{{depts}}" as="d" hint-placeholder-count="5">
+            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1.4fr; gap: 14px; align-items: center; padding: 12px 22px; border-top: 1px solid #F0EBE2; font-size: 14px">
+              <span style="font-weight: 600">{{d.name}}</span><span>{{d.cards}}</span><span>{{d.views}}</span><span>{{d.saves}}</span><span>{{d.leads}}</span>
+              <span style="display: flex; align-items: center; gap: 10px"><span style="flex: 1; height: 6px; border-radius: 999px; background: #F2EEE6"><span style="display: block; height: 6px; border-radius: 999px; background: #B08D4F; width: {{d.w}}"></span></span><span style="width: 40px; text-align: right; color: #4E4A44">{{d.rate}}</span></span>
+            </div>
+          </sc-for>
+        </div></div>
+      </section>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const I = {
+      home: 'M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z',
+      card: 'M5 5.5h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2zM7 14.5h5',
+      plus: 'M12 5v14M5 12h14',
+      grid: 'M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z',
+      palette: 'M12 3a9 9 0 1 0 0 18c1.2 0 1.8-.8 1.8-1.7 0-1.3-1-1.6-1-2.8 0-1 .8-1.5 1.8-1.5H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z',
+      people: 'M9 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c1.9.7 3.1 2.4 3.5 5.2',
+      map: 'M4 6l5-2 6 2 5-2v14l-5 2-6-2-5 2zM9 4v14M15 6v14',
+      check: 'M5 12.5l4.5 4.5L19 7.5',
+      qr: 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM20 14v1M14 20h1M18 18h3v3',
+      nfc: 'M8 8.5a5 5 0 0 1 0 7M11.5 6a8.5 8.5 0 0 1 0 12M15 3.5a12 12 0 0 1 0 17',
+      wallet: 'M5 6h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zM3 10h18M16 14.5h2',
+      mail: 'M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM3.5 6l8.5 7 8.5-7',
+      chart: 'M4 20V10M10 20V4M16 20v-7M22 20H2',
+      inbox: 'M3 13l3-8h12l3 8v6H3zM3 13h5l1.5 2.5h5L16 13h5',
+      plug: 'M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0zM12 17v4',
+      sync: 'M20 11a8 8 0 0 0-14.5-4.5L4 8M4 4v4h4M4 13a8 8 0 0 0 14.5 4.5L20 16M20 20v-4h-4',
+      shield: 'M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z',
+      receipt: 'M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6',
+      gear: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1',
+      alert: 'M12 4l9 16H3zM12 10v4M12 17h.01'
+    };
+    const active = 'analytics';
+    const mk = (id, label, d, href, badge) => ({
+      label, d, href: href || '#', badge: badge || '',
+      bg: id === active ? '#F4EEE2' : 'transparent',
+      color: id === active ? '#17171B' : '#4E4A44',
+      iconColor: id === active ? '#B08D4F' : '#8E887E',
+      weight: id === active ? '600' : '400'
+    });
+    const nav = [
+      { g: '', items: [mk('home', 'Home', I.home, 'Overview.dc.html')] },
+      { g: 'CARDS', items: [mk('cards', 'All cards', I.card, 'Cards.dc.html'), mk('create', 'Create a card', I.plus, 'CreateStep1.dc.html'), mk('templates', 'Templates', I.grid), mk('brand', 'Brand kit', I.palette, 'BrandKit.dc.html')] },
+      { g: 'PEOPLE', items: [mk('employees', 'Employees', I.people, 'Employees.dc.html'), mk('departments', 'Departments', I.map), mk('approvals', 'Approvals', I.check, '#', '7')] },
+      { g: 'SHARING', items: [mk('qr', 'QR codes', I.qr), mk('nfc', 'NFC cards', I.nfc, 'NFC.dc.html'), mk('wallet', 'Wallet passes', I.wallet), mk('sig', 'Email signatures', I.mail)] },
+      { g: 'INSIGHTS', items: [mk('analytics', 'Analytics', I.chart, 'Analytics.dc.html'), mk('leads', 'Leads', I.inbox, 'Leads.dc.html', '12')] },
+      { g: 'AUTOMATION', items: [mk('integrations', 'HR integrations', I.plug, 'Integrations.dc.html'), mk('sync', 'Sync activity', I.sync, '#', '2')] },
+      { g: 'SETTINGS', items: [mk('team', 'Team and roles', I.people), mk('security', 'Security', I.shield), mk('billing', 'Billing', I.receipt), mk('settings', 'Company settings', I.gear)] }
+    ];
+
+    const v = [420,438,431,452,470,446,463,489,502,495,521,540,533,512,548,566,559,584,601,594,622,610,641,668,655,689,702,731,748,780];
+    const l = [6,7,6,8,7,7,9,8,9,10,9,11,10,10,11,12,11,12,13,12,13,13,14,14,13,15,14,15,16,15];
+    const W = 720, H = 240;
+    const yv = x => Math.round(H - (x - 300) / 560 * (H - 20) - 8);
+    const yl = x => Math.round(H - (x * 10 - 0) / 560 * (H - 20) - 8 + 30);
+    const px = i => Math.round(i * W / (v.length - 1));
+    const views = 'M' + v.map((x, i) => px(i) + ' ' + yv(x)).join('L');
+    const viewsArea = views + 'L' + W + ' ' + H + 'L0 ' + H + 'Z';
+    const leads = 'M' + l.map((x, i) => px(i) + ' ' + yl(x)).join('L');
+    const depts = [['Private Clients', '312', '7,840', '1,622', '128', 0.016], ['Wealth', '240', '4,210', '880', '61', 0.014], ['Corporate Finance', '188', '3,105', '640', '54', 0.017], ['Research', '264', '1,980', '310', '22', 0.011], ['Operations', '244', '1,285', '190', '9', 0.007]]
+      .map(([name, cards, views, saves, leads, r]) => ({ name, cards, views, saves, leads, rate: (r * 100).toFixed(1) + '%', w: Math.round(r / 0.02 * 100) + '%' }));
+    return { nav, views, viewsArea, leads, depts,
+      kpis: [
+        { label: 'CARD VIEWS', value: '18,420', delta: '+12.4%' }, { label: 'UNIQUE VISITORS', value: '11,906', delta: '+9.8%' },
+        { label: 'CONTACT SAVES', value: '3,642', delta: '+14.1%' }, { label: 'LEADS', value: '312', delta: '+8.1%' },
+        { label: 'LEAD RATE', value: '1.7%', delta: '+0.2 pts' }
+      ],
+      channels: [{ name: 'NFC tap', pct: '38%', op: 1 }, { name: 'QR scan', pct: '27%', op: 0.8 }, { name: 'Wallet pass', pct: '21%', op: 0.6 }, { name: 'Shared link', pct: '14%', op: 0.45 }],
+      cities: [{ name: 'Dubai', v: '6,210', w: '100%' }, { name: 'Riyadh', v: '3,480', w: '56%' }, { name: 'London', v: '3,105', w: '50%' }, { name: 'Karachi', v: '2,240', w: '36%' }, { name: 'Abu Dhabi', v: '1,390', w: '22%' }],
+      top: [
+        { rank: '1', name: 'Tom Allerton', dept: 'Corporate Finance · London', views: '2,388', leads: '36' },
+        { rank: '2', name: 'Sara Khan', dept: 'Private Clients · Dubai', views: '2,140', leads: '41' },
+        { rank: '3', name: 'Layla Mansour', dept: 'Corporate Finance · Riyadh', views: '1,860', leads: '29' },
+        { rank: '4', name: 'James Whitford', dept: 'Wealth · London', views: '1,512', leads: '18' },
+        { rank: '5', name: 'Hana Qureshi', dept: 'Private Clients · Karachi', views: '1,205', leads: '22' }
+      ] };
+  }
+}
+</script>
+</body>
+</html>

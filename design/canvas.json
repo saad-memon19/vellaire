@@ -1,0 +1,707 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "Analytics.dc.html": {
+      "expand": "fill",
+      "h": 1500,
+      "page": "all",
+      "title": "Analytics",
+      "w": 1440,
+      "x": 13680,
+      "y": 1570
+    },
+    "Approvals.dc.html": {
+      "expand": "fill",
+      "h": 1100,
+      "page": "all",
+      "title": "Approvals",
+      "w": 1440,
+      "x": 6080,
+      "y": 1570
+    },
+    "Brand.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "page": "all",
+      "title": "Brand foundations",
+      "w": 1440,
+      "x": 0,
+      "y": 11220
+    },
+    "BrandKit.dc.html": {
+      "expand": "fill",
+      "h": 1620,
+      "page": "all",
+      "title": "Brand kit",
+      "w": 1440,
+      "x": 9120,
+      "y": 1570
+    },
+    "Cards.dc.html": {
+      "expand": "fill",
+      "h": 1380,
+      "page": "all",
+      "title": "All cards",
+      "w": 1440,
+      "x": 1520,
+      "y": 1570
+    },
+    "Console.dc.html": {
+      "expand": "fill",
+      "h": 1300,
+      "page": "all",
+      "title": "Command center",
+      "w": 1440,
+      "x": 0,
+      "y": 7360
+    },
+    "ConsoleCompanies.dc.html": {
+      "expand": "fill",
+      "h": 1180,
+      "page": "all",
+      "title": "Companies",
+      "w": 1440,
+      "x": 1520,
+      "y": 7360
+    },
+    "ConsoleCompany.dc.html": {
+      "expand": "fill",
+      "h": 1220,
+      "page": "all",
+      "title": "Company detail",
+      "w": 1440,
+      "x": 3040,
+      "y": 7360
+    },
+    "ConsoleNFC.dc.html": {
+      "expand": "fill",
+      "h": 1080,
+      "page": "all",
+      "title": "NFC fulfilment",
+      "w": 1440,
+      "x": 4560,
+      "y": 7360
+    },
+    "ConsoleSupport.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "page": "all",
+      "title": "Support inbox",
+      "w": 1440,
+      "x": 6080,
+      "y": 7360
+    },
+    "CreateDone.dc.html": {
+      "expand": "fill",
+      "h": 1180,
+      "page": "all",
+      "title": "Published",
+      "w": 1440,
+      "x": 6080,
+      "y": 3960
+    },
+    "CreateStep1.dc.html": {
+      "expand": "fill",
+      "h": 1080,
+      "page": "all",
+      "title": "Step 1 · Person",
+      "w": 1440,
+      "x": 0,
+      "y": 3960
+    },
+    "CreateStep2.dc.html": {
+      "expand": "fill",
+      "h": 1140,
+      "page": "all",
+      "title": "Step 2 · Design",
+      "w": 1440,
+      "x": 1520,
+      "y": 3960
+    },
+    "CreateStep3.dc.html": {
+      "expand": "fill",
+      "h": 1420,
+      "page": "all",
+      "title": "Step 3 · Details",
+      "w": 1440,
+      "x": 3040,
+      "y": 3960
+    },
+    "CreateStep4.dc.html": {
+      "expand": "fill",
+      "h": 1360,
+      "page": "all",
+      "title": "Step 4 · Publish",
+      "w": 1440,
+      "x": 4560,
+      "y": 3960
+    },
+    "EditMyCard.dc.html": {
+      "h": 844,
+      "page": "all",
+      "title": "Edit my card (E2)",
+      "w": 390,
+      "x": 460,
+      "y": 9150
+    },
+    "Editor.dc.html": {
+      "expand": "fill",
+      "h": 1260,
+      "page": "all",
+      "title": "Card detail",
+      "w": 1440,
+      "x": 3040,
+      "y": 1570
+    },
+    "Employees.dc.html": {
+      "expand": "fill",
+      "h": 1260,
+      "page": "all",
+      "title": "Employees",
+      "w": 1440,
+      "x": 4560,
+      "y": 1570
+    },
+    "InactiveCard.dc.html": {
+      "h": 844,
+      "page": "all",
+      "title": "Inactive card (V3)",
+      "w": 390,
+      "x": 3220,
+      "y": 9150
+    },
+    "Integrations.dc.html": {
+      "expand": "fill",
+      "h": 1200,
+      "page": "all",
+      "title": "Connect Workday",
+      "w": 1440,
+      "x": 16720,
+      "y": 1570
+    },
+    "Label1.dc.html": {
+      "h": 150,
+      "page": "all",
+      "title": "1 · Company dashboard",
+      "w": 1600,
+      "x": 0,
+      "y": 1340
+    },
+    "Label2.dc.html": {
+      "h": 150,
+      "page": "all",
+      "title": "2 · Create a card",
+      "w": 1600,
+      "x": 0,
+      "y": 3730
+    },
+    "Label3.dc.html": {
+      "h": 150,
+      "page": "all",
+      "title": "4 · Product owner console",
+      "w": 1600,
+      "x": 0,
+      "y": 7130
+    },
+    "Label4.dc.html": {
+      "h": 150,
+      "page": "all",
+      "title": "5 · Employee app and public card",
+      "w": 1600,
+      "x": 0,
+      "y": 8920
+    },
+    "Label5.dc.html": {
+      "h": 150,
+      "page": "all",
+      "title": "6 · Brand and website",
+      "w": 1600,
+      "x": 0,
+      "y": 10990
+    },
+    "Label6.dc.html": {
+      "h": 150,
+      "page": "all",
+      "title": "3 · Sign-up and onboarding",
+      "w": 1600,
+      "x": 0,
+      "y": 5640
+    },
+    "Leads.dc.html": {
+      "expand": "fill",
+      "h": 1180,
+      "page": "all",
+      "title": "Leads",
+      "w": 1440,
+      "x": 15200,
+      "y": 1570
+    },
+    "Main.dc.html": {
+      "expand": "fill",
+      "h": 7400,
+      "is_interactive": true,
+      "page": "all",
+      "title": "Landing page (M1)",
+      "w": 1440,
+      "x": 1520,
+      "y": 11220
+    },
+    "MobileInsights.dc.html": {
+      "h": 844,
+      "page": "all",
+      "title": "Insights (E5)",
+      "w": 390,
+      "x": 1840,
+      "y": 9150
+    },
+    "MobileLeads.dc.html": {
+      "h": 844,
+      "page": "all",
+      "title": "Leads (E4)",
+      "w": 390,
+      "x": 1380,
+      "y": 9150
+    },
+    "MyCard.dc.html": {
+      "h": 844,
+      "page": "all",
+      "title": "My card (E1)",
+      "w": 390,
+      "x": 0,
+      "y": 9150
+    },
+    "NFC.dc.html": {
+      "expand": "fill",
+      "h": 1300,
+      "page": "all",
+      "title": "NFC cards",
+      "w": 1440,
+      "x": 12160,
+      "y": 1570
+    },
+    "OnboardBrand.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "page": "all",
+      "title": "Setup 2 · Brand",
+      "w": 1440,
+      "x": 4560,
+      "y": 5870
+    },
+    "OnboardCompany.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "page": "all",
+      "title": "Setup 1 · Company",
+      "w": 1440,
+      "x": 3040,
+      "y": 5870
+    },
+    "OnboardDone.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "page": "all",
+      "title": "Setup 5 · First card",
+      "w": 1440,
+      "x": 9120,
+      "y": 5870
+    },
+    "OnboardPeople.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "page": "all",
+      "title": "Setup 4 · People",
+      "w": 1440,
+      "x": 7600,
+      "y": 5870
+    },
+    "OnboardTemplate.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "page": "all",
+      "title": "Setup 3 · Template",
+      "w": 1440,
+      "x": 6080,
+      "y": 5870
+    },
+    "Overview.dc.html": {
+      "expand": "fill",
+      "h": 1560,
+      "page": "all",
+      "title": "Home",
+      "w": 1440,
+      "x": 0,
+      "y": 1570
+    },
+    "PublicCard.dc.html": {
+      "h": 1580,
+      "page": "all",
+      "title": "Public card (V1)",
+      "w": 390,
+      "x": 2300,
+      "y": 9150
+    },
+    "QRStudio.dc.html": {
+      "expand": "fill",
+      "h": 1040,
+      "page": "all",
+      "title": "QR codes",
+      "w": 1440,
+      "x": 10640,
+      "y": 1570
+    },
+    "Settings.dc.html": {
+      "expand": "fill",
+      "h": 1900,
+      "page": "all",
+      "title": "Company settings",
+      "w": 1440,
+      "x": 19760,
+      "y": 1570
+    },
+    "Share.dc.html": {
+      "h": 844,
+      "page": "all",
+      "title": "Employee app · Share (E3)",
+      "w": 390,
+      "x": 920,
+      "y": 9150
+    },
+    "ShareDetails.dc.html": {
+      "h": 844,
+      "page": "all",
+      "title": "Share your details (V2)",
+      "w": 390,
+      "x": 2760,
+      "y": 9150
+    },
+    "SignIn.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "page": "all",
+      "title": "Sign in (A1)",
+      "w": 1440,
+      "x": 0,
+      "y": 5870
+    },
+    "SignUp.dc.html": {
+      "expand": "fill",
+      "h": 980,
+      "page": "all",
+      "title": "Create account (A2)",
+      "w": 1440,
+      "x": 1520,
+      "y": 5870
+    },
+    "Structure.dc.html": {
+      "h": 1140,
+      "page": "all",
+      "title": "Start here · how Vellaire is organised",
+      "w": 1600,
+      "x": 0,
+      "y": 0
+    },
+    "Team.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "page": "all",
+      "title": "Team and roles",
+      "w": 1440,
+      "x": 18240,
+      "y": 1570
+    },
+    "TeamPage.dc.html": {
+      "h": 844,
+      "page": "all",
+      "title": "Team page (V4)",
+      "w": 390,
+      "x": 3680,
+      "y": 9150
+    },
+    "Templates.dc.html": {
+      "expand": "fill",
+      "h": 1260,
+      "page": "all",
+      "title": "Templates",
+      "w": 1440,
+      "x": 7600,
+      "y": 1570
+    },
+    "Label7.dc.html": {
+      "x": 0,
+      "y": 18880,
+      "w": 1600,
+      "h": 150,
+      "page": "all",
+      "title": "7 · Product owner console · more"
+    },
+    "ConsoleUsers.dc.html": {
+      "x": 0,
+      "y": 19110,
+      "w": 1440,
+      "h": 1180,
+      "page": "all",
+      "title": "Users directory",
+      "expand": "fill"
+    },
+    "ConsolePlans.dc.html": {
+      "x": 1520,
+      "y": 19110,
+      "w": 1440,
+      "h": 1260,
+      "page": "all",
+      "title": "Plans",
+      "expand": "fill"
+    },
+    "ConsoleSubscriptions.dc.html": {
+      "x": 3040,
+      "y": 19110,
+      "w": 1440,
+      "h": 1240,
+      "page": "all",
+      "title": "Subscriptions and invoices",
+      "expand": "fill"
+    },
+    "ConsoleRevenue.dc.html": {
+      "x": 4560,
+      "y": 19110,
+      "w": 1440,
+      "h": 1340,
+      "page": "all",
+      "title": "Revenue analytics",
+      "expand": "fill"
+    },
+    "ConsolePartners.dc.html": {
+      "x": 6080,
+      "y": 19110,
+      "w": 1440,
+      "h": 1240,
+      "page": "all",
+      "title": "Partners and coupons",
+      "expand": "fill"
+    },
+    "ConsoleIntegrations.dc.html": {
+      "x": 7600,
+      "y": 19110,
+      "w": 1440,
+      "h": 1300,
+      "page": "all",
+      "title": "Integration health",
+      "expand": "fill"
+    },
+    "ConsoleTemplates.dc.html": {
+      "x": 9120,
+      "y": 19110,
+      "w": 1440,
+      "h": 1240,
+      "page": "all",
+      "title": "Template library",
+      "expand": "fill"
+    },
+    "ConsoleAI.dc.html": {
+      "x": 10640,
+      "y": 19110,
+      "w": 1440,
+      "h": 1380,
+      "page": "all",
+      "title": "AI usage and cost",
+      "expand": "fill"
+    },
+    "ConsoleAnnouncements.dc.html": {
+      "x": 12160,
+      "y": 19110,
+      "w": 1440,
+      "h": 1560,
+      "page": "all",
+      "title": "Announcements and emails",
+      "expand": "fill"
+    },
+    "ConsoleSecurity.dc.html": {
+      "x": 13680,
+      "y": 19110,
+      "w": 1440,
+      "h": 1320,
+      "page": "all",
+      "title": "Security and audit",
+      "expand": "fill"
+    },
+    "ConsoleFlags.dc.html": {
+      "x": 15200,
+      "y": 19110,
+      "w": 1440,
+      "h": 1180,
+      "page": "all",
+      "title": "Feature flags",
+      "expand": "fill"
+    },
+    "ConsoleHealth.dc.html": {
+      "x": 16720,
+      "y": 19110,
+      "w": 1440,
+      "h": 1220,
+      "page": "all",
+      "title": "System health",
+      "expand": "fill"
+    },
+    "Label8.dc.html": {
+      "x": 0,
+      "y": 20930,
+      "w": 1600,
+      "h": 150,
+      "page": "all",
+      "title": "8 · Company dashboard · more"
+    },
+    "Departments.dc.html": {
+      "x": 0,
+      "y": 21160,
+      "w": 1440,
+      "h": 1100,
+      "page": "all",
+      "title": "Departments and offices",
+      "expand": "fill"
+    },
+    "HRIntegrations.dc.html": {
+      "x": 1520,
+      "y": 21160,
+      "w": 1440,
+      "h": 1380,
+      "page": "all",
+      "title": "HR integrations",
+      "expand": "fill"
+    },
+    "SyncActivity.dc.html": {
+      "x": 3040,
+      "y": 21160,
+      "w": 1440,
+      "h": 1180,
+      "page": "all",
+      "title": "Sync activity",
+      "expand": "fill"
+    },
+    "WalletPasses.dc.html": {
+      "x": 4560,
+      "y": 21160,
+      "w": 1440,
+      "h": 1240,
+      "page": "all",
+      "title": "Wallet passes",
+      "expand": "fill"
+    },
+    "Signatures.dc.html": {
+      "x": 6080,
+      "y": 21160,
+      "w": 1440,
+      "h": 1280,
+      "page": "all",
+      "title": "Email signatures",
+      "expand": "fill"
+    },
+    "Security.dc.html": {
+      "x": 7600,
+      "y": 21160,
+      "w": 1440,
+      "h": 1260,
+      "page": "all",
+      "title": "Security and SSO",
+      "expand": "fill"
+    },
+    "Billing.dc.html": {
+      "x": 9120,
+      "y": 21160,
+      "w": 1440,
+      "h": 1180,
+      "page": "all",
+      "title": "Billing",
+      "expand": "fill"
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-10-05T12:00:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {},
+  "order": [
+    "Structure.dc.html",
+    "Label1.dc.html",
+    "Overview.dc.html",
+    "Cards.dc.html",
+    "Editor.dc.html",
+    "Employees.dc.html",
+    "Approvals.dc.html",
+    "Templates.dc.html",
+    "BrandKit.dc.html",
+    "QRStudio.dc.html",
+    "NFC.dc.html",
+    "Analytics.dc.html",
+    "Leads.dc.html",
+    "Integrations.dc.html",
+    "Team.dc.html",
+    "Settings.dc.html",
+    "Label2.dc.html",
+    "CreateStep1.dc.html",
+    "CreateStep2.dc.html",
+    "CreateStep3.dc.html",
+    "CreateStep4.dc.html",
+    "CreateDone.dc.html",
+    "Label6.dc.html",
+    "SignIn.dc.html",
+    "SignUp.dc.html",
+    "OnboardCompany.dc.html",
+    "OnboardBrand.dc.html",
+    "OnboardTemplate.dc.html",
+    "OnboardPeople.dc.html",
+    "OnboardDone.dc.html",
+    "Label3.dc.html",
+    "Console.dc.html",
+    "ConsoleCompanies.dc.html",
+    "ConsoleCompany.dc.html",
+    "ConsoleNFC.dc.html",
+    "ConsoleSupport.dc.html",
+    "Label4.dc.html",
+    "MyCard.dc.html",
+    "EditMyCard.dc.html",
+    "Share.dc.html",
+    "MobileLeads.dc.html",
+    "MobileInsights.dc.html",
+    "PublicCard.dc.html",
+    "ShareDetails.dc.html",
+    "InactiveCard.dc.html",
+    "TeamPage.dc.html",
+    "Label5.dc.html",
+    "Brand.dc.html",
+    "Main.dc.html",
+    "Label7.dc.html",
+    "ConsoleUsers.dc.html",
+    "ConsolePlans.dc.html",
+    "ConsoleSubscriptions.dc.html",
+    "ConsoleRevenue.dc.html",
+    "ConsolePartners.dc.html",
+    "ConsoleIntegrations.dc.html",
+    "ConsoleTemplates.dc.html",
+    "ConsoleAI.dc.html",
+    "ConsoleAnnouncements.dc.html",
+    "ConsoleSecurity.dc.html",
+    "ConsoleFlags.dc.html",
+    "ConsoleHealth.dc.html",
+    "Label8.dc.html",
+    "Departments.dc.html",
+    "HRIntegrations.dc.html",
+    "SyncActivity.dc.html",
+    "WalletPasses.dc.html",
+    "Signatures.dc.html",
+    "Security.dc.html",
+    "Billing.dc.html"
+  ],
+  "pages": [
+    {
+      "id": "all",
+      "name": "All screens"
+    }
+  ],
+  "title": "Vellaire — Product UI/UX Design"
+}

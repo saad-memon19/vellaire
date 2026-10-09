@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Company dashboard — Team and roles</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&amp;family=Instrument+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0;background:#F7F5F0}
+a{color:#876A33;text-decoration:none}a:hover{color:#17171B}
+.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.seal circle,.seal rect{fill:none;stroke:#B08D4F;stroke-width:1.2}
+.nav-a:hover{background:#F7F3EA !important;color:#17171B !important}
+.tile:hover{border-color:#B08D4F !important;transform:translateY(-2px)}
+.tile{transition:transform 250ms cubic-bezier(.22,1,.36,1),border-color 250ms}
+.ink:hover{background:#2E2E35 !important}
+.row:hover{background:#FAF7F1}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F7F5F0; color: #17171B; font-family: 'Instrument Sans', 'Helvetica Neue', Helvetica, sans-serif; font-size: 14px">
+
+  <aside aria-label="Workspace navigation" style="flex: 1 1 248px; background: #FFFFFF; border-right: 1px solid #E6E0D5; padding: 22px 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 0 10px">
+      <svg class="seal" width="28" height="28" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18.5"></circle><rect x="17.6" y="8" width="4.8" height="21" rx="0.8" transform="rotate(-20 20 29)"></rect><rect x="17.6" y="8" width="4.8" height="21" rx="0.8" transform="rotate(20 20 29)"></rect></svg>
+      <span style="font-family: 'Cormorant Garamond', 'Times New Roman', serif; letter-spacing: 0.24em; font-size: 17px; font-weight: 500">VELLAIRE</span>
+    </div>
+    <button type="button" style="display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 10px; border: 1px solid #E6E0D5; background: #F7F5F0; color: #17171B; font-family: inherit; cursor: pointer; min-height: 52px">
+      <span style="width: 34px; height: 34px; border-radius: 8px; background: #17171B; display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 17px; color: #E6D3A3">M</span>
+      <span style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px; flex: 1"><span style="font-size: 14px; font-weight: 600">Meridian Capital</span><span style="font-size: 12px; color: #6E685F">Enterprise · 1,320 seats</span></span>
+      <svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #8E887E"><path d="M8 10l4-4 4 4M8 14l4 4 4-4"></path></svg>
+    </button>
+    <nav style="display: flex; flex-direction: column; gap: 16px">
+      <sc-for list="{{nav}}" as="grp" hint-placeholder-count="7">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <sc-if value="{{grp.g}}" hint-placeholder-val="{{ true }}"><div style="font-size: 10.5px; letter-spacing: 0.18em; color: #7A746A; padding: 0 12px 6px; font-weight: 500">{{grp.g}}</div></sc-if>
+          <sc-for list="{{grp.items}}" as="it" hint-placeholder-count="3">
+            <a href="{{it.href}}" class="nav-a" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 8px; font-size: 14px; min-height: 36px; box-sizing: border-box; background: {{it.bg}}; color: {{it.color}}; font-weight: {{it.weight}}">
+              <svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: {{it.iconColor}}"><path d="{{it.d}}"></path></svg>
+              <span style="flex: 1">{{it.label}}</span>
+              <sc-if value="{{it.badge}}" hint-placeholder-val="{{ false }}"><span style="font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #F6EFE1; color: #876A33; font-weight: 600">{{it.badge}}</span></sc-if>
+            </a>
+          </sc-for>
+        </div>
+      </sc-for>
+    </nav>
+  </aside>
+
+  <div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+    <header style="display: flex; align-items: center; gap: 16px; padding: 16px 40px; border-bottom: 1px solid #E6E0D5; background: #FFFFFF; flex-wrap: wrap">
+      <label for="q" style="flex: 1 1 320px; max-width: 520px; display: flex; align-items: center; gap: 10px; background: #F7F5F0; border: 1px solid #E6E0D5; border-radius: 8px; padding: 0 14px; height: 42px; color: #6E685F">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-3.5-3.5"></path></svg>
+        <input id="q" type="search" placeholder="Search people, cards, settings" style="flex: 1; background: transparent; border: none; outline: none; color: #17171B; font-family: inherit; font-size: 14px; min-width: 0">
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; border: 1px solid #E0D9CC; border-radius: 4px; padding: 2px 6px; background: #FFFFFF">⌘K</span>
+      </label>
+      <div style="margin-left: auto; display: flex; align-items: center; gap: 8px">
+        <button type="button" aria-label="Help" style="width: 42px; height: 42px; border-radius: 8px; border: 1px solid #E6E0D5; background: #FFFFFF; color: #4E4A44; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01"></path></svg></button>
+        <button type="button" aria-label="Notifications, 3 unread" style="position: relative; width: 42px; height: 42px; border-radius: 8px; border: 1px solid #E6E0D5; background: #FFFFFF; color: #4E4A44; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20.5a2 2 0 0 0 4 0"></path></svg><span style="position: absolute; top: 9px; right: 10px; width: 7px; height: 7px; border-radius: 50%; background: #B08D4F"></span></button>
+        <button type="button" aria-label="Account menu" style="width: 42px; height: 42px; border-radius: 50%; border: 1px solid #D9C9A6; background: #F6EFE1; color: #876A33; font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 600; cursor: pointer">SK</button>
+      </div>
+    </header>
+
+    <main style="padding: 36px 40px 56px; display: flex; flex-direction: column; gap: 24px; max-width: 1320px; width: 100%; box-sizing: border-box">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap">
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <div style="font-size: 12px; letter-spacing: 0.2em; color: #876A33; font-weight: 500">SETTINGS</div>
+          <h1 style="margin: 0; font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-weight: 400; font-size: 46px; line-height: 1.05">Team and roles</h1>
+          <p style="margin: 0; color: #5E5952; font-size: 15px">Who can manage cards, brand and integrations. Employees do not need a seat here.</p>
+        </div>
+        <button type="button" class="ink" style="height: 44px; padding: 0 20px; border-radius: 8px; border: none; background: #17171B; color: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Invite an admin</button>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+        <section style="flex: 3 1 560px; min-width: 0; background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 14px; overflow: hidden">
+          <div style="overflow-x: auto"><div style="min-width: 640px">
+            <div style="display: grid; grid-template-columns: 2.2fr 1.4fr 1.3fr 1fr 90px; gap: 14px; padding: 10px 20px; font-size: 11px; letter-spacing: 0.14em; color: #6E685F; font-weight: 500; background: #FAF8F3"><span>PERSON</span><span>ROLE</span><span>SCOPE</span><span>LAST ACTIVE</span><span></span></div>
+            <sc-for list="{{admins}}" as="a" hint-placeholder-count="6">
+              <div class="row" style="display: grid; grid-template-columns: 2.2fr 1.4fr 1.3fr 1fr 90px; gap: 14px; align-items: center; padding: 13px 20px; border-top: 1px solid #F0EBE2">
+                <span style="display: flex; align-items: center; gap: 12px"><span style="width: 36px; height: 36px; border-radius: 50%; background: #F2EEE6; color: #876A33; display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 15px; font-weight: 600; flex: none">{{a.ini}}</span><span style="display: flex; flex-direction: column"><span style="font-weight: 600">{{a.name}}</span><span style="font-size: 12.5px; color: #6E685F">{{a.email}}</span></span></span>
+                <span><span style="font-size: 12.5px; padding: 4px 10px; border-radius: 999px; font-weight: 500; background: {{a.rBg}}; color: {{a.rFg}}">{{a.role}}</span></span>
+                <span style="font-size: 13.5px; color: #2A2A30">{{a.scope}}</span>
+                <span style="font-size: 13px; color: #6E685F">{{a.last}}</span>
+                <button type="button" style="justify-self: end; height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid #E0D9CC; background: #FFFFFF; font-family: inherit; font-size: 12.5px; cursor: pointer">Edit</button>
+              </div>
+            </sc-for>
+          </div></div>
+        </section>
+        <section style="flex: 2 1 360px; min-width: 0; background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 14px; overflow: hidden">
+          <div style="padding: 20px 22px; display: flex; flex-direction: column; gap: 3px"><h2 style="margin: 0; font-size: 16px; font-weight: 600">What each role can do</h2><span style="font-size: 13px; color: #6E685F">Department managers only see their own team</span></div>
+          <div style="overflow-x: auto"><div style="min-width: 380px">
+            <div style="display: grid; grid-template-columns: 1.8fr repeat(4, 1fr); gap: 6px; padding: 10px 22px; font-size: 10.5px; letter-spacing: 0.1em; color: #6E685F; font-weight: 500; background: #FAF8F3; text-align: center"><span style="text-align: left">PERMISSION</span><span>OWNER</span><span>ADMIN</span><span>BRAND</span><span>MANAGER</span></div>
+            <sc-for list="{{perms}}" as="p" hint-placeholder-count="8">
+              <div style="display: grid; grid-template-columns: 1.8fr repeat(4, 1fr); gap: 6px; padding: 11px 22px; border-top: 1px solid #F0EBE2; font-size: 13.5px; align-items: center; text-align: center">
+                <span style="text-align: left">{{p.n}}</span>
+                <sc-for list="{{p.v}}" as="v" hint-placeholder-count="4"><span style="color: {{v.c}}; font-weight: 600">{{v.t}}</span></sc-for>
+              </div>
+            </sc-for>
+          </div></div>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const I = {
+      home: 'M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z',
+      card: 'M5 5.5h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2zM7 14.5h5',
+      plus: 'M12 5v14M5 12h14',
+      grid: 'M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z',
+      palette: 'M12 3a9 9 0 1 0 0 18c1.2 0 1.8-.8 1.8-1.7 0-1.3-1-1.6-1-2.8 0-1 .8-1.5 1.8-1.5H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z',
+      people: 'M9 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c1.9.7 3.1 2.4 3.5 5.2',
+      map: 'M4 6l5-2 6 2 5-2v14l-5 2-6-2-5 2zM9 4v14M15 6v14',
+      check: 'M5 12.5l4.5 4.5L19 7.5',
+      qr: 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM20 14v1M14 20h1M18 18h3v3',
+      nfc: 'M8 8.5a5 5 0 0 1 0 7M11.5 6a8.5 8.5 0 0 1 0 12M15 3.5a12 12 0 0 1 0 17',
+      wallet: 'M5 6h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zM3 10h18M16 14.5h2',
+      mail: 'M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM3.5 6l8.5 7 8.5-7',
+      chart: 'M4 20V10M10 20V4M16 20v-7M22 20H2',
+      inbox: 'M3 13l3-8h12l3 8v6H3zM3 13h5l1.5 2.5h5L16 13h5',
+      plug: 'M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0zM12 17v4',
+      sync: 'M20 11a8 8 0 0 0-14.5-4.5L4 8M4 4v4h4M4 13a8 8 0 0 0 14.5 4.5L20 16M20 20v-4h-4',
+      shield: 'M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z',
+      receipt: 'M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6',
+      gear: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1',
+      alert: 'M12 4l9 16H3zM12 10v4M12 17h.01'
+    };
+    const active = 'team';
+    const mk = (id, label, d, href, badge) => ({
+      label, d, href: href || '#', badge: badge || '',
+      bg: id === active ? '#F4EEE2' : 'transparent',
+      color: id === active ? '#17171B' : '#4E4A44',
+      iconColor: id === active ? '#B08D4F' : '#8E887E',
+      weight: id === active ? '600' : '400'
+    });
+    const nav = [
+      { g: '', items: [mk('home', 'Home', I.home, 'Overview.dc.html')] },
+      { g: 'CARDS', items: [mk('cards', 'All cards', I.card, 'Cards.dc.html'), mk('create', 'Create a card', I.plus, 'CreateStep1.dc.html'), mk('templates', 'Templates', I.grid, 'Templates.dc.html'), mk('brand', 'Brand kit', I.palette, 'BrandKit.dc.html')] },
+      { g: 'PEOPLE', items: [mk('employees', 'Employees', I.people, 'Employees.dc.html'), mk('departments', 'Departments', I.map), mk('approvals', 'Approvals', I.check, 'Approvals.dc.html', '7')] },
+      { g: 'SHARING', items: [mk('qr', 'QR codes', I.qr, 'QRStudio.dc.html'), mk('nfc', 'NFC cards', I.nfc, 'NFC.dc.html'), mk('wallet', 'Wallet passes', I.wallet), mk('sig', 'Email signatures', I.mail)] },
+      { g: 'INSIGHTS', items: [mk('analytics', 'Analytics', I.chart, 'Analytics.dc.html'), mk('leads', 'Leads', I.inbox, 'Leads.dc.html', '12')] },
+      { g: 'AUTOMATION', items: [mk('integrations', 'HR integrations', I.plug, 'Integrations.dc.html'), mk('sync', 'Sync activity', I.sync, '#', '2')] },
+      { g: 'SETTINGS', items: [mk('team', 'Team and roles', I.people, 'Team.dc.html'), mk('security', 'Security', I.shield), mk('billing', 'Billing', I.receipt), mk('settings', 'Company settings', I.gear, 'Settings.dc.html')] }
+    ];
+
+
+    const RC = { Owner: ['#17171B', '#E6D3A3'], Admin: ['#F6EFE1', '#876A33'], 'Brand Manager': ['#E6ECF6', '#2F4A7A'], 'HR Manager': ['#E5F2EB', '#1F7A55'], 'Department Manager': ['#EFEBE3', '#4E4A44'] };
+    const ad = (ini, name, email, role, scope, last) => ({ ini, name, email, role, scope, last, rBg: RC[role][0], rFg: RC[role][1] });
+    const Y = { t: '✓', c: '#1F7A55' }, N = { t: '—', c: '#C9BFAD' }, T = { t: 'Team', c: '#876A33' };
+    const perms = [
+      ['Create and edit cards', [Y, Y, Y, T]], ['Approve changes', [Y, Y, Y, T]], ['Edit brand kit', [Y, Y, Y, N]],
+      ['Connect HR systems', [Y, Y, N, N]], ['Order NFC cards', [Y, Y, N, T]], ['See leads', [Y, Y, N, T]],
+      ['Manage admins', [Y, Y, N, N]], ['Billing', [Y, N, N, N]]
+    ].map(([n, v]) => ({ n, v }));
+    return { nav, perms,
+      admins: [
+        ad('SK', 'Sara Khan', 'sara.khan@meridian.com', 'Owner', 'Whole company', 'Now'),
+        ad('DA', 'David Asante', 'david.asante@meridian.com', 'Admin', 'Whole company', 'Today'),
+        ad('NH', 'Nour Hamdan', 'nour.hamdan@meridian.com', 'Brand Manager', 'Whole company', 'Yesterday'),
+        ad('PS', 'Priya Shah', 'priya.shah@meridian.com', 'HR Manager', 'Whole company', '2 days ago'),
+        ad('TA', 'Tom Allerton', 'tom.allerton@meridian.com', 'Department Manager', 'Corporate Finance', '3 days ago'),
+        ad('HQ', 'Hana Qureshi', 'hana.qureshi@meridian.com', 'Department Manager', 'Karachi office', 'Last week')
+      ] };
+  }
+}
+</script>
+</body>
+</html>

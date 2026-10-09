@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Employee app — Insights</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&amp;family=Instrument+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0;background:#F7F5F0}
+a{text-decoration:none}
+.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.seal circle,.seal rect{fill:none;stroke:#C9A96E;stroke-width:1.1}
+@keyframes tilt{0%,100%{transform:perspective(1200px) rotateY(-8deg) rotateX(6deg)}50%{transform:perspective(1200px) rotateY(6deg) rotateX(3deg)}}
+.tilt{animation:tilt 8s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){.tilt{animation:none}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; overflow: hidden; background: #F7F5F0; color: #17171B; font-family: 'Instrument Sans', 'Helvetica Neue', Helvetica, sans-serif; display: flex; flex-direction: column">
+  <main style="flex: 1; min-height: 0; padding: 56px 20px 16px; display: flex; flex-direction: column; gap: 16px; overflow: hidden">
+    <div style="display: flex; justify-content: space-between; align-items: center">
+      <h1 style="margin: 0; font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-weight: 500; font-size: 34px">Insights</h1>
+      <span style="font-size: 13px; padding: 8px 14px; border-radius: 999px; border: 1px solid #E0D9CC; background: #FFFFFF">This month</span>
+    </div>
+    <section style="background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 13px; color: #5E5952">Card views</span><span style="font-size: 12.5px; color: #1F7A55">+18%</span></div>
+      <span style="font-family: 'Cormorant Garamond', serif; font-size: 44px; font-weight: 600; line-height: 1">2,140</span>
+      <svg viewBox="0 0 320 90" preserveAspectRatio="none" style="width: 100%; height: 90px" aria-label="Views rising through the month">
+        <path d="{{area}}" style="fill: rgba(176,141,79,0.12)"></path>
+        <path d="{{line}}" style="fill: none; stroke: #B08D4F; stroke-width: 2; stroke-linejoin: round"></path>
+      </svg>
+    </section>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+      <sc-for list="{{tiles}}" as="t" hint-placeholder-count="4">
+        <div style="background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; color: #5E5952">{{t.label}}</span><span style="font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 600; line-height: 1.05">{{t.value}}</span><span style="font-size: 11.5px; color: #1F7A55">{{t.delta}}</span></div>
+      </sc-for>
+    </div>
+    <section style="background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+      <span style="font-size: 14px; font-weight: 600">How people open your card</span>
+      <sc-for list="{{channels}}" as="c" hint-placeholder-count="4">
+        <div style="display: grid; grid-template-columns: 82px 1fr 36px; gap: 10px; align-items: center; font-size: 13px"><span>{{c.name}}</span><span style="height: 8px; border-radius: 999px; background: #F2EEE6"><span style="display: block; height: 8px; border-radius: 999px; background: #B08D4F; width: {{c.pct}}; opacity: {{c.op}}"></span></span><span style="text-align: right; color: #4E4A44">{{c.pct}}</span></div>
+      </sc-for>
+    </section>
+  </main>
+  <nav aria-label="App" style="height: 84px; flex: none; border-top: 1px solid #E6E0D5; background: #FFFFFF; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); padding-bottom: 20px; box-sizing: border-box">
+    <sc-for list="{{tabs}}" as="t" hint-placeholder-count="5">
+      <a href="{{t.href}}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 10.5px; color: {{t.color}}; font-weight: {{t.weight}}"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{t.d}}"></path></svg>{{t.name}}</a>
+    </sc-for>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const active = 'insights';
+    const tabs = [
+      ['card', 'My card', 'MyCard.dc.html', 'M5 5.5h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2zM7 14.5h5'],
+      ['share', 'Share', 'Share.dc.html', 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM20 14v1M14 20h1M18 18h3v3'],
+      ['leads', 'Leads', 'MobileLeads.dc.html', 'M3 13l3-8h12l3 8v6H3zM3 13h5l1.5 2.5h5L16 13h5'],
+      ['insights', 'Insights', 'MobileInsights.dc.html', 'M4 20V10M10 20V4M16 20v-7M22 20H2'],
+      ['settings', 'Settings', '#', 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1']
+    ].map(([id, name, href, d]) => ({ name, href, d, color: id === active ? '#876A33' : '#6E685F', weight: id === active ? '600' : '400' }));
+
+    const pts = [40,44,42,50,55,52,60,58,66,70,68,76,82,80,90];
+    const xy = pts.map((v, i) => [Math.round(i * 320 / (pts.length - 1)), Math.round(90 - (v - 30) / 65 * 80 - 4)]);
+    const line = 'M' + xy.map(p => p[0] + ' ' + p[1]).join('L');
+    const area = line + 'L320 90L0 90Z';
+    const tiles = [{ label: 'Saved your contact', value: '486', delta: '+11%' }, { label: 'Leads', value: '41', delta: '+9' }, { label: 'NFC taps', value: '812', delta: '+24%' }, { label: 'Link clicks', value: '330', delta: '+6%' }];
+    const channels = [{ name: 'NFC tap', pct: '42%', op: 1 }, { name: 'QR scan', pct: '24%', op: 0.8 }, { name: 'Wallet', pct: '19%', op: 0.6 }, { name: 'Link', pct: '15%', op: 0.45 }];
+    return { tabs, line, area, tiles, channels };
+  }
+}
+</script>
+</body>
+</html>

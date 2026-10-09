@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Create a card — 4 Publish</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&amp;family=Instrument+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0;background:#F7F5F0}
+a{color:#876A33;text-decoration:none}a:hover{color:#17171B}
+.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.seal circle,.seal rect{fill:none;stroke:#C9A96E;stroke-width:1.1}
+.seal-gold circle,.seal-gold rect{fill:none;stroke:#B08D4F;stroke-width:1.2}
+.opt:hover{border-color:#B08D4F !important}
+.ink:hover{background:#2E2E35 !important}
+.fld:focus{outline:none;border-color:#B08D4F !important;box-shadow:0 0 0 3px rgba(176,141,79,0.18)}
+.prow:hover{background:#FAF7F1}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F7F5F0; color: #17171B; font-family: 'Instrument Sans', 'Helvetica Neue', Helvetica, sans-serif; font-size: 14px; display: flex; flex-direction: column">
+  <header style="background: #FFFFFF; border-bottom: 1px solid #E6E0D5; padding: 14px 32px; display: flex; align-items: center; gap: 28px; flex-wrap: wrap">
+    <div style="display: flex; align-items: center; gap: 16px">
+      <a href="Cards.dc.html" aria-label="Close and go back to all cards" style="width: 40px; height: 40px; border-radius: 8px; border: 1px solid #E6E0D5; display: flex; align-items: center; justify-content: center; color: #4E4A44"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></a>
+      <div style="display: flex; flex-direction: column; gap: 1px"><span style="font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-size: 24px; font-weight: 500; line-height: 1.1">Create a card</span><span style="font-size: 12px; color: #6E685F">Meridian Capital</span></div>
+    </div>
+    <ol aria-label="Steps" style="list-style: none; margin: 0 auto; padding: 0; display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+      <sc-for list="{{steps}}" as="s" hint-placeholder-count="4">
+        <li style="display: flex; align-items: center; gap: 12px">
+          <span style="display: flex; align-items: center; gap: 10px; font-size: 14px; color: {{s.color}}; font-weight: {{s.weight}}"><span style="width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; background: {{s.dotBg}}; color: {{s.dotFg}}; border: 1px solid {{s.dotLine}}">{{s.n}}</span>{{s.name}}</span>
+          <sc-if value="{{s.more}}" hint-placeholder-val="{{ true }}"><span style="width: 40px; height: 1px; background: {{s.bar}}"></span></sc-if>
+        </li>
+      </sc-for>
+    </ol>
+    <button type="button" style="height: 40px; padding: 0 16px; border-radius: 8px; border: 1px solid #D9D2C4; background: #FFFFFF; color: #17171B; font-family: inherit; font-size: 14px; cursor: pointer">Save as draft</button>
+  </header>
+  <div style="flex: 1; display: flex; flex-wrap: wrap">
+    <main style="flex: 3 1 560px; min-width: 0; padding: 44px 48px 120px; box-sizing: border-box; display: flex; justify-content: center">
+      <div style="width: 100%; max-width: 720px; display: flex; flex-direction: column; gap: 28px">
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <div style="font-size: 12px; letter-spacing: 0.2em; color: #876A33; font-weight: 500">STEP 4 OF 4</div>
+          <h1 style="margin: 0; font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-weight: 400; font-size: 44px; line-height: 1.05">Share and publish</h1>
+          <p style="margin: 0; color: #5E5952; font-size: 15px; line-height: 1.6">Choose how Omar receives his card. You can change any of this later.</p>
+        </div>
+
+        <section style="background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 14px">
+          <h2 style="margin: 0; font-size: 16px; font-weight: 600">When should it go live?</h2>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 12px">
+            <label class="opt" style="display: flex; gap: 12px; padding: 16px; border-radius: 12px; background: #FBF6EC; border: 2px solid #B08D4F; cursor: pointer"><input type="radio" name="when" checked style="width: 18px; height: 18px; accent-color: #17171B; margin-top: 2px"><span style="display: flex; flex-direction: column; gap: 3px"><span style="font-weight: 600">Publish now</span><span style="font-size: 13px; color: #5E5952">Live as soon as you finish</span></span></label>
+            <label class="opt" style="display: flex; gap: 12px; padding: 16px; border-radius: 12px; background: #FFFFFF; border: 1px solid #E6E0D5; cursor: pointer"><input type="radio" name="when" style="width: 18px; height: 18px; accent-color: #17171B; margin-top: 2px"><span style="display: flex; flex-direction: column; gap: 3px"><span style="font-weight: 600">On his start date</span><span style="font-size: 13px; color: #5E5952">Monday 3 November, from Workday</span></span></label>
+          </div>
+        </section>
+
+        <section style="background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 14px; overflow: hidden">
+          <div style="padding: 20px 22px 8px"><h2 style="margin: 0; font-size: 16px; font-weight: 600">Deliver to Omar</h2></div>
+          <sc-for list="{{deliver}}" as="d" hint-placeholder-count="4">
+            <div style="display: flex; align-items: center; gap: 14px; padding: 16px 22px; border-top: 1px solid #F0EBE2">
+              <span style="width: 40px; height: 40px; border-radius: 10px; background: #F6EFE1; color: #876A33; display: flex; align-items: center; justify-content: center; flex: none"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{d.icon}}"></path></svg></span>
+              <span style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-weight: 600">{{d.name}}</span><span style="font-size: 13px; color: #5E5952">{{d.desc}}</span></span>
+              <button type="button" role="switch" aria-checked="true" aria-label="{{d.name}}" style="width: 46px; height: 28px; border-radius: 999px; border: none; background: #17171B; position: relative; cursor: pointer; flex: none"><span style="position: absolute; top: 4px; left: 22px; width: 20px; height: 20px; border-radius: 50%; background: #E6D3A3"></span></button>
+            </div>
+          </sc-for>
+        </section>
+
+        <section style="background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 14px">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap">
+            <div style="display: flex; flex-direction: column; gap: 3px"><h2 style="margin: 0; font-size: 16px; font-weight: 600">NFC card</h2><span style="font-size: 13px; color: #5E5952">Engraved with Omar's name and the Meridian seal</span></div>
+            <button type="button" role="switch" aria-checked="true" aria-label="Order an NFC card" style="width: 46px; height: 28px; border-radius: 999px; border: none; background: #17171B; position: relative; cursor: pointer"><span style="position: absolute; top: 4px; left: 22px; width: 20px; height: 20px; border-radius: 50%; background: #E6D3A3"></span></button>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); gap: 10px">
+            <sc-for list="{{materials}}" as="m" hint-placeholder-count="4">
+              <label class="opt" style="display: flex; flex-direction: column; gap: 10px; padding: 10px; border-radius: 12px; cursor: pointer; background: {{m.rowBg}}; border: {{m.border}}">
+                <span style="aspect-ratio: 1.586; border-radius: 8px; background: {{m.bg}}; box-shadow: 0 6px 14px rgba(23,23,27,0.12)"></span>
+                <span style="display: flex; justify-content: space-between; align-items: center; gap: 8px"><span style="font-size: 13.5px; font-weight: 600">{{m.name}}</span><input type="radio" name="mat" checked="{{m.sel}}" style="width: 18px; height: 18px; accent-color: #17171B"></span>
+              </label>
+            </sc-for>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center; padding: 12px 14px; border-radius: 10px; background: #F7F5F0; font-size: 13px; color: #4E4A44"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #876A33"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"></path></svg>Ship to Dubai office · [Office address], DIFC<a href="#" style="margin-left: auto; font-weight: 500">Change</a></div>
+        </section>
+
+        <section style="background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 10px">
+          <label for="slug" style="font-size: 16px; font-weight: 600">Card link</label>
+          <div style="display: flex; align-items: center; border: 1px solid #E0D9CC; border-radius: 8px; overflow: hidden; height: 46px"><span style="padding: 0 12px; height: 100%; display: flex; align-items: center; background: #F7F5F0; color: #6E685F; font-family: 'JetBrains Mono', monospace; font-size: 13px; border-right: 1px solid #E0D9CC">cards.meridian.com/</span><input id="slug" class="fld" value="omar-haddad" style="flex: 1; border: none; height: 100%; padding: 0 12px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #17171B; min-width: 0"></div>
+          <span style="font-size: 12.5px; color: #1F7A55">This link is available. It never changes, even if Omar's title does.</span>
+        </section>
+      </div>
+    </main>
+    <aside aria-label="Live preview" style="flex: 2 1 380px; min-width: 0; background: #EFE9DD; border-left: 1px solid #E2DBCD; padding: 44px 40px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 22px">
+      <div style="align-self: stretch; display: flex; justify-content: space-between; align-items: center"><span style="font-size: 12px; letter-spacing: 0.2em; color: #6E685F; font-weight: 500">LIVE PREVIEW</span><span style="font-size: 12px; color: #6E685F">Updates as you type</span></div>
+      <div style="width: 300px; border-radius: 20px; background: linear-gradient(160deg, #1A1A1E, #0E0E10); color: #F6F1E7; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 30px 60px rgba(23,23,27,0.28)">
+        <div style="display: flex; justify-content: space-between; align-items: center"><div style="display: flex; align-items: center; gap: 8px"><svg class="seal" width="22" height="22" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18.5"></circle><rect x="17.6" y="8" width="4.8" height="21" rx="0.8" transform="rotate(-20 20 29)"></rect><rect x="17.6" y="8" width="4.8" height="21" rx="0.8" transform="rotate(20 20 29)"></rect></svg><span style="font-size: 9px; letter-spacing: 0.28em; color: #C9A96E">MERIDIAN</span></div><span style="font-size: 9px; letter-spacing: 0.2em; color: #A9A49A">WALLET PASS</span></div>
+        <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 9px; letter-spacing: 0.2em; color: #A9A49A">NAME</span><span style="font-family: 'Cormorant Garamond', serif; font-size: 26px">Omar Haddad</span></div>
+        <div style="display: flex; gap: 24px"><div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 9px; letter-spacing: 0.2em; color: #A9A49A">TITLE</span><span style="font-size: 13px">Associate</span></div><div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 9px; letter-spacing: 0.2em; color: #A9A49A">OFFICE</span><span style="font-size: 13px">Dubai</span></div></div>
+        <div style="align-self: center; width: 150px; height: 150px; background: #F6F1E7; border-radius: 10px; padding: 10px; box-sizing: border-box"><div style="width: 100%; height: 100%; background: repeating-conic-gradient(#17171B 0 25%, #F6F1E7 0 50%) 0 0 / 13px 13px"></div></div>
+      </div>
+      <div style="display: flex; gap: 10px">
+        <span style="height: 40px; padding: 0 14px; border-radius: 8px; background: #000000; color: #FFFFFF; font-size: 12.5px; display: flex; align-items: center">Add to Apple Wallet</span>
+        <span style="height: 40px; padding: 0 14px; border-radius: 8px; background: #000000; color: #FFFFFF; font-size: 12.5px; display: flex; align-items: center">Add to Google Wallet</span>
+      </div>
+      <div style="align-self: stretch; background: #FFFFFF; border: 1px solid #E2DBCD; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; font-size: 13px">
+        <div style="font-weight: 600">Summary</div>
+        <div style="display: flex; justify-content: space-between"><span style="color: #6E685F">Design</span><span>Classic · Obsidian and Gold</span></div>
+        <div style="display: flex; justify-content: space-between"><span style="color: #6E685F">Goes live</span><span>Now</span></div>
+        <div style="display: flex; justify-content: space-between"><span style="color: #6E685F">NFC card</span><span>Obsidian Metal</span></div>
+        <div style="display: flex; justify-content: space-between"><span style="color: #6E685F">Approval</span><span style="color: #1F7A55">Not required for you</span></div>
+      </div>
+    </aside>
+  </div>
+  <footer style="position: sticky; bottom: 0; background: #FFFFFF; border-top: 1px solid #E6E0D5; padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap">
+    <a href="CreateStep3.dc.html" style="height: 46px; padding: 0 20px; border-radius: 8px; border: 1px solid #D9D2C4; color: #17171B; display: inline-flex; align-items: center; gap: 8px; font-size: 14px"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>Back</a>
+    <span style="font-size: 13px; color: #6E685F">Step 4 of 4 · Publish</span>
+    <a href="CreateDone.dc.html" class="ink" style="height: 46px; padding: 0 24px; border-radius: 8px; background: #17171B; color: #FFFFFF; display: inline-flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600">Publish card<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #E6D3A3"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1360}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const step = 3;
+    const names = ['Person', 'Design', 'Details', 'Publish'];
+    const steps = names.map((name, i) => {
+      const done = i < step, now = i === step;
+      return {
+        name, n: done ? '✓' : String(i + 1), more: i < names.length - 1,
+        color: now || done ? '#17171B' : '#8E887E', weight: now ? '600' : '400',
+        dotBg: done ? '#B08D4F' : (now ? '#17171B' : '#FFFFFF'), dotFg: done || now ? '#FFFFFF' : '#8E887E',
+        dotLine: done ? '#B08D4F' : (now ? '#17171B' : '#D9D2C4'), bar: done ? '#B08D4F' : '#D9D2C4'
+      };
+    });
+
+    const deliver = [
+      { name: 'Welcome email', desc: 'Sent to omar.haddad@meridian.com with his card link', icon: 'M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM3.5 6l8.5 7 8.5-7' },
+      { name: 'Apple and Google Wallet pass', desc: 'One tap to add, updates itself when details change', icon: 'M5 6h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zM3 10h18M16 14.5h2' },
+      { name: 'Email signature', desc: 'Added to his Outlook mailbox automatically', icon: 'M4 20h4L19 9l-4-4L4 16z' },
+      { name: 'Video call background', desc: 'Branded background with his QR code', icon: 'M3 6h12v12H3zM15 10l6-3v10l-6-3' }
+    ];
+    const materials = [
+      ['Obsidian Metal', 'linear-gradient(135deg,#1F1F24,#0B0B0D 45%,#2A2A30 58%,#0B0B0D)'],
+      ['Brushed Steel', 'linear-gradient(135deg,#B8BCC2,#8C9097 40%,#D3D6DA 55%,#9A9EA4)'],
+      ['24K Gold', 'linear-gradient(135deg,#B8955A,#E6D3A3 38%,#C9A96E 55%,#9C7A44)'],
+      ['Walnut', 'linear-gradient(135deg,#6B4429,#4A2E1B 50%,#5C3A22)']
+    ].map(([name, bg], i) => ({ name, bg, sel: i === 0, rowBg: i === 0 ? '#FBF6EC' : '#FFFFFF', border: i === 0 ? '2px solid #B08D4F' : '1px solid #E6E0D5' }));
+    return { steps, deliver, materials };
+  }
+}
+</script>
+</body>
+</html>

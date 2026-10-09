@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Company dashboard — NFC cards</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&amp;family=Instrument+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0;background:#F7F5F0}
+a{color:#876A33;text-decoration:none}a:hover{color:#17171B}
+.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.seal circle,.seal rect{fill:none;stroke:#B08D4F;stroke-width:1.2}
+.nav-a:hover{background:#F7F3EA !important;color:#17171B !important}
+.tile:hover{border-color:#B08D4F !important;transform:translateY(-2px)}
+.tile{transition:transform 250ms cubic-bezier(.22,1,.36,1),border-color 250ms}
+.ink:hover{background:#2E2E35 !important}
+.row:hover{background:#FAF7F1}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F7F5F0; color: #17171B; font-family: 'Instrument Sans', 'Helvetica Neue', Helvetica, sans-serif; font-size: 14px">
+
+  <aside aria-label="Workspace navigation" style="flex: 1 1 248px; background: #FFFFFF; border-right: 1px solid #E6E0D5; padding: 22px 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 0 10px">
+      <svg class="seal" width="28" height="28" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18.5"></circle><rect x="17.6" y="8" width="4.8" height="21" rx="0.8" transform="rotate(-20 20 29)"></rect><rect x="17.6" y="8" width="4.8" height="21" rx="0.8" transform="rotate(20 20 29)"></rect></svg>
+      <span style="font-family: 'Cormorant Garamond', 'Times New Roman', serif; letter-spacing: 0.24em; font-size: 17px; font-weight: 500">VELLAIRE</span>
+    </div>
+    <button type="button" style="display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 10px; border: 1px solid #E6E0D5; background: #F7F5F0; color: #17171B; font-family: inherit; cursor: pointer; min-height: 52px">
+      <span style="width: 34px; height: 34px; border-radius: 8px; background: #17171B; display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 17px; color: #E6D3A3">M</span>
+      <span style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px; flex: 1"><span style="font-size: 14px; font-weight: 600">Meridian Capital</span><span style="font-size: 12px; color: #6E685F">Enterprise · 1,320 seats</span></span>
+      <svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #8E887E"><path d="M8 10l4-4 4 4M8 14l4 4 4-4"></path></svg>
+    </button>
+    <nav style="display: flex; flex-direction: column; gap: 16px">
+      <sc-for list="{{nav}}" as="grp" hint-placeholder-count="7">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <sc-if value="{{grp.g}}" hint-placeholder-val="{{ true }}"><div style="font-size: 10.5px; letter-spacing: 0.18em; color: #7A746A; padding: 0 12px 6px; font-weight: 500">{{grp.g}}</div></sc-if>
+          <sc-for list="{{grp.items}}" as="it" hint-placeholder-count="3">
+            <a href="{{it.href}}" class="nav-a" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 8px; font-size: 14px; min-height: 36px; box-sizing: border-box; background: {{it.bg}}; color: {{it.color}}; font-weight: {{it.weight}}">
+              <svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: {{it.iconColor}}"><path d="{{it.d}}"></path></svg>
+              <span style="flex: 1">{{it.label}}</span>
+              <sc-if value="{{it.badge}}" hint-placeholder-val="{{ false }}"><span style="font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #F6EFE1; color: #876A33; font-weight: 600">{{it.badge}}</span></sc-if>
+            </a>
+          </sc-for>
+        </div>
+      </sc-for>
+    </nav>
+  </aside>
+
+  <div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+    <header style="display: flex; align-items: center; gap: 16px; padding: 16px 40px; border-bottom: 1px solid #E6E0D5; background: #FFFFFF; flex-wrap: wrap">
+      <label for="q" style="flex: 1 1 320px; max-width: 520px; display: flex; align-items: center; gap: 10px; background: #F7F5F0; border: 1px solid #E6E0D5; border-radius: 8px; padding: 0 14px; height: 42px; color: #6E685F">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-3.5-3.5"></path></svg>
+        <input id="q" type="search" placeholder="Search people, cards, settings" style="flex: 1; background: transparent; border: none; outline: none; color: #17171B; font-family: inherit; font-size: 14px; min-width: 0">
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; border: 1px solid #E0D9CC; border-radius: 4px; padding: 2px 6px; background: #FFFFFF">⌘K</span>
+      </label>
+      <div style="margin-left: auto; display: flex; align-items: center; gap: 8px">
+        <button type="button" aria-label="Help" style="width: 42px; height: 42px; border-radius: 8px; border: 1px solid #E6E0D5; background: #FFFFFF; color: #4E4A44; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01"></path></svg></button>
+        <button type="button" aria-label="Notifications, 3 unread" style="position: relative; width: 42px; height: 42px; border-radius: 8px; border: 1px solid #E6E0D5; background: #FFFFFF; color: #4E4A44; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20.5a2 2 0 0 0 4 0"></path></svg><span style="position: absolute; top: 9px; right: 10px; width: 7px; height: 7px; border-radius: 50%; background: #B08D4F"></span></button>
+        <button type="button" aria-label="Account menu" style="width: 42px; height: 42px; border-radius: 50%; border: 1px solid #D9C9A6; background: #F6EFE1; color: #876A33; font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 600; cursor: pointer">SK</button>
+      </div>
+    </header>
+
+    <main style="padding: 36px 40px 56px; display: flex; flex-direction: column; gap: 24px; max-width: 1320px; width: 100%; box-sizing: border-box">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap">
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <div style="font-size: 12px; letter-spacing: 0.2em; color: #876A33; font-weight: 500">SHARING</div>
+          <h1 style="margin: 0; font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-weight: 400; font-size: 46px; line-height: 1.05">NFC cards</h1>
+          <p style="margin: 0; color: #5E5952; font-size: 15px">Order engraved cards, follow every order, and switch off a lost card in one click.</p>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); gap: 12px">
+        <sc-for list="{{kpis}}" as="k" hint-placeholder-count="4">
+          <div style="background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 8px">
+            <span style="font-size: 11px; letter-spacing: 0.16em; color: #6E685F; font-weight: 500">{{k.label}}</span>
+            <span style="font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-size: 36px; font-weight: 500; line-height: 1">{{k.value}}</span>
+            <span style="font-size: 12.5px; color: {{k.c}}">{{k.note}}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+        <div style="flex: 3 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+          <section style="background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 14px; overflow: hidden">
+            <div style="padding: 20px 22px; display: flex; justify-content: space-between; align-items: center"><h2 style="margin: 0; font-size: 16px; font-weight: 600">Orders</h2><span style="font-size: 13px; color: #6E685F">3 in progress</span></div>
+            <sc-for list="{{orders}}" as="o" hint-placeholder-count="3">
+              <div style="padding: 18px 22px; border-top: 1px solid #F0EBE2; display: flex; flex-direction: column; gap: 14px">
+                <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap">
+                  <span style="width: 56px; height: 36px; border-radius: 6px; flex: none; background: {{o.mat}}; box-shadow: 0 6px 12px rgba(23,23,27,0.15)"></span>
+                  <span style="flex: 1 1 200px; display: flex; flex-direction: column; gap: 2px"><span style="font-weight: 600">{{o.title}}</span><span style="font-size: 12.5px; color: #6E685F">{{o.sub}}</span></span>
+                  <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #6E685F">{{o.id}}</span>
+                  <span style="font-size: 12px; padding: 3px 10px; border-radius: 999px; font-weight: 500; background: {{o.stBg}}; color: {{o.stFg}}">{{o.status}}</span>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px">
+                  <sc-for list="{{o.steps}}" as="s" hint-placeholder-count="5">
+                    <span style="display: flex; flex-direction: column; gap: 6px"><span style="height: 4px; border-radius: 999px; background: {{s.bar}}"></span><span style="font-size: 11.5px; color: {{s.color}}; font-weight: {{s.weight}}">{{s.name}}</span></span>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </section>
+
+          <section style="background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 14px; overflow: hidden">
+            <div style="padding: 16px 22px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap">
+              <h2 style="margin: 0; font-size: 16px; font-weight: 600">Cards in use</h2>
+              <label for="ds" style="flex: 0 1 280px; display: flex; align-items: center; gap: 8px; background: #F7F5F0; border: 1px solid #E6E0D5; border-radius: 8px; padding: 0 10px; height: 38px; color: #6E685F"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 16px; height: 16px"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-3.5-3.5"></path></svg><input id="ds" type="search" placeholder="Search holder" style="flex: 1; border: none; outline: none; background: transparent; font-family: inherit; font-size: 13.5px; min-width: 0"></label>
+            </div>
+            <div style="overflow-x: auto">
+              <div style="min-width: 640px">
+                <div style="display: grid; grid-template-columns: 2fr 1.3fr 1.2fr 1fr 110px; gap: 14px; padding: 10px 22px; font-size: 11px; letter-spacing: 0.14em; color: #6E685F; font-weight: 500; background: #FAF8F3"><span>HOLDER</span><span>MATERIAL</span><span>LAST TAP</span><span>STATUS</span><span></span></div>
+                <sc-for list="{{devices}}" as="d" hint-placeholder-count="5">
+                  <div class="row" style="display: grid; grid-template-columns: 2fr 1.3fr 1.2fr 1fr 110px; gap: 14px; align-items: center; padding: 12px 22px; border-top: 1px solid #F0EBE2">
+                    <span style="display: flex; flex-direction: column"><span style="font-weight: 600">{{d.name}}</span><span style="font-size: 12.5px; color: #6E685F">{{d.office}}</span></span>
+                    <span style="display: flex; align-items: center; gap: 8px"><span style="width: 26px; height: 17px; border-radius: 3px; background: {{d.mat}}"></span>{{d.material}}</span>
+                    <span style="color: #4E4A44">{{d.tap}}</span>
+                    <span><span style="font-size: 12px; padding: 3px 10px; border-radius: 999px; font-weight: 500; background: {{d.stBg}}; color: {{d.stFg}}">{{d.status}}</span></span>
+                    <button type="button" style="justify-self: end; height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid #E0D9CC; background: #FFFFFF; font-family: inherit; font-size: 12.5px; color: {{d.actColor}}; cursor: pointer">{{d.action}}</button>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <aside aria-label="New order" style="flex: 2 1 340px; min-width: 0; background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 20px">
+          <div style="display: flex; flex-direction: column; gap: 4px"><h2 style="margin: 0; font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-size: 28px; font-weight: 500">New order</h2><span style="font-size: 13px; color: #5E5952">Engraved from your brand kit automatically</span></div>
+          <div style="background: #EFE9DD; border-radius: 12px; padding: 22px; display: flex; justify-content: center">
+            <div style="width: 100%; max-width: 280px; aspect-ratio: 1.586; border-radius: 14px; background: linear-gradient(135deg,#1F1F24,#0B0B0D 45%,#2A2A30 58%,#0B0B0D); border: 1px solid rgba(201,169,110,0.4); box-shadow: 0 20px 40px rgba(23,23,27,0.28); padding: 18px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; color: #C9A96E">
+              <span style="font-family: 'Cormorant Garamond', serif; font-size: 11px; letter-spacing: 0.3em; font-weight: 600">MERIDIAN</span>
+              <span style="display: flex; flex-direction: column; gap: 3px"><span style="font-family: 'Cormorant Garamond', serif; font-size: 22px">[Employee name]</span><span style="font-size: 10px; letter-spacing: 0.06em; color: #A9A49A">[Job title]</span></span>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <span style="font-size: 13px; font-weight: 500">Material</span>
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+              <sc-for list="{{materials}}" as="m" hint-placeholder-count="4">
+                <label style="display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 10px; cursor: pointer; background: {{m.rowBg}}; border: {{m.border}}"><input type="radio" name="mat" checked="{{m.sel}}" style="width: 16px; height: 16px; accent-color: #17171B"><span style="width: 30px; height: 20px; border-radius: 4px; background: {{m.bg}}; flex: none"></span><span style="font-size: 13px; font-weight: 500">{{m.name}}</span></label>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <span style="font-size: 13px; font-weight: 500">For</span>
+            <button type="button" style="height: 46px; border-radius: 8px; border: 1px solid #E0D9CC; background: #FFFFFF; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; font-family: inherit; font-size: 14px; color: #17171B; cursor: pointer">New joiners this month · 9 people<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 14px; height: 14px; color: #8E887E"><path d="M7 10l5 5 5-5"></path></svg></button>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <span style="font-size: 13px; font-weight: 500">Ship to</span>
+            <button type="button" style="height: 46px; border-radius: 8px; border: 1px solid #E0D9CC; background: #FFFFFF; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; font-family: inherit; font-size: 14px; color: #17171B; cursor: pointer">Each person's office<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 14px; height: 14px; color: #8E887E"><path d="M7 10l5 5 5-5"></path></svg></button>
+          </div>
+          <label style="display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 10px; background: #FBF6EC; border: 1px solid #EBDDC0; cursor: pointer"><input type="checkbox" checked style="width: 17px; height: 17px; accent-color: #17171B; margin-top: 1px"><span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 13.5px; font-weight: 600">Order automatically for every new hire</span><span style="font-size: 12.5px; color: #5E5952">Triggered by Workday when a card is published</span></span></label>
+          <button type="button" class="ink" style="height: 50px; border-radius: 8px; border: none; background: #17171B; color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer">Review order · 9 cards</button>
+        </aside>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const I = {
+      home: 'M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z',
+      card: 'M5 5.5h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2zM7 14.5h5',
+      plus: 'M12 5v14M5 12h14',
+      grid: 'M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z',
+      palette: 'M12 3a9 9 0 1 0 0 18c1.2 0 1.8-.8 1.8-1.7 0-1.3-1-1.6-1-2.8 0-1 .8-1.5 1.8-1.5H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z',
+      people: 'M9 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c1.9.7 3.1 2.4 3.5 5.2',
+      map: 'M4 6l5-2 6 2 5-2v14l-5 2-6-2-5 2zM9 4v14M15 6v14',
+      check: 'M5 12.5l4.5 4.5L19 7.5',
+      qr: 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM20 14v1M14 20h1M18 18h3v3',
+      nfc: 'M8 8.5a5 5 0 0 1 0 7M11.5 6a8.5 8.5 0 0 1 0 12M15 3.5a12 12 0 0 1 0 17',
+      wallet: 'M5 6h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zM3 10h18M16 14.5h2',
+      mail: 'M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM3.5 6l8.5 7 8.5-7',
+      chart: 'M4 20V10M10 20V4M16 20v-7M22 20H2',
+      inbox: 'M3 13l3-8h12l3 8v6H3zM3 13h5l1.5 2.5h5L16 13h5',
+      plug: 'M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0zM12 17v4',
+      sync: 'M20 11a8 8 0 0 0-14.5-4.5L4 8M4 4v4h4M4 13a8 8 0 0 0 14.5 4.5L20 16M20 20v-4h-4',
+      shield: 'M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z',
+      receipt: 'M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6',
+      gear: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1',
+      alert: 'M12 4l9 16H3zM12 10v4M12 17h.01'
+    };
+    const active = 'nfc';
+    const mk = (id, label, d, href, badge) => ({
+      label, d, href: href || '#', badge: badge || '',
+      bg: id === active ? '#F4EEE2' : 'transparent',
+      color: id === active ? '#17171B' : '#4E4A44',
+      iconColor: id === active ? '#B08D4F' : '#8E887E',
+      weight: id === active ? '600' : '400'
+    });
+    const nav = [
+      { g: '', items: [mk('home', 'Home', I.home, 'Overview.dc.html')] },
+      { g: 'CARDS', items: [mk('cards', 'All cards', I.card, 'Cards.dc.html'), mk('create', 'Create a card', I.plus, 'CreateStep1.dc.html'), mk('templates', 'Templates', I.grid), mk('brand', 'Brand kit', I.palette, 'BrandKit.dc.html')] },
+      { g: 'PEOPLE', items: [mk('employees', 'Employees', I.people, 'Employees.dc.html'), mk('departments', 'Departments', I.map), mk('approvals', 'Approvals', I.check, '#', '7')] },
+      { g: 'SHARING', items: [mk('qr', 'QR codes', I.qr), mk('nfc', 'NFC cards', I.nfc, 'NFC.dc.html'), mk('wallet', 'Wallet passes', I.wallet), mk('sig', 'Email signatures', I.mail)] },
+      { g: 'INSIGHTS', items: [mk('analytics', 'Analytics', I.chart, 'Analytics.dc.html'), mk('leads', 'Leads', I.inbox, 'Leads.dc.html', '12')] },
+      { g: 'AUTOMATION', items: [mk('integrations', 'HR integrations', I.plug, 'Integrations.dc.html'), mk('sync', 'Sync activity', I.sync, '#', '2')] },
+      { g: 'SETTINGS', items: [mk('team', 'Team and roles', I.people), mk('security', 'Security', I.shield), mk('billing', 'Billing', I.receipt), mk('settings', 'Company settings', I.gear)] }
+    ];
+
+    const MAT = {
+      'Obsidian Metal': 'linear-gradient(135deg,#1F1F24,#0B0B0D 45%,#2A2A30 58%,#0B0B0D)',
+      'Brushed Steel': 'linear-gradient(135deg,#B8BCC2,#8C9097 40%,#D3D6DA 55%,#9A9EA4)',
+      '24K Gold': 'linear-gradient(135deg,#B8955A,#E6D3A3 38%,#C9A96E 55%,#9C7A44)',
+      'Walnut': 'linear-gradient(135deg,#6B4429,#4A2E1B 50%,#5C3A22)'
+    };
+    const STEPS = ['Artwork', 'Production', 'Encoded', 'Shipped', 'Delivered'];
+    const ST = { 'In production': ['#FBF0DC', '#8A5A12'], Shipped: ['#E6ECF6', '#2F4A7A'], Delivered: ['#E5F2EB', '#1F7A55'], Active: ['#E5F2EB', '#1F7A55'], Lost: ['#F8E4E7', '#A3283A'], 'Not activated': ['#EFEBE3', '#4E4A44'] };
+    const ord = (title, sub, id, material, status, at) => ({
+      title, sub, id, status, mat: MAT[material], stBg: ST[status][0], stFg: ST[status][1],
+      steps: STEPS.map((name, i) => ({ name, bar: i <= at ? '#B08D4F' : '#EEE8DD', color: i <= at ? '#17171B' : '#8E887E', weight: i === at ? '600' : '400' }))
+    });
+    const dev = (name, office, material, tap, status) => ({
+      name, office, material, tap, status, mat: MAT[material], stBg: ST[status][0], stFg: ST[status][1],
+      action: status === 'Lost' ? 'Reassign' : (status === 'Not activated' ? 'Activate' : 'Mark lost'), actColor: status === 'Active' ? '#A3283A' : '#17171B'
+    });
+    const materials = Object.keys(MAT).map((name, i) => ({ name, bg: MAT[name], sel: i === 0, rowBg: i === 0 ? '#FBF6EC' : '#FFFFFF', border: i === 0 ? '2px solid #B08D4F' : '1px solid #E6E0D5' }));
+    return { nav, materials,
+      kpis: [
+        { label: 'CARDS IN USE', value: '1,104', note: '812 taps this week', c: '#1F7A55' },
+        { label: 'IN PRODUCTION', value: '23', note: '2 orders', c: '#6E685F' },
+        { label: 'ON THE WAY', value: '14', note: 'Arriving at Dubai office', c: '#6E685F' },
+        { label: 'LOST OR SWITCHED OFF', value: '6', note: 'All disabled safely', c: '#6E685F' }
+      ],
+      orders: [
+        ord('9 Obsidian Metal cards', 'October joiners · Dubai, Riyadh, London', 'ORD-2041', 'Obsidian Metal', 'In production', 1),
+        ord('14 Brushed Steel cards', 'Private Clients team · Dubai', 'ORD-2033', 'Brushed Steel', 'Shipped', 3),
+        ord('3 24K Gold cards', 'Leadership · London', 'ORD-2029', '24K Gold', 'In production', 0)
+      ],
+      devices: [
+        dev('Sara Khan', 'Dubai', 'Obsidian Metal', '2 hours ago', 'Active'),
+        dev('Layla Mansour', 'Riyadh', '24K Gold', 'Yesterday', 'Active'),
+        dev('James Whitford', 'London', 'Brushed Steel', '3 days ago', 'Active'),
+        dev('Hana Qureshi', 'Karachi', 'Walnut', '—', 'Not activated'),
+        dev('Daniel Reyes', 'Dubai', 'Obsidian Metal', '12 Sep', 'Lost')
+      ] };
+  }
+}
+</script>
+</body>
+</html>

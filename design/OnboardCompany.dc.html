@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Setup — 1 Your company</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&amp;family=Instrument+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0;background:#F7F5F0}
+a{color:#876A33;text-decoration:none}
+.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.seal circle,.seal rect{fill:none;stroke:#C9A96E;stroke-width:1.1}
+.seal-gold circle,.seal-gold rect{fill:none;stroke:#B08D4F;stroke-width:1.2}
+.opt:hover{border-color:#B08D4F !important}
+.ink:hover{background:#2E2E35 !important}
+.fld:focus{outline:none;border-color:#B08D4F !important;box-shadow:0 0 0 3px rgba(176,141,79,0.18)}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F7F5F0; color: #17171B; font-family: 'Instrument Sans', 'Helvetica Neue', Helvetica, sans-serif; font-size: 14px; display: flex; flex-direction: column">
+  <header style="background: #FFFFFF; border-bottom: 1px solid #E6E0D5; padding: 16px 32px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap">
+    <span style="display: flex; align-items: center; gap: 10px"><svg class="seal-gold" width="26" height="26" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18.5"></circle><rect x="17.6" y="8" width="4.8" height="21" rx="0.8" transform="rotate(-20 20 29)"></rect><rect x="17.6" y="8" width="4.8" height="21" rx="0.8" transform="rotate(20 20 29)"></rect></svg><span style="font-family: 'Cormorant Garamond', serif; letter-spacing: 0.24em; font-size: 16px; font-weight: 600">VELLAIRE</span></span>
+    <span style="margin-left: auto; font-size: 13px; color: #5E5952">Setting up Meridian Capital · step 1 of 5</span>
+  </header>
+  <div style="height: 3px; background: #EEE8DD"><div style="height: 3px; width: 20%; background: #B08D4F"></div></div>
+  <div style="flex: 1; display: flex; flex-wrap: wrap">
+    <main style="flex: 3 1 520px; min-width: 0; padding: 56px 56px 48px; box-sizing: border-box; display: flex; justify-content: center">
+      <div style="width: 100%; max-width: 620px; display: flex; flex-direction: column; gap: 28px">
+        <ol aria-label="Setup steps" style="list-style: none; margin: 0; padding: 0; display: flex; gap: 18px; flex-wrap: wrap">
+          <sc-for list="{{steps}}" as="s" hint-placeholder-count="5"><li style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: {{s.color}}; font-weight: {{s.weight}}"><span style="width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; background: {{s.dotBg}}; color: {{s.dotFg}}; border: 1px solid {{s.line}}">{{s.n}}</span>{{s.name}}</li></sc-for>
+        </ol>
+        <div style="display: flex; flex-direction: column; gap: 10px">
+          <h1 style="margin: 0; font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-weight: 400; font-size: 48px; line-height: 1.05">Tell us about<br>your company.</h1>
+          <p style="margin: 0; color: #5E5952; font-size: 16px; line-height: 1.6">Five short steps. Most companies finish in under ten minutes.</p>
+        </div>
+        <section style="background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 16px; padding: 22px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 18px">
+          <div style="display: flex; flex-direction: column; gap: 6px"><label for="cn" style="font-size: 13px; font-weight: 500">Company name</label><input id="cn" class="fld" value="Meridian Capital" placeholder="" style="height: 46px; border-radius: 8px; border: 1px solid #E0D9CC; background: #FFFFFF; padding: 0 12px; font-family: inherit; font-size: 14px; color: #17171B"></div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><label for="ws" style="font-size: 13px; font-weight: 500">Website</label><input id="ws" class="fld" value="meridian.com" placeholder="yourcompany.com" style="height: 46px; border-radius: 8px; border: 1px solid #E0D9CC; background: #FFFFFF; padding: 0 12px; font-family: inherit; font-size: 14px; color: #17171B"></div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><label for="ind" style="font-size: 13px; font-weight: 500">Industry</label><button id="ind" type="button" style="height: 46px; border-radius: 8px; border: 1px solid #E0D9CC; background: #FFFFFF; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; font-family: inherit; font-size: 14px; color: #17171B; cursor: pointer">Financial services<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 14px; height: 14px; color: #8E887E"><path d="M7 10l5 5 5-5"></path></svg></button></div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><label for="size" style="font-size: 13px; font-weight: 500">Company size</label><button id="size" type="button" style="height: 46px; border-radius: 8px; border: 1px solid #E0D9CC; background: #FFFFFF; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; font-family: inherit; font-size: 14px; color: #17171B; cursor: pointer">1,001–5,000 people<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 14px; height: 14px; color: #8E887E"><path d="M7 10l5 5 5-5"></path></svg></button></div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><label for="ctry" style="font-size: 13px; font-weight: 500">Headquarters</label><button id="ctry" type="button" style="height: 46px; border-radius: 8px; border: 1px solid #E0D9CC; background: #FFFFFF; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; font-family: inherit; font-size: 14px; color: #17171B; cursor: pointer">United Arab Emirates<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 14px; height: 14px; color: #8E887E"><path d="M7 10l5 5 5-5"></path></svg></button></div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><label for="lang" style="font-size: 13px; font-weight: 500">Card languages</label><button id="lang" type="button" style="height: 46px; border-radius: 8px; border: 1px solid #E0D9CC; background: #FFFFFF; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; font-family: inherit; font-size: 14px; color: #17171B; cursor: pointer">English and Arabic<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 14px; height: 14px; color: #8E887E"><path d="M7 10l5 5 5-5"></path></svg></button></div>
+        </section>
+        <div style="display: flex; gap: 12px; align-items: center; padding: 14px 16px; border-radius: 12px; background: #FBF6EC; border: 1px solid #EBDDC0; font-size: 14px; color: #4E4A44"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #B08D4F"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>We will read meridian.com in the next step to prepare your brand kit.</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 8px">
+          <a href="SignUp.dc.html" style="height: 46px; padding: 0 18px; border-radius: 8px; border: 1px solid #D9D2C4; color: #17171B; display: inline-flex; align-items: center; font-size: 14px">Back</a>
+          <a href="OnboardBrand.dc.html" class="ink" style="height: 48px; padding: 0 26px; border-radius: 8px; background: #17171B; color: #FFFFFF; display: inline-flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600">Continue<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #E6D3A3"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+        </div>
+      </div>
+    </main>
+    <aside aria-label="Preview" style="flex: 2 1 400px; min-width: 0; background: #EFE9DD; padding: 56px 40px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px">
+      <div style="width: 380px; max-width: 100%; aspect-ratio: 1.586; border-radius: 18px; background: linear-gradient(135deg, #1C1C20 0%, #0E0E10 42%, #26262C 56%, #0C0C0E 100%); border: 1px solid rgba(201,169,110,0.4); box-shadow: 0 30px 60px rgba(23,23,27,0.3); padding: 26px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; color: #F6F1E7">
+        <span style="font-family: 'Cormorant Garamond', serif; font-size: 13px; letter-spacing: 0.3em; color: #C9A96E; font-weight: 600">MERIDIAN CAPITAL</span>
+        <span style="display: flex; flex-direction: column; gap: 6px"><span style="font-family: 'Cormorant Garamond', serif; font-size: 30px">Your name here</span><span style="height: 1px; width: 46px; background: #C9A96E"></span><span style="font-size: 12px; color: #A9A49A">Your title</span></span>
+      </div>
+      <span style="font-size: 13px; color: #5E5952">Your company name appears on every card</span>
+    </aside>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const names = ['Company', 'Brand', 'Template', 'People', 'First card'];
+    const step = 0;
+    const steps = names.map((name, i) => ({ name, n: i < step ? '✓' : String(i + 1), color: i <= step ? '#17171B' : '#8E887E', weight: i === step ? '600' : '400', dotBg: i < step ? '#B08D4F' : (i === step ? '#17171B' : '#FFFFFF'), dotFg: i <= step ? '#FFFFFF' : '#8E887E', line: i < step ? '#B08D4F' : (i === step ? '#17171B' : '#D9D2C4') }));
+
+    return { steps };
+  }
+}
+</script>
+</body>
+</html>

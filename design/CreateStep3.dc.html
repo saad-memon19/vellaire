@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Create a card — 3 Details</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&amp;family=Instrument+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0;background:#F7F5F0}
+a{color:#876A33;text-decoration:none}a:hover{color:#17171B}
+.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.seal circle,.seal rect{fill:none;stroke:#C9A96E;stroke-width:1.1}
+.seal-gold circle,.seal-gold rect{fill:none;stroke:#B08D4F;stroke-width:1.2}
+.opt:hover{border-color:#B08D4F !important}
+.ink:hover{background:#2E2E35 !important}
+.fld:focus{outline:none;border-color:#B08D4F !important;box-shadow:0 0 0 3px rgba(176,141,79,0.18)}
+.prow:hover{background:#FAF7F1}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F7F5F0; color: #17171B; font-family: 'Instrument Sans', 'Helvetica Neue', Helvetica, sans-serif; font-size: 14px; display: flex; flex-direction: column">
+  <header style="background: #FFFFFF; border-bottom: 1px solid #E6E0D5; padding: 14px 32px; display: flex; align-items: center; gap: 28px; flex-wrap: wrap">
+    <div style="display: flex; align-items: center; gap: 16px">
+      <a href="Cards.dc.html" aria-label="Close and go back to all cards" style="width: 40px; height: 40px; border-radius: 8px; border: 1px solid #E6E0D5; display: flex; align-items: center; justify-content: center; color: #4E4A44"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></a>
+      <div style="display: flex; flex-direction: column; gap: 1px"><span style="font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-size: 24px; font-weight: 500; line-height: 1.1">Create a card</span><span style="font-size: 12px; color: #6E685F">Meridian Capital</span></div>
+    </div>
+    <ol aria-label="Steps" style="list-style: none; margin: 0 auto; padding: 0; display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+      <sc-for list="{{steps}}" as="s" hint-placeholder-count="4">
+        <li style="display: flex; align-items: center; gap: 12px">
+          <span style="display: flex; align-items: center; gap: 10px; font-size: 14px; color: {{s.color}}; font-weight: {{s.weight}}"><span style="width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; background: {{s.dotBg}}; color: {{s.dotFg}}; border: 1px solid {{s.dotLine}}">{{s.n}}</span>{{s.name}}</span>
+          <sc-if value="{{s.more}}" hint-placeholder-val="{{ true }}"><span style="width: 40px; height: 1px; background: {{s.bar}}"></span></sc-if>
+        </li>
+      </sc-for>
+    </ol>
+    <button type="button" style="height: 40px; padding: 0 16px; border-radius: 8px; border: 1px solid #D9D2C4; background: #FFFFFF; color: #17171B; font-family: inherit; font-size: 14px; cursor: pointer">Save as draft</button>
+  </header>
+  <div style="flex: 1; display: flex; flex-wrap: wrap">
+    <main style="flex: 3 1 560px; min-width: 0; padding: 44px 48px 120px; box-sizing: border-box; display: flex; justify-content: center">
+      <div style="width: 100%; max-width: 720px; display: flex; flex-direction: column; gap: 28px">
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <div style="font-size: 12px; letter-spacing: 0.2em; color: #876A33; font-weight: 500">STEP 3 OF 4</div>
+          <h1 style="margin: 0; font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-weight: 400; font-size: 44px; line-height: 1.05">Add the details</h1>
+          <p style="margin: 0; color: #5E5952; font-size: 15px; line-height: 1.6">Fields marked <b style="font-weight: 600">From Workday</b> are filled for you and stay in sync. Everything else is optional.</p>
+        </div>
+
+        <section style="background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 14px; padding: 22px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap">
+          <div style="width: 84px; height: 84px; border-radius: 50%; padding: 3px; background: linear-gradient(140deg, #E6D3A3, #9C7A44); box-sizing: border-box; flex: none"><div style="width: 100%; height: 100%; border-radius: 50%; background: #F2EEE6; border: 3px solid #FFFFFF; box-sizing: border-box; display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600; color: #876A33">OH</div></div>
+          <div style="flex: 1 1 240px; display: flex; flex-direction: column; gap: 4px"><h2 style="margin: 0; font-size: 16px; font-weight: 600">Profile photo</h2><span style="font-size: 13px; color: #5E5952; line-height: 1.5">A square photo, at least 600 px. Photo changes need Brand Manager approval.</span></div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap">
+            <button type="button" style="height: 40px; padding: 0 14px; border-radius: 8px; border: 1px solid #D9D2C4; background: #FFFFFF; font-family: inherit; font-size: 13px; color: #17171B; cursor: pointer">Upload photo</button>
+            <button type="button" style="height: 40px; padding: 0 14px; border-radius: 8px; border: 1px solid #EBDDC0; background: #FBF6EC; font-family: inherit; font-size: 13px; color: #876A33; cursor: pointer; display: flex; gap: 6px; align-items: center"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 15px; height: 15px"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>Match team style</button>
+          </div>
+        </section>
+        <section style="background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 16px">
+          <div style="display: flex; flex-direction: column; gap: 3px"><h2 style="margin: 0; font-size: 16px; font-weight: 600">Identity</h2><span style="font-size: 13px; color: #6E685F">How Omar is introduced</span></div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); gap: 16px">
+            <sc-for list="{{identity}}" as="f" hint-placeholder-count="4">
+              <div style="display: flex; flex-direction: column; gap: 6px">
+                <div style="display: flex; justify-content: space-between; align-items: center"><label for="{{f.id}}" style="font-size: 13px; font-weight: 500; color: #2A2A30">{{f.label}}</label><span style="display: inline-flex; gap: 5px; align-items: center; font-size: 11.5px; color: {{f.tagColor}}"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 13px; height: 13px"><path d="{{f.tagD}}"></path></svg>{{f.tag}}</span></div>
+                <input id="{{f.id}}" class="fld" value="{{f.v}}" placeholder="{{f.ph}}" style="height: 44px; border-radius: 8px; border: 1px solid #E0D9CC; padding: 0 12px; font-family: inherit; font-size: 14px; background: {{f.bg}}; color: {{f.fg}}">
+              </div>
+            </sc-for>
+          </div>
+        </section>
+        <section style="background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 16px">
+          <div style="display: flex; flex-direction: column; gap: 3px"><h2 style="margin: 0; font-size: 16px; font-weight: 600">Contact</h2><span style="font-size: 13px; color: #6E685F">How clients reach Omar</span></div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); gap: 16px">
+            <sc-for list="{{contact}}" as="f" hint-placeholder-count="4">
+              <div style="display: flex; flex-direction: column; gap: 6px">
+                <div style="display: flex; justify-content: space-between; align-items: center"><label for="{{f.id}}" style="font-size: 13px; font-weight: 500; color: #2A2A30">{{f.label}}</label><span style="display: inline-flex; gap: 5px; align-items: center; font-size: 11.5px; color: {{f.tagColor}}"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 13px; height: 13px"><path d="{{f.tagD}}"></path></svg>{{f.tag}}</span></div>
+                <input id="{{f.id}}" class="fld" value="{{f.v}}" placeholder="{{f.ph}}" style="height: 44px; border-radius: 8px; border: 1px solid #E0D9CC; padding: 0 12px; font-family: inherit; font-size: 14px; background: {{f.bg}}; color: {{f.fg}}">
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <section style="background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap">
+            <div style="display: flex; flex-direction: column; gap: 3px"><label for="bio" style="font-size: 16px; font-weight: 600">About</label><span style="font-size: 13px; color: #6E685F">Two or three sentences in the company's voice</span></div>
+            <div style="display: flex; gap: 8px">
+              <button type="button" style="height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid #EBDDC0; background: #FBF6EC; font-family: inherit; font-size: 13px; color: #876A33; cursor: pointer; display: flex; gap: 6px; align-items: center"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 15px; height: 15px"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>Write with AI</button>
+              <button type="button" style="height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid #E0D9CC; background: #FFFFFF; font-family: inherit; font-size: 13px; color: #17171B; cursor: pointer">Translate</button>
+            </div>
+          </div>
+          <textarea id="bio" class="fld" rows="4" style="border-radius: 8px; border: 1px solid #E0D9CC; padding: 12px; font-family: inherit; font-size: 14px; line-height: 1.6; color: #17171B; resize: vertical">Omar joins Private Clients in Dubai, supporting families and founders with long-term wealth planning across the Gulf.</textarea>
+          <div style="display: flex; justify-content: space-between; font-size: 12px; color: #6E685F"><span>Languages: English · add Arabic</span><span>118 / 300</span></div>
+        </section>
+
+        <section style="background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; flex-direction: column; gap: 3px"><h2 style="margin: 0; font-size: 16px; font-weight: 600">Links and buttons</h2><span style="font-size: 13px; color: #6E685F">Shown on the online card in this order</span></div>
+          <sc-for list="{{links}}" as="l" hint-placeholder-count="3">
+            <div style="display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid #EEE8DD; border-radius: 10px">
+              <svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #A39B8E"><path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01"></path></svg>
+              <span style="width: 36px; height: 36px; border-radius: 9px; background: #F6EFE1; color: #876A33; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; flex: none">{{l.ic}}</span>
+              <span style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-weight: 500">{{l.name}}</span><span style="font-size: 12.5px; color: #6E685F">{{l.v}}</span></span>
+              <button type="button" style="height: 34px; padding: 0 12px; border-radius: 8px; border: 1px solid #E6E0D5; background: #FFFFFF; font-family: inherit; font-size: 13px; color: #17171B; cursor: pointer">Edit</button>
+            </div>
+          </sc-for>
+          <button type="button" style="height: 44px; border-radius: 10px; border: 1px dashed #C9BFAD; background: transparent; color: #4E4A44; font-family: inherit; font-size: 14px; cursor: pointer">Add a link or button</button>
+        </section>
+      </div>
+    </main>
+    <aside aria-label="Live preview" style="flex: 2 1 380px; min-width: 0; background: #EFE9DD; border-left: 1px solid #E2DBCD; padding: 44px 40px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 22px">
+      <div style="align-self: stretch; display: flex; justify-content: space-between; align-items: center"><span style="font-size: 12px; letter-spacing: 0.2em; color: #6E685F; font-weight: 500">LIVE PREVIEW</span><span style="font-size: 12px; color: #6E685F">Updates as you type</span></div>
+      <div style="width: 320px; height: 660px; border-radius: 46px; border: 1px solid #CFC6B5; background: #17171B; padding: 10px; box-sizing: border-box; box-shadow: 0 30px 60px rgba(23,23,27,0.25)">
+        <div style="height: 100%; border-radius: 37px; overflow: hidden; background: #0F0F12; color: #F6F1E7; display: flex; flex-direction: column">
+          <div style="height: 140px; flex: none; background: radial-gradient(80% 90% at 70% 10%, rgba(201,169,110,0.32), rgba(15,15,18,0) 70%), linear-gradient(160deg, #24221D, #0F0F12); padding: 20px; box-sizing: border-box; font-size: 8.5px; letter-spacing: 0.3em; color: #C9A96E">MERIDIAN CAPITAL</div>
+          <div style="padding: 0 20px; display: flex; flex-direction: column; gap: 12px; margin-top: -40px">
+            <div style="width: 78px; height: 78px; border-radius: 50%; border: 2px solid #C9A96E; background: #2A2A30; display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 26px; color: #E6D3A3">OH</div>
+            <div style="display: flex; flex-direction: column; gap: 3px"><span style="font-family: 'Cormorant Garamond', serif; font-size: 28px; line-height: 1.05">Omar Haddad</span><span style="font-size: 12px; color: #A9A49A">Associate · Private Clients</span></div>
+            <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px">
+              <span style="height: 42px; border-radius: 11px; border: 1px solid #2A2A30; display: flex; align-items: center; justify-content: center; color: #E6D3A3"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z"></path></svg></span>
+              <span style="height: 42px; border-radius: 11px; border: 1px solid #2A2A30; display: flex; align-items: center; justify-content: center; color: #E6D3A3"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM3.5 6l8.5 7 8.5-7"></path></svg></span>
+              <span style="height: 42px; border-radius: 11px; border: 1px solid #2A2A30; display: flex; align-items: center; justify-content: center; color: #E6D3A3"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-3.9A8.5 8.5 0 1 1 8 19z"></path></svg></span>
+              <span style="height: 42px; border-radius: 11px; border: 1px solid #2A2A30; display: flex; align-items: center; justify-content: center; color: #E6D3A3"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"></path></svg></span>
+            </div>
+            <span style="height: 44px; border-radius: 11px; background: #C9A96E; color: #0B0B0D; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px">Save contact</span>
+            <span style="height: 42px; border-radius: 11px; border: 1px solid #3A3A42; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #E8E3D9">Share your details</span>
+            <p style="margin: 0; font-size: 11.5px; line-height: 1.6; color: #A9A49A">Omar joins Private Clients in Dubai, supporting families and founders with long-term wealth planning.</p>
+            <div style="display: flex; flex-direction: column; border-top: 1px solid #1E1E23">
+              <span style="padding: 11px 0; border-bottom: 1px solid #1E1E23; font-size: 12px">Book a meeting</span>
+              <span style="padding: 11px 0; border-bottom: 1px solid #1E1E23; font-size: 12px">LinkedIn</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #5E5952">cards.meridian.com/omar-haddad</div>
+    </aside>
+  </div>
+  <footer style="position: sticky; bottom: 0; background: #FFFFFF; border-top: 1px solid #E6E0D5; padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap">
+    <a href="CreateStep2.dc.html" style="height: 46px; padding: 0 20px; border-radius: 8px; border: 1px solid #D9D2C4; color: #17171B; display: inline-flex; align-items: center; gap: 8px; font-size: 14px"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>Back</a>
+    <span style="font-size: 13px; color: #6E685F">Step 3 of 4 · Details</span>
+    <a href="CreateStep4.dc.html" class="ink" style="height: 46px; padding: 0 24px; border-radius: 8px; background: #17171B; color: #FFFFFF; display: inline-flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600">Continue to publish<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #E6D3A3"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1420}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const step = 2;
+    const names = ['Person', 'Design', 'Details', 'Publish'];
+    const steps = names.map((name, i) => {
+      const done = i < step, now = i === step;
+      return {
+        name, n: done ? '✓' : String(i + 1), more: i < names.length - 1,
+        color: now || done ? '#17171B' : '#8E887E', weight: now ? '600' : '400',
+        dotBg: done ? '#B08D4F' : (now ? '#17171B' : '#FFFFFF'), dotFg: done || now ? '#FFFFFF' : '#8E887E',
+        dotLine: done ? '#B08D4F' : (now ? '#17171B' : '#D9D2C4'), bar: done ? '#B08D4F' : '#D9D2C4'
+      };
+    });
+
+    const T = {
+      hr: { tag: 'From Workday', tagD: 'M7 11h10v9H7zM9 11V8a3 3 0 0 1 6 0v3', tagColor: '#6E685F', bg: '#F7F5F0', fg: '#4E4A44' },
+      edit: { tag: 'Optional', tagD: 'M4 20h4L19 9l-4-4L4 16z', tagColor: '#1F7A55', bg: '#FFFFFF', fg: '#17171B' }
+    };
+    const f = (id, label, v, k, ph) => ({ id, label, v, ph: ph || '', ...T[k] });
+    const identity = [f('n', 'Full name', 'Omar Haddad', 'hr'), f('t', 'Job title', 'Associate', 'hr'), f('d', 'Department', 'Private Clients', 'hr'), f('pr', 'Pronouns', '', 'edit', 'e.g. he/him')];
+    const contact = [f('e', 'Work email', 'omar.haddad@meridian.com', 'hr'), f('o', 'Office phone', '+971 4 000 0000', 'hr'), f('m', 'Mobile', '', 'edit', '+971 5x xxx xxxx'), f('w', 'WhatsApp', '', 'edit', 'Same as mobile')];
+    const links = [
+      { ic: 'Cal', name: 'Book a meeting', v: 'Calendar link · 30 minutes' },
+      { ic: 'in', name: 'LinkedIn', v: 'linkedin.com/in/omarhaddad' },
+      { ic: 'PDF', name: 'Private Clients brochure', v: 'From the brand library' }
+    ];
+    return { steps, identity, contact, links };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Platform console — Plans</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&amp;family=Instrument+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0;background:#F7F5F0}
+a{color:#876A33;text-decoration:none}a:hover{color:#17171B}
+.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.seal circle,.seal rect{fill:none;stroke:#B08D4F;stroke-width:1.1}
+.nav-a:hover{background:#F7F3EA !important;color:#17171B !important}
+.row:hover{background:#FAF7F1}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-direction: column; background: #F7F5F0; color: #17171B; font-family: 'Instrument Sans', 'Helvetica Neue', Helvetica, sans-serif; font-size: 14px">
+  <div style="background: linear-gradient(90deg, #8E7244, #B08D4F 50%, #8E7244); color: #0B0B0D; font-size: 11px; letter-spacing: 0.32em; text-align: center; padding: 6px 12px; font-weight: 600">PLATFORM CONSOLE · INTERNAL STAFF ONLY</div>
+  <div style="flex: 1; display: flex; flex-wrap: wrap">
+    <aside aria-label="Console navigation" style="flex: 1 1 248px; background: #FFFFFF; border-right: 1px solid #F4EEE2; padding: 22px 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 22px">
+      <div style="display: flex; align-items: center; gap: 12px; padding: 4px 10px">
+        <svg class="seal" width="28" height="28" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18.5"></circle><rect x="17.6" y="8" width="4.8" height="21" rx="0.8" transform="rotate(-20 20 29)"></rect><rect x="17.6" y="8" width="4.8" height="21" rx="0.8" transform="rotate(20 20 29)"></rect></svg>
+        <span style="display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Cormorant Garamond', serif; letter-spacing: 0.22em; font-size: 16px">VELLAIRE</span><span style="font-size: 11px; color: #6E685F; letter-spacing: 0.12em">CONSOLE</span></span>
+      </div>
+      <nav style="display: flex; flex-direction: column; gap: 18px">
+        <sc-for list="{{nav}}" as="grp" hint-placeholder-count="6">
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <sc-if value="{{grp.g}}" hint-placeholder-val="{{ true }}"><div style="font-size: 10.5px; letter-spacing: 0.18em; color: #7A746A; padding: 0 12px 6px">{{grp.g}}</div></sc-if>
+            <sc-for list="{{grp.items}}" as="it" hint-placeholder-count="3">
+              <a href="{{it.href}}" class="nav-a" style="display: flex; align-items: center; gap: 12px; padding: 9px 12px; border-radius: 8px; font-size: 14px; min-height: 36px; box-sizing: border-box; background: {{it.bg}}; color: {{it.color}}">
+                <svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: {{it.iconColor}}"><path d="{{it.d}}"></path></svg>
+                <span style="flex: 1">{{it.label}}</span>
+                <sc-if value="{{it.badge}}" hint-placeholder-val="{{ false }}"><span style="font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #F8E4E7; color: #A3283A">{{it.badge}}</span></sc-if>
+              </a>
+            </sc-for>
+          </div>
+        </sc-for>
+      </nav>
+    </aside>
+
+    <div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+      <header style="display: flex; align-items: center; gap: 16px; padding: 18px 40px; border-bottom: 1px solid #F4EEE2; flex-wrap: wrap">
+        <label for="cq" style="flex: 1 1 320px; max-width: 520px; display: flex; align-items: center; gap: 10px; background: #F7F5F0; border: 1px solid #E6E0D5; border-radius: 8px; padding: 0 14px; height: 42px; color: #6E685F">
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-3.5-3.5"></path></svg>
+          <input id="cq" type="search" placeholder="Search companies, users, invoices, orders" style="flex: 1; background: transparent; border: none; outline: none; color: #17171B; font-family: inherit; font-size: 14px; min-width: 0">
+        </label>
+        <div style="margin-left: auto; display: flex; align-items: center; gap: 12px">
+          <span style="display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: #1F7A55"><span style="width: 8px; height: 8px; border-radius: 50%; background: #2E7D5B"></span>All systems operational</span>
+          <button type="button" aria-label="Account menu" style="width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(201,169,110,0.5); background: #F4EEE2; color: #876A33; font-family: 'Cormorant Garamond', serif; font-size: 16px; cursor: pointer">PO</button>
+        </div>
+      </header>
+
+      <main style="padding: 36px 40px 48px; display: flex; flex-direction: column; gap: 22px; max-width: 1320px; width: 100%; box-sizing: border-box">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap">
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <div style="font-size: 12px; letter-spacing: 0.2em; color: #876A33; font-weight: 500">REVENUE</div>
+            <h1 style="margin: 0; font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-weight: 400; font-size: 42px; line-height: 1.05">Plans</h1>
+            <p style="margin: 0; color: #5E5952; font-size: 15px">What each plan includes. Prices are set per region and shown to customers on the website and in billing.</p>
+          </div>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap"><button type="button" style="height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid #D9D2C4; background: #FFFFFF; color: #17171B; font-family: inherit; font-size: 14px; cursor: pointer">Compare versions</button><button type="button" style="height: 44px; padding: 0 18px; border-radius: 8px; border: none; background: #17171B; color: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer">New plan</button></div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px">
+          <sc-for list="{{plans}}" as="p" hint-placeholder-count="3">
+            <article style="background: #FFFFFF; border: {{p.border}}; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 16px">
+              <div style="display: flex; justify-content: space-between; align-items: center"><span style="font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 500">{{p.name}}</span><span style="font-size: 12px; padding: 3px 10px; border-radius: 999px; background: #E5F2EB; color: #1F7A55; font-weight: 500">Live · v{{p.ver}}</span></div>
+              <div style="display: flex; align-items: baseline; gap: 6px"><span style="font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 600">[PRICE]</span><span style="font-size: 13px; color: #6E685F">per card, per month</span></div>
+              <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; text-align: center">
+                <span style="padding: 10px 6px; border-radius: 10px; background: #F7F5F0; display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600">{{p.companies}}</span><span style="font-size: 11.5px; color: #6E685F">companies</span></span>
+                <span style="padding: 10px 6px; border-radius: 10px; background: #F7F5F0; display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600">{{p.cards}}</span><span style="font-size: 11.5px; color: #6E685F">cards</span></span>
+                <span style="padding: 10px 6px; border-radius: 10px; background: #F7F5F0; display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600">{{p.min}}</span><span style="font-size: 11.5px; color: #6E685F">min seats</span></span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 8px; padding-top: 12px; border-top: 1px solid #F0EBE2">
+                <sc-for list="{{p.features}}" as="f" hint-placeholder-count="6"><span style="display: flex; gap: 10px; align-items: center; font-size: 13.5px; color: {{f.color}}"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 16px; height: 16px; color: {{f.icon}}"><path d="{{f.d}}"></path></svg>{{f.n}}</span></sc-for>
+              </div>
+              <div style="display: flex; gap: 8px; margin-top: auto"><button type="button" style="flex: 1; height: 40px; border-radius: 8px; border: 1px solid #E0D9CC; background: #FFFFFF; font-family: inherit; font-size: 13.5px; cursor: pointer">Edit plan</button><button type="button" style="flex: 1; height: 40px; border-radius: 8px; border: 1px solid #E0D9CC; background: #FFFFFF; font-family: inherit; font-size: 13.5px; cursor: pointer">Regional prices</button></div>
+            </article>
+          </sc-for>
+        </div>
+        <section style="background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 14px; overflow: hidden">
+          <div style="padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap"><h2 style="margin: 0; font-size: 16px; font-weight: 600">Limits per plan</h2></div><div style="overflow-x: auto"><div style="min-width: 640px">
+            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 14px; padding: 10px 20px; font-size: 11px; letter-spacing: 0.14em; color: #6E685F; font-weight: 500; background: #FAF8F3"><span>LIMIT</span><span>ESSENTIAL</span><span>PROFESSIONAL</span><span>ENTERPRISE</span></div>
+            <sc-for list="{{limits}}" as="r" hint-placeholder-count="6">
+              <div class="row" style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 14px; align-items: center; padding: 13px 20px; border-top: 1px solid #F0EBE2; font-size: 14px"><span style="font-weight: 500">{{r.n}}</span><span>{{r.a}}</span><span>{{r.b}}</span><span>{{r.c}}</span></div>
+            </sc-for>
+          </div></div>
+        </section>
+      </main>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1260}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const I = {
+      home: 'M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z',
+      building: 'M4 21V5l8-2v18M12 8h8v13M8 8h.01M8 12h.01M8 16h.01M16 12h.01M16 16h.01M2 21h20',
+      people: 'M9 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c1.9.7 3.1 2.4 3.5 5.2',
+      tag: 'M3 12V4h8l10 10-8 8zM7.5 8.5h.01',
+      receipt: 'M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6',
+      chart: 'M4 20V10M10 20V4M16 20v-7M22 20H2',
+      handshake: 'M3 12l4-4 5 3 5-3 4 4-9 8z',
+      nfc: 'M8 8.5a5 5 0 0 1 0 7M11.5 6a8.5 8.5 0 0 1 0 12M15 3.5a12 12 0 0 1 0 17',
+      plug: 'M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0zM12 17v4',
+      grid: 'M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z',
+      spark: 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z',
+      inbox: 'M3 13l3-8h12l3 8v6H3zM3 13h5l1.5 2.5h5L16 13h5',
+      mega: 'M3 10v4h4l8 5V5L7 10zM18 9a4 4 0 0 1 0 6',
+      shield: 'M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z',
+      flag: 'M5 21V4h11l-2 4 2 4H5',
+      pulse: 'M3 12h4l3-7 4 14 3-7h4'
+    };
+    const active = 'plans';
+    const HREF = { command: 'Console.dc.html', companies: 'ConsoleCompanies.dc.html', users: 'ConsoleUsers.dc.html', plans: 'ConsolePlans.dc.html', subs: 'ConsoleSubscriptions.dc.html', rev: 'ConsoleRevenue.dc.html', partners: 'ConsolePartners.dc.html', nfc: 'ConsoleNFC.dc.html', int: 'ConsoleIntegrations.dc.html', lib: 'ConsoleTemplates.dc.html', ai: 'ConsoleAI.dc.html', support: 'ConsoleSupport.dc.html', ann: 'ConsoleAnnouncements.dc.html', sec: 'ConsoleSecurity.dc.html', flags: 'ConsoleFlags.dc.html', health: 'ConsoleHealth.dc.html' };
+    const mk = (id, label, d, badge) => ({
+      label, d, badge: badge || '', href: HREF[id] || '#',
+      bg: id === active ? '#F4EEE2' : 'transparent',
+      color: id === active ? '#17171B' : '#4E4A44',
+      iconColor: id === active ? '#B08D4F' : '#7A746A'
+    });
+    const nav = [
+      { g: '', items: [mk('command', 'Command center', I.home)] },
+      { g: 'CUSTOMERS', items: [mk('companies', 'Companies', I.building), mk('users', 'Users directory', I.people)] },
+      { g: 'REVENUE', items: [mk('plans', 'Plans', I.tag), mk('subs', 'Subscriptions & invoices', I.receipt, '2'), mk('rev', 'Revenue analytics', I.chart), mk('partners', 'Partners & coupons', I.handshake)] },
+      { g: 'OPERATIONS', items: [mk('nfc', 'NFC fulfilment', I.nfc, '3'), mk('int', 'Integration health', I.plug), mk('lib', 'Template library', I.grid), mk('ai', 'AI usage & cost', I.spark)] },
+      { g: 'SUPPORT', items: [mk('support', 'Support inbox', I.inbox), mk('ann', 'Announcements', I.mega)] },
+      { g: 'PLATFORM', items: [mk('sec', 'Security & audit', I.shield), mk('flags', 'Feature flags', I.flag), mk('health', 'System health', I.pulse)] }
+    ];
+
+    const Y = 'M5 12.5l4.5 4.5L19 7.5', N = 'M7 7l10 10M17 7L7 17';
+    const ft = (list) => list.map(([n, on]) => ({ n, d: on ? Y : N, icon: on ? '#1F7A55' : '#C9BFAD', color: on ? '#17171B' : '#8E887E' }));
+    return { nav, plans: [
+        { name: 'Essential', ver: '3', companies: '21', cards: '1,240', min: '5', border: '1px solid #E6E0D5', features: ft([['Brand kit and templates', true], ['QR and wallet passes', true], ['CSV import', true], ['HR and SSO integrations', false], ['Approvals and sub-brands', false], ['Custom domain', false]]) },
+        { name: 'Professional', ver: '4', companies: '36', cards: '6,890', min: '25', border: '2px solid #B08D4F', features: ft([['Brand kit and templates', true], ['QR and wallet passes', true], ['HR, SCIM and CRM integrations', true], ['Approvals and sub-brands', true], ['Custom domain', true], ['Data residency choice', false]]) },
+        { name: 'Enterprise', ver: '2', companies: '18', cards: '7,050', min: '250', border: '1px solid #E6E0D5', features: ft([['Everything in Professional', true], ['Workday, SAP, Oracle, custom API', true], ['Data residency choice', true], ['Audit export and IP allow-list', true], ['Named account manager', true], ['Bespoke template design', true]]) }
+      ],
+      limits: [
+        { n: 'Sub-brands', a: '1', b: '5', c: 'Unlimited' }, { n: 'HR and identity connections', a: '—', b: '2', c: 'Unlimited' },
+        { n: 'AI credits per card, per month', a: '20', b: '100', c: 'Custom' }, { n: 'Admins', a: '3', b: '15', c: 'Unlimited' },
+        { n: 'Support', a: 'Email', b: 'Priority chat', c: 'Account manager and SLA' }
+      ] };
+  }
+}
+</script>
+</body>
+</html>

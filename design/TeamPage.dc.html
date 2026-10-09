@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Public card — Company team page</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&amp;family=Instrument+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0;background:#F7F5F0}
+a{text-decoration:none}
+.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.seal-gold circle,.seal-gold rect{fill:none;stroke:#B08D4F;stroke-width:1.2}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #F7F5F0; color: #17171B; font-family: 'Instrument Sans', 'Helvetica Neue', Helvetica, sans-serif">
+  <div style="padding: 52px 20px 24px; display: flex; flex-direction: column; gap: 18px">
+    <div style="display: flex; align-items: center; gap: 12px"><span style="width: 48px; height: 48px; border-radius: 12px; background: #17171B; display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 24px; color: #C9A96E">M</span><span style="display: flex; flex-direction: column"><span style="font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 500; line-height: 1.05">Meridian Capital</span><span style="font-size: 13px; color: #5E5952">Meet our team</span></span></div>
+    <label style="display: flex; align-items: center; gap: 10px; height: 48px; border-radius: 12px; border: 1px solid #E0D9CC; background: #FFFFFF; padding: 0 14px; color: #6E685F"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-3.5-3.5"></path></svg><input placeholder="Search name or team" style="flex: 1; border: none; outline: none; font-family: inherit; font-size: 15px; background: transparent; min-width: 0"></label>
+    <div style="display: flex; gap: 8px; overflow: hidden"><sc-for list="{{chips}}" as="c" hint-placeholder-count="4"><span style="font-size: 13px; padding: 8px 14px; border-radius: 999px; white-space: nowrap; background: {{c.bg}}; color: {{c.fg}}; border: 1px solid {{c.line}}">{{c.n}}</span></sc-for></div>
+    <section style="background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 16px; overflow: hidden">
+      <sc-for list="{{people}}" as="p" hint-placeholder-count="7"><a href="PublicCard.dc.html" style="display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-top: 1px solid {{p.top}}; color: #17171B"><span style="width: 46px; height: 46px; border-radius: 50%; background: #F2EEE6; color: #876A33; display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 600; flex: none">{{p.ini}}</span><span style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-weight: 600">{{p.name}}</span><span style="font-size: 12.5px; color: #5E5952">{{p.title}}</span></span><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #A39B8E"><path d="M9 6l6 6-6 6"></path></svg></a></sc-for>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const chips = ['All', 'Private Clients', 'Wealth', 'Corporate Finance'].map((n, i) => ({ n, bg: i === 0 ? '#17171B' : '#FFFFFF', fg: i === 0 ? '#FFFFFF' : '#17171B', line: i === 0 ? '#17171B' : '#E0D9CC' }));
+    const people = [['SK','Sara Khan','Head of Private Clients · Dubai'],['TA','Tom Allerton','Partner · London'],['LM','Layla Mansour','Managing Director · Riyadh'],['JW','James Whitford','VP Wealth · London'],['HQ','Hana Qureshi','Relationship Manager · Karachi'],['OH','Omar Haddad','Associate · Dubai'],['RF','Rania Farouk','Analyst · Riyadh']].map(([ini, name, title], i) => ({ ini, name, title, top: i === 0 ? 'transparent' : '#F0EBE2' }));
+    return { chips, people };
+  }
+}
+</script>
+</body>
+</html>

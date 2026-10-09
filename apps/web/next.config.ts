@@ -1,0 +1,15 @@
+import type { NextConfig } from 'next';
+
+const API = process.env.API_URL || 'http://localhost:4000';
+
+const nextConfig: NextConfig = {
+  // The browser talks to /api/* on the same origin; Next forwards it to the API server.
+  async rewrites() {
+    return [
+      { source: '/api/:path*', destination: `${API}/:path*` },
+      { source: '/files/:path*', destination: `${API}/files/:path*` },
+    ];
+  },
+};
+
+export default nextConfig;

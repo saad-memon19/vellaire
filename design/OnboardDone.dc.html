@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Setup — 5 Your first card</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&amp;family=Instrument+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0;background:#F7F5F0}
+a{color:#876A33;text-decoration:none}
+.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.seal circle,.seal rect{fill:none;stroke:#C9A96E;stroke-width:1.1}
+.seal-gold circle,.seal-gold rect{fill:none;stroke:#B08D4F;stroke-width:1.2}
+.opt:hover{border-color:#B08D4F !important}
+.ink:hover{background:#2E2E35 !important}
+.fld:focus{outline:none;border-color:#B08D4F !important;box-shadow:0 0 0 3px rgba(176,141,79,0.18)}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F7F5F0; color: #17171B; font-family: 'Instrument Sans', 'Helvetica Neue', Helvetica, sans-serif; font-size: 14px; display: flex; flex-direction: column">
+  <header style="background: #FFFFFF; border-bottom: 1px solid #E6E0D5; padding: 16px 32px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap">
+    <span style="display: flex; align-items: center; gap: 10px"><svg class="seal-gold" width="26" height="26" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18.5"></circle><rect x="17.6" y="8" width="4.8" height="21" rx="0.8" transform="rotate(-20 20 29)"></rect><rect x="17.6" y="8" width="4.8" height="21" rx="0.8" transform="rotate(20 20 29)"></rect></svg><span style="font-family: 'Cormorant Garamond', serif; letter-spacing: 0.24em; font-size: 16px; font-weight: 600">VELLAIRE</span></span>
+    <span style="margin-left: auto; font-size: 13px; color: #5E5952">Setting up Meridian Capital · step 5 of 5</span>
+  </header>
+  <div style="height: 3px; background: #EEE8DD"><div style="height: 3px; width: 100%; background: #B08D4F"></div></div>
+  <div style="flex: 1; display: flex; flex-wrap: wrap">
+    <main style="flex: 3 1 520px; min-width: 0; padding: 56px 56px 48px; box-sizing: border-box; display: flex; justify-content: center">
+      <div style="width: 100%; max-width: 620px; display: flex; flex-direction: column; gap: 28px">
+        <ol aria-label="Setup steps" style="list-style: none; margin: 0; padding: 0; display: flex; gap: 18px; flex-wrap: wrap">
+          <sc-for list="{{steps}}" as="s" hint-placeholder-count="5"><li style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: {{s.color}}; font-weight: {{s.weight}}"><span style="width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; background: {{s.dotBg}}; color: {{s.dotFg}}; border: 1px solid {{s.line}}">{{s.n}}</span>{{s.name}}</li></sc-for>
+        </ol>
+        <div style="display: flex; flex-direction: column; gap: 10px">
+          <span style="width: 56px; height: 56px; border-radius: 50%; background: #17171B; color: #E6D3A3; display: flex; align-items: center; justify-content: center"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 26px; height: 26px; stroke-width: 1.8"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>
+          <h1 style="margin: 0; font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-weight: 400; font-size: 48px; line-height: 1.05">Your first card is ready, Sara.</h1>
+          <p style="margin: 0; color: #5E5952; font-size: 16px; line-height: 1.6">Add it to your phone and try it. Workday is connected, so your team's cards are being prepared for your approval.</p>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap">
+          <button type="button" style="height: 48px; padding: 0 18px; border-radius: 10px; border: none; background: #000000; color: #FFFFFF; font-family: inherit; font-size: 14px; display: flex; gap: 8px; align-items: center; cursor: pointer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zM3 10h18"></path></svg>Add to Apple Wallet</button>
+          <button type="button" style="height: 48px; padding: 0 18px; border-radius: 10px; border: none; background: #000000; color: #FFFFFF; font-family: inherit; font-size: 14px; display: flex; gap: 8px; align-items: center; cursor: pointer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zM3 10h18"></path></svg>Add to Google Wallet</button>
+          <a href="PublicCard.dc.html" style="height: 48px; padding: 0 18px; border-radius: 10px; border: 1px solid #D9D2C4; background: #FFFFFF; color: #17171B; font-size: 14px; display: inline-flex; align-items: center; box-sizing: border-box">View my card</a>
+        </div>
+        <section style="background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 16px; overflow: hidden">
+          <div style="padding: 18px 20px 6px; font-size: 16px; font-weight: 600">Recommended next</div>
+          <sc-for list="{{next}}" as="n" hint-placeholder-count="3">
+            <a href="{{n.href}}" style="display: flex; align-items: center; gap: 14px; padding: 14px 20px; border-top: 1px solid #F0EBE2; color: #17171B">
+              <span style="width: 40px; height: 40px; border-radius: 10px; background: #F6EFE1; color: #876A33; display: flex; align-items: center; justify-content: center; flex: none"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"></path></svg></span>
+              <span style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-weight: 600">{{n.t}}</span><span style="font-size: 13px; color: #5E5952">{{n.s}}</span></span>
+              <svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #A39B8E"><path d="M9 6l6 6-6 6"></path></svg>
+            </a>
+          </sc-for>
+        </section>
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 8px">
+          <a href="OnboardPeople.dc.html" style="height: 46px; padding: 0 18px; border-radius: 8px; border: 1px solid #D9D2C4; color: #17171B; display: inline-flex; align-items: center; font-size: 14px">Back</a>
+          <a href="Overview.dc.html" class="ink" style="height: 48px; padding: 0 26px; border-radius: 8px; background: #17171B; color: #FFFFFF; display: inline-flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600">Go to dashboard<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #E6D3A3"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+        </div>
+      </div>
+    </main>
+    <aside aria-label="Preview" style="flex: 2 1 400px; min-width: 0; background: #EFE9DD; padding: 56px 40px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px">
+      <div style="width: 380px; max-width: 100%; aspect-ratio: 1.586; border-radius: 18px; background: linear-gradient(135deg, #1C1C20 0%, #0E0E10 42%, #26262C 56%, #0C0C0E 100%); border: 1px solid rgba(201,169,110,0.4); box-shadow: 0 30px 60px rgba(23,23,27,0.3); padding: 26px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; color: #F6F1E7">
+        <span style="font-family: 'Cormorant Garamond', serif; font-size: 13px; letter-spacing: 0.3em; color: #C9A96E; font-weight: 600">MERIDIAN CAPITAL</span>
+        <span style="display: flex; flex-direction: column; gap: 6px"><span style="font-family: 'Cormorant Garamond', serif; font-size: 30px">Sara Khan</span><span style="height: 1px; width: 46px; background: #C9A96E"></span><span style="font-size: 12px; color: #A9A49A">Head of Private Clients</span></span>
+      </div>
+      <div style="width: 300px; border-radius: 20px; background: linear-gradient(160deg, #1A1A1E, #0E0E10); color: #F6F1E7; padding: 18px; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 24px 48px rgba(23,23,27,0.25)">
+        <span style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 9px; letter-spacing: 0.2em; color: #A9A49A">WALLET PASS</span><span style="font-family: 'Cormorant Garamond', serif; font-size: 22px">Sara Khan</span><span style="font-size: 11px; color: #C9A96E">Meridian Capital</span></span>
+        <span style="width: 70px; height: 70px; background: #F6F1E7; border-radius: 8px; padding: 6px; box-sizing: border-box"><span style="display: block; width: 100%; height: 100%; background: repeating-conic-gradient(#17171B 0 25%, #F6F1E7 0 50%) 0 0 / 10px 10px"></span></span>
+      </div>
+      <span style="font-size: 13px; color: #5E5952">Live at cards.meridian.com/sara-khan</span>
+    </aside>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const names = ['Company', 'Brand', 'Template', 'People', 'First card'];
+    const step = 4;
+    const steps = names.map((name, i) => ({ name, n: i < step ? '✓' : String(i + 1), color: i <= step ? '#17171B' : '#8E887E', weight: i === step ? '600' : '400', dotBg: i < step ? '#B08D4F' : (i === step ? '#17171B' : '#FFFFFF'), dotFg: i <= step ? '#FFFFFF' : '#8E887E', line: i < step ? '#B08D4F' : (i === step ? '#17171B' : '#D9D2C4') }));
+
+    const next = [
+      { t: 'Review your team\'s cards', s: '312 cards prepared from Workday, waiting for approval', href: 'Approvals.dc.html', d: 'M5 12.5l4.5 4.5L19 7.5' },
+      { t: 'Order NFC cards', s: 'Metal, wood or PVC, engraved with your brand', href: 'NFC.dc.html', d: 'M8 8.5a5 5 0 0 1 0 7M11.5 6a8.5 8.5 0 0 1 0 12M15 3.5a12 12 0 0 1 0 17' },
+      { t: 'Invite a Brand Manager', s: 'Share the work of approving changes', href: 'Team.dc.html', d: 'M10 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM3.5 20c.8-3.6 3.4-5.5 6.5-5.5 1.4 0 2.6.4 3.6 1M18 14v6M15 17h6' }
+    ];
+    return { steps, next };
+  }
+}
+</script>
+</body>
+</html>

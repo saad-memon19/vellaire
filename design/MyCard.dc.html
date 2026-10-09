@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Employee app — My card</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&amp;family=Instrument+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0;background:#F7F5F0}
+a{text-decoration:none}
+.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.seal circle,.seal rect{fill:none;stroke:#C9A96E;stroke-width:1.1}
+@keyframes tilt{0%,100%{transform:perspective(1200px) rotateY(-8deg) rotateX(6deg)}50%{transform:perspective(1200px) rotateY(6deg) rotateX(3deg)}}
+.tilt{animation:tilt 8s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){.tilt{animation:none}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; overflow: hidden; background: #F7F5F0; color: #17171B; font-family: 'Instrument Sans', 'Helvetica Neue', Helvetica, sans-serif; display: flex; flex-direction: column">
+  <main style="flex: 1; min-height: 0; padding: 56px 20px 16px; display: flex; flex-direction: column; gap: 16px; overflow: hidden">
+    <div style="display: flex; justify-content: space-between; align-items: center">
+      <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 13px; color: #6E685F">Good evening</span><h1 style="margin: 0; font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-weight: 500; font-size: 32px; line-height: 1.05">Sara</h1></div>
+      <span style="width: 44px; height: 44px; border-radius: 50%; background: #F6EFE1; border: 1px solid #D9C9A6; color: #876A33; display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 600">SK</span>
+    </div>
+    <div style="display: flex; justify-content: center; padding: 6px 0 2px">
+      <div class="tilt" style="width: 340px; aspect-ratio: 1.586; border-radius: 18px; background: linear-gradient(135deg, #1C1C20 0%, #0E0E10 42%, #26262C 56%, #0C0C0E 100%); border: 1px solid rgba(201,169,110,0.4); box-shadow: 0 28px 50px rgba(23,23,27,0.3); padding: 22px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; color: #F6F1E7">
+        <div style="display: flex; justify-content: space-between; align-items: center"><div style="display: flex; align-items: center; gap: 8px"><svg class="seal" width="24" height="24" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18.5"></circle><rect x="17.6" y="8" width="4.8" height="21" rx="0.8" transform="rotate(-20 20 29)"></rect><rect x="17.6" y="8" width="4.8" height="21" rx="0.8" transform="rotate(20 20 29)"></rect></svg><span style="font-size: 9px; letter-spacing: 0.3em; color: #C9A96E">MERIDIAN CAPITAL</span></div><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #C9A96E"><path d="M8 8.5a5 5 0 0 1 0 7M11.5 6a8.5 8.5 0 0 1 0 12M15 3.5a12 12 0 0 1 0 17"></path></svg></div>
+        <div style="display: flex; flex-direction: column; gap: 5px"><span style="font-family: 'Cormorant Garamond', serif; font-size: 28px">Sara Khan</span><span style="height: 1px; width: 40px; background: #C9A96E"></span><span style="font-size: 11px; color: #A9A49A">Head of Private Clients</span></div>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12.5px; color: #5E5952"><span style="width: 7px; height: 7px; border-radius: 50%; background: #1F7A55"></span>Live · updated from HR 2 days ago</div>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+      <a href="Share.dc.html" style="height: 54px; border-radius: 14px; background: #17171B; color: #FFFFFF; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; font-size: 15px"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #E6D3A3"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM20 14v1M14 20h1M18 18h3v3"></path></svg>Show QR</a>
+      <a href="PublicCard.dc.html" style="height: 54px; border-radius: 14px; border: 1px solid #D9D2C4; background: #FFFFFF; color: #17171B; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px">Preview card</a>
+    </div>
+    <section style="background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 16px; padding: 16px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; text-align: center">
+      <span style="display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600">214</span><span style="font-size: 11.5px; color: #5E5952">Views this week</span></span>
+      <span style="display: flex; flex-direction: column; gap: 2px; border-left: 1px solid #F0EBE2; border-right: 1px solid #F0EBE2"><span style="font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600">48</span><span style="font-size: 11.5px; color: #5E5952">Saved you</span></span>
+      <span style="display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600">6</span><span style="font-size: 11.5px; color: #5E5952">New leads</span></span>
+    </section>
+    <a href="MobileLeads.dc.html" style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 16px; background: #FBF6EC; border: 1px solid #EBDDC0; color: #17171B">
+      <span style="width: 40px; height: 40px; border-radius: 12px; background: #17171B; color: #E6D3A3; display: flex; align-items: center; justify-content: center"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg></span>
+      <span style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14px; font-weight: 600">Follow up with Faisal</span><span style="font-size: 12.5px; color: #5E5952">A draft email is ready for you</span></span>
+      <svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #A39B8E"><path d="M9 6l6 6-6 6"></path></svg>
+    </a>
+    <a href="#" style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 16px; background: #FFFFFF; border: 1px solid #E6E0D5; color: #17171B">
+      <span style="width: 40px; height: 40px; border-radius: 12px; background: #F6EFE1; color: #876A33; display: flex; align-items: center; justify-content: center"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg></span>
+      <span style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14px; font-weight: 600">Edit my card</span><span style="font-size: 12.5px; color: #5E5952">Bio, photo, links and languages</span></span>
+      <svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #A39B8E"><path d="M9 6l6 6-6 6"></path></svg>
+    </a>
+  </main>
+  <nav aria-label="App" style="height: 84px; flex: none; border-top: 1px solid #E6E0D5; background: #FFFFFF; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); padding-bottom: 20px; box-sizing: border-box">
+    <sc-for list="{{tabs}}" as="t" hint-placeholder-count="5">
+      <a href="{{t.href}}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 10.5px; color: {{t.color}}; font-weight: {{t.weight}}"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{t.d}}"></path></svg>{{t.name}}</a>
+    </sc-for>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const active = 'card';
+    const tabs = [
+      ['card', 'My card', 'MyCard.dc.html', 'M5 5.5h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2zM7 14.5h5'],
+      ['share', 'Share', 'Share.dc.html', 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM20 14v1M14 20h1M18 18h3v3'],
+      ['leads', 'Leads', 'MobileLeads.dc.html', 'M3 13l3-8h12l3 8v6H3zM3 13h5l1.5 2.5h5L16 13h5'],
+      ['insights', 'Insights', 'MobileInsights.dc.html', 'M4 20V10M10 20V4M16 20v-7M22 20H2'],
+      ['settings', 'Settings', '#', 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1']
+    ].map(([id, name, href, d]) => ({ name, href, d, color: id === active ? '#876A33' : '#6E685F', weight: id === active ? '600' : '400' }));
+
+    return { tabs };
+  }
+}
+</script>
+</body>
+</html>

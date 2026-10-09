@@ -1,0 +1,9 @@
+{
+  "name": "design-check",
+  "private": true,
+  "type": "module",
+  "description": "Screenshots design artboards next to the built pages, and crawls every route for errors.",
+  "dependencies": {
+    "playwright": "^1.63.0"
+  }
+}

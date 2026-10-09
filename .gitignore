@@ -1,0 +1,11 @@
+node_modules
+dist
+.next
+.env
+.env.local
+uploads
+*.log
+.DS_Store
+
+# design-check screenshots
+tools/design-check/out

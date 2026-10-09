@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Create a card — 2 Design</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&amp;family=Instrument+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0;background:#F7F5F0}
+a{color:#876A33;text-decoration:none}a:hover{color:#17171B}
+.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.seal circle,.seal rect{fill:none;stroke:#C9A96E;stroke-width:1.1}
+.seal-gold circle,.seal-gold rect{fill:none;stroke:#B08D4F;stroke-width:1.2}
+.opt:hover{border-color:#B08D4F !important}
+.ink:hover{background:#2E2E35 !important}
+.fld:focus{outline:none;border-color:#B08D4F !important;box-shadow:0 0 0 3px rgba(176,141,79,0.18)}
+.prow:hover{background:#FAF7F1}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F7F5F0; color: #17171B; font-family: 'Instrument Sans', 'Helvetica Neue', Helvetica, sans-serif; font-size: 14px; display: flex; flex-direction: column">
+  <header style="background: #FFFFFF; border-bottom: 1px solid #E6E0D5; padding: 14px 32px; display: flex; align-items: center; gap: 28px; flex-wrap: wrap">
+    <div style="display: flex; align-items: center; gap: 16px">
+      <a href="Cards.dc.html" aria-label="Close and go back to all cards" style="width: 40px; height: 40px; border-radius: 8px; border: 1px solid #E6E0D5; display: flex; align-items: center; justify-content: center; color: #4E4A44"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></a>
+      <div style="display: flex; flex-direction: column; gap: 1px"><span style="font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-size: 24px; font-weight: 500; line-height: 1.1">Create a card</span><span style="font-size: 12px; color: #6E685F">Meridian Capital</span></div>
+    </div>
+    <ol aria-label="Steps" style="list-style: none; margin: 0 auto; padding: 0; display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+      <sc-for list="{{steps}}" as="s" hint-placeholder-count="4">
+        <li style="display: flex; align-items: center; gap: 12px">
+          <span style="display: flex; align-items: center; gap: 10px; font-size: 14px; color: {{s.color}}; font-weight: {{s.weight}}"><span style="width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; background: {{s.dotBg}}; color: {{s.dotFg}}; border: 1px solid {{s.dotLine}}">{{s.n}}</span>{{s.name}}</span>
+          <sc-if value="{{s.more}}" hint-placeholder-val="{{ true }}"><span style="width: 40px; height: 1px; background: {{s.bar}}"></span></sc-if>
+        </li>
+      </sc-for>
+    </ol>
+    <button type="button" style="height: 40px; padding: 0 16px; border-radius: 8px; border: 1px solid #D9D2C4; background: #FFFFFF; color: #17171B; font-family: inherit; font-size: 14px; cursor: pointer">Save as draft</button>
+  </header>
+  <div style="flex: 1; display: flex; flex-wrap: wrap">
+    <main style="flex: 3 1 560px; min-width: 0; padding: 44px 48px 120px; box-sizing: border-box; display: flex; justify-content: center">
+      <div style="width: 100%; max-width: 720px; display: flex; flex-direction: column; gap: 28px">
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <div style="font-size: 12px; letter-spacing: 0.2em; color: #876A33; font-weight: 500">STEP 2 OF 4</div>
+          <h1 style="margin: 0; font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-weight: 400; font-size: 44px; line-height: 1.05">Choose a design</h1>
+          <p style="margin: 0; color: #5E5952; font-size: 15px; line-height: 1.6">Your brand kit is applied automatically. Pick a layout and a finish.</p>
+        </div>
+
+        <section style="display: flex; flex-direction: column; gap: 14px">
+          <div style="display: flex; justify-content: space-between; align-items: baseline"><h2 style="margin: 0; font-size: 16px; font-weight: 600">Layout</h2><span style="font-size: 13px; color: #6E685F">Default for Private Clients: Classic</span></div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr)); gap: 12px">
+            <sc-for list="{{layouts}}" as="t" hint-placeholder-count="4">
+              <label class="opt" style="display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 14px; background: {{t.bg}}; border: {{t.border}}; cursor: pointer">
+                <span style="aspect-ratio: 1.586; border-radius: 8px; background: #17171B; padding: 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 6px; justify-content: {{t.justify}}; align-items: {{t.align}}">
+                  <span style="width: 44%; height: 6px; border-radius: 2px; background: #C9A96E"></span>
+                  <span style="width: 62%; height: 4px; border-radius: 2px; background: #4A4A52"></span>
+                  <span style="width: 34%; height: 4px; border-radius: 2px; background: #4A4A52"></span>
+                </span>
+                <span style="display: flex; justify-content: space-between; align-items: center"><span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14px; font-weight: 600">{{t.name}}</span><span style="font-size: 12px; color: #6E685F">{{t.desc}}</span></span><input type="radio" name="layout" checked="{{t.sel}}" style="width: 18px; height: 18px; accent-color: #17171B"></span>
+              </label>
+            </sc-for>
+          </div>
+        </section>
+
+        <section style="display: flex; flex-direction: column; gap: 14px">
+          <div style="display: flex; justify-content: space-between; align-items: baseline"><h2 style="margin: 0; font-size: 16px; font-weight: 600">Colour theme</h2><span style="display: inline-flex; gap: 6px; align-items: center; font-size: 13px; color: #6E685F"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 15px; height: 15px; color: #B08D4F"><path d="M7 11h10v9H7zM9 11V8a3 3 0 0 1 6 0v3"></path></svg>Approved by your Brand Manager</span></div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); gap: 10px">
+            <sc-for list="{{themes}}" as="t" hint-placeholder-count="6">
+              <label class="opt" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: {{t.rowBg}}; border: {{t.border}}; cursor: pointer; min-height: 56px; box-sizing: border-box">
+                <span style="width: 34px; height: 34px; border-radius: 50%; flex: none; background: {{t.bg}}; box-shadow: inset 0 0 0 1px rgba(23,23,27,0.12), inset 0 0 0 9px {{t.bg}}, inset 0 0 0 17px {{t.accent}}"></span>
+                <span style="flex: 1; font-size: 14px; font-weight: 500">{{t.name}}</span>
+                <input type="radio" name="theme" checked="{{t.sel}}" style="width: 18px; height: 18px; accent-color: #17171B">
+              </label>
+            </sc-for>
+          </div>
+        </section>
+
+        <section style="display: flex; flex-direction: column; gap: 14px">
+          <h2 style="margin: 0; font-size: 16px; font-weight: 600">Cover for the online card</h2>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr)); gap: 12px">
+            <label class="opt" style="display: flex; flex-direction: column; gap: 10px; padding: 10px; border-radius: 14px; background: #FBF6EC; border: 2px solid #B08D4F; cursor: pointer">
+              <span style="height: 74px; border-radius: 8px; background: radial-gradient(80% 90% at 70% 10%, rgba(201,169,110,0.4), rgba(15,15,18,0) 70%), linear-gradient(160deg, #2A2620, #0F0F12)"></span>
+              <span style="display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 600">Brand default<input type="radio" name="cover" checked style="width: 18px; height: 18px; accent-color: #17171B"></span>
+            </label>
+            <label class="opt" style="display: flex; flex-direction: column; gap: 10px; padding: 10px; border-radius: 14px; background: #FFFFFF; border: 1px solid #E6E0D5; cursor: pointer">
+              <span style="height: 74px; border-radius: 8px; background: repeating-linear-gradient(135deg, rgba(201,169,110,0.35) 0 1px, rgba(0,0,0,0) 1px 10px), #17171B"></span>
+              <span style="display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 600">Gold linework<input type="radio" name="cover" style="width: 18px; height: 18px; accent-color: #17171B"></span>
+            </label>
+            <label class="opt" style="display: flex; flex-direction: column; gap: 10px; padding: 10px; border-radius: 14px; background: #FFFFFF; border: 1px dashed #C9BFAD; cursor: pointer">
+              <span style="height: 74px; border-radius: 8px; background: #F7F5F0; display: flex; align-items: center; justify-content: center; color: #876A33"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 22px; height: 22px"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"></path></svg></span>
+              <span style="display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 600">Upload image<input type="radio" name="cover" style="width: 18px; height: 18px; accent-color: #17171B"></span>
+            </label>
+          </div>
+        </section>
+      </div>
+    </main>
+    <aside aria-label="Live preview" style="flex: 2 1 380px; min-width: 0; background: #EFE9DD; border-left: 1px solid #E2DBCD; padding: 44px 40px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 22px">
+      <div style="align-self: stretch; display: flex; justify-content: space-between; align-items: center"><span style="font-size: 12px; letter-spacing: 0.2em; color: #6E685F; font-weight: 500">LIVE PREVIEW</span><span style="font-size: 12px; color: #6E685F">Updates as you type</span></div>
+      <div style="width: 380px; max-width: 100%; aspect-ratio: 1.586; border-radius: 18px; background: linear-gradient(135deg, #1C1C20 0%, #0E0E10 42%, #26262C 56%, #0C0C0E 100%); border: 1px solid rgba(201,169,110,0.4); box-shadow: 0 30px 60px rgba(23,23,27,0.28); padding: 26px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; color: #F6F1E7">
+        <div style="display: flex; justify-content: space-between; align-items: center">
+          <div style="display: flex; align-items: center; gap: 10px"><svg class="seal" width="26" height="26" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18.5"></circle><rect x="17.6" y="8" width="4.8" height="21" rx="0.8" transform="rotate(-20 20 29)"></rect><rect x="17.6" y="8" width="4.8" height="21" rx="0.8" transform="rotate(20 20 29)"></rect></svg><span style="font-size: 9.5px; letter-spacing: 0.3em; color: #C9A96E">MERIDIAN CAPITAL</span></div>
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #C9A96E; width: 22px; height: 22px"><path d="M8 8.5a5 5 0 0 1 0 7M11.5 6a8.5 8.5 0 0 1 0 12M15 3.5a12 12 0 0 1 0 17"></path></svg>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px"><span style="font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-size: 30px">Omar Haddad</span><span style="height: 1px; width: 46px; background: #C9A96E"></span><span style="font-size: 12px; color: #A9A49A; letter-spacing: 0.06em">Associate · Private Clients</span></div>
+      </div>
+      <div style="width: 380px; max-width: 100%; aspect-ratio: 1.586; border-radius: 18px; background: linear-gradient(135deg, #1C1C20 0%, #0E0E10 42%, #26262C 56%, #0C0C0E 100%); border: 1px solid rgba(201,169,110,0.4); box-shadow: 0 30px 60px rgba(23,23,27,0.22); display: flex; align-items: center; justify-content: center; gap: 22px">
+        <div style="width: 96px; height: 96px; border-radius: 10px; background: #F6F1E7; padding: 8px; box-sizing: border-box"><div style="width: 100%; height: 100%; background: repeating-conic-gradient(#17171B 0 25%, #F6F1E7 0 50%) 0 0 / 16px 16px"></div></div>
+        <div style="display: flex; flex-direction: column; gap: 6px; color: #F6F1E7"><span style="font-size: 10px; letter-spacing: 0.24em; color: #C9A96E">TAP OR SCAN</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #A9A49A">meridian.com/omar</span></div>
+      </div>
+      <div style="font-size: 13px; color: #5E5952">Front and back · NFC and online card share this design</div>
+    </aside>
+  </div>
+  <footer style="position: sticky; bottom: 0; background: #FFFFFF; border-top: 1px solid #E6E0D5; padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap">
+    <a href="CreateStep1.dc.html" style="height: 46px; padding: 0 20px; border-radius: 8px; border: 1px solid #D9D2C4; color: #17171B; display: inline-flex; align-items: center; gap: 8px; font-size: 14px"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>Back</a>
+    <span style="font-size: 13px; color: #6E685F">Step 2 of 4 · Design</span>
+    <a href="CreateStep3.dc.html" class="ink" style="height: 46px; padding: 0 24px; border-radius: 8px; background: #17171B; color: #FFFFFF; display: inline-flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600">Continue to details<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #E6D3A3"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1140}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const step = 1;
+    const names = ['Person', 'Design', 'Details', 'Publish'];
+    const steps = names.map((name, i) => {
+      const done = i < step, now = i === step;
+      return {
+        name, n: done ? '✓' : String(i + 1), more: i < names.length - 1,
+        color: now || done ? '#17171B' : '#8E887E', weight: now ? '600' : '400',
+        dotBg: done ? '#B08D4F' : (now ? '#17171B' : '#FFFFFF'), dotFg: done || now ? '#FFFFFF' : '#8E887E',
+        dotLine: done ? '#B08D4F' : (now ? '#17171B' : '#D9D2C4'), bar: done ? '#B08D4F' : '#D9D2C4'
+      };
+    });
+
+    const layouts = [
+      ['Classic', 'Centred, timeless', 'center', 'center'],
+      ['Modern', 'Left aligned', 'center', 'flex-start'],
+      ['Editorial', 'Large name', 'flex-end', 'flex-start'],
+      ['Minimal', 'Logo first', 'flex-start', 'flex-start']
+    ].map(([name, desc, justify, align], i) => ({ name, desc, justify, align, sel: i === 0, bg: i === 0 ? '#FBF6EC' : '#FFFFFF', border: i === 0 ? '2px solid #B08D4F' : '1px solid #E6E0D5' }));
+    const themes = [
+      ['Obsidian and Gold', '#111114', '#C9A96E'], ['Ivory and Ink', '#F6F1E7', '#17171B'], ['Navy and Silver', '#13203A', '#C3CAD6'],
+      ['Emerald and Brass', '#0F2E25', '#C7A45A'], ['Burgundy and Cream', '#3A1218', '#E3C9A0'], ['Pure Monochrome', '#FFFFFF', '#0B0B0D']
+    ].map(([name, bg, accent], i) => ({ name, bg, accent, sel: i === 0, rowBg: i === 0 ? '#FBF6EC' : '#FFFFFF', border: i === 0 ? '2px solid #B08D4F' : '1px solid #E6E0D5' }));
+    return { steps, layouts, themes };
+  }
+}
+</script>
+</body>
+</html>

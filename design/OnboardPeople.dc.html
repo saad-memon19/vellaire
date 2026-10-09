@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Setup — 4 Your people</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&amp;family=Instrument+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0;background:#F7F5F0}
+a{color:#876A33;text-decoration:none}
+.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.seal circle,.seal rect{fill:none;stroke:#C9A96E;stroke-width:1.1}
+.seal-gold circle,.seal-gold rect{fill:none;stroke:#B08D4F;stroke-width:1.2}
+.opt:hover{border-color:#B08D4F !important}
+.ink:hover{background:#2E2E35 !important}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F7F5F0; color: #17171B; font-family: 'Instrument Sans', 'Helvetica Neue', Helvetica, sans-serif; font-size: 14px; display: flex; flex-direction: column">
+  <header style="background: #FFFFFF; border-bottom: 1px solid #E6E0D5; padding: 16px 32px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap">
+    <span style="display: flex; align-items: center; gap: 10px"><svg class="seal-gold" width="26" height="26" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18.5"></circle><rect x="17.6" y="8" width="4.8" height="21" rx="0.8" transform="rotate(-20 20 29)"></rect><rect x="17.6" y="8" width="4.8" height="21" rx="0.8" transform="rotate(20 20 29)"></rect></svg><span style="font-family: 'Cormorant Garamond', serif; letter-spacing: 0.24em; font-size: 16px; font-weight: 600">VELLAIRE</span></span>
+    <span style="margin-left: auto; font-size: 13px; color: #5E5952">Setting up Meridian Capital · step 4 of 5</span>
+  </header>
+  <div style="height: 3px; background: #EEE8DD"><div style="height: 3px; width: 80%; background: #B08D4F"></div></div>
+  <div style="flex: 1; display: flex; flex-wrap: wrap">
+    <main style="flex: 3 1 520px; min-width: 0; padding: 56px 56px 48px; box-sizing: border-box; display: flex; justify-content: center">
+      <div style="width: 100%; max-width: 620px; display: flex; flex-direction: column; gap: 28px">
+        <ol aria-label="Setup steps" style="list-style: none; margin: 0; padding: 0; display: flex; gap: 18px; flex-wrap: wrap">
+          <sc-for list="{{steps}}" as="s" hint-placeholder-count="5"><li style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: {{s.color}}; font-weight: {{s.weight}}"><span style="width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; background: {{s.dotBg}}; color: {{s.dotFg}}; border: 1px solid {{s.line}}">{{s.n}}</span>{{s.name}}</li></sc-for>
+        </ol>
+        <div style="display: flex; flex-direction: column; gap: 10px">
+          <h1 style="margin: 0; font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-weight: 400; font-size: 48px; line-height: 1.05">How should we add your people?</h1>
+          <p style="margin: 0; color: #5E5952; font-size: 16px; line-height: 1.6">Connect your HR system and every employee gets a card automatically. You can change this later.</p>
+        </div>
+        <label class="opt" style="display: flex; flex-direction: column; gap: 16px; padding: 22px; border-radius: 16px; background: #FBF6EC; border: 2px solid #B08D4F; cursor: pointer">
+          <span style="display: flex; justify-content: space-between; align-items: center; gap: 12px"><span style="display: flex; flex-direction: column; gap: 3px"><span style="display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 600">Connect an HR or identity system<span style="font-size: 11px; padding: 3px 8px; border-radius: 999px; background: #17171B; color: #E6D3A3; font-weight: 500">Recommended</span></span><span style="font-size: 13.5px; color: #5E5952">Joiners, title changes and leavers update cards on their own</span></span><input type="radio" name="how" checked style="width: 18px; height: 18px; accent-color: #17171B"></span>
+          <span style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(130px, 100%), 1fr)); gap: 8px"><sc-for list="{{systems}}" as="s" hint-placeholder-count="8"><span style="height: 52px; border-radius: 10px; background: #FFFFFF; border: {{s.border}}; display: flex; align-items: center; justify-content: center; font-size: 13.5px; font-weight: {{s.weight}}">{{s.n}}</span></sc-for></span>
+        </label>
+        <label class="opt" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 20px 22px; border-radius: 16px; background: #FFFFFF; border: 1px solid #E6E0D5; cursor: pointer"><span style="display: flex; flex-direction: column; gap: 3px"><span style="font-size: 16px; font-weight: 600">Upload a spreadsheet</span><span style="font-size: 13.5px; color: #5E5952">CSV or Excel with name, title and email</span></span><input type="radio" name="how" style="width: 18px; height: 18px; accent-color: #17171B"></label>
+        <label class="opt" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 20px 22px; border-radius: 16px; background: #FFFFFF; border: 1px solid #E6E0D5; cursor: pointer"><span style="display: flex; flex-direction: column; gap: 3px"><span style="font-size: 16px; font-weight: 600">Invite people by email</span><span style="font-size: 13.5px; color: #5E5952">Good for small teams</span></span><input type="radio" name="how" style="width: 18px; height: 18px; accent-color: #17171B"></label>
+        <a href="OnboardDone.dc.html" style="font-size: 14px; color: #5E5952; text-decoration: underline">Skip for now, I'll do this later</a>
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 8px">
+          <a href="OnboardTemplate.dc.html" style="height: 46px; padding: 0 18px; border-radius: 8px; border: 1px solid #D9D2C4; color: #17171B; display: inline-flex; align-items: center; font-size: 14px">Back</a>
+          <a href="Integrations.dc.html" class="ink" style="height: 48px; padding: 0 26px; border-radius: 8px; background: #17171B; color: #FFFFFF; display: inline-flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600">Connect Workday<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #E6D3A3"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+        </div>
+      </div>
+    </main>
+    <aside aria-label="Preview" style="flex: 2 1 400px; min-width: 0; background: #EFE9DD; padding: 56px 40px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px">
+      <div style="width: 100%; max-width: 380px; background: #FFFFFF; border-radius: 18px; padding: 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 24px 48px rgba(23,23,27,0.12)">
+        <span style="font-size: 11px; letter-spacing: 0.2em; color: #876A33; font-weight: 600">WHAT HAPPENS NEXT</span>
+        <sc-for list="{{next}}" as="n" hint-placeholder-count="4"><div style="display: flex; gap: 12px; align-items: flex-start"><span style="width: 26px; height: 26px; border-radius: 50%; background: #F6EFE1; color: #876A33; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex: none">{{n.i}}</span><span style="display: flex; flex-direction: column; gap: 2px"><span style="font-weight: 600">{{n.t}}</span><span style="font-size: 13px; color: #5E5952">{{n.s}}</span></span></div></sc-for>
+      </div>
+      <span style="font-size: 13px; color: #5E5952">Nothing is published until you say so</span>
+    </aside>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const names = ['Company', 'Brand', 'Template', 'People', 'First card'];
+    const step = 3;
+    const steps = names.map((name, i) => ({ name, n: i < step ? '✓' : String(i + 1), color: i <= step ? '#17171B' : '#8E887E', weight: i === step ? '600' : '400', dotBg: i < step ? '#B08D4F' : (i === step ? '#17171B' : '#FFFFFF'), dotFg: i <= step ? '#FFFFFF' : '#8E887E', line: i < step ? '#B08D4F' : (i === step ? '#17171B' : '#D9D2C4') }));
+
+    const systems = ['Workday', 'SAP SuccessFactors', 'Microsoft Entra ID', 'Google Workspace', 'Okta', 'BambooHR', 'Zoho People', 'Odoo'].map((n, i) => ({ n, border: i === 0 ? '2px solid #17171B' : '1px solid #E6E0D5', weight: i === 0 ? '600' : '400' }));
+    const next = [
+      { i: '1', t: 'Sign in to Workday', s: 'One click, read-only access' },
+      { i: '2', t: 'Check the field matches', s: 'AI suggests them for you' },
+      { i: '3', t: 'See a preview', s: '"1,320 cards will be created"' },
+      { i: '4', t: 'Publish when ready', s: 'Welcome emails go out to your team' }
+    ];
+    return { steps, systems, next };
+  }
+}
+</script>
+</body>
+</html>

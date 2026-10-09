@@ -1,0 +1,278 @@
+import { BadRequestException, Body, ForbiddenException, Controller, Get, Param, Post, Query, Req, Res } from '@nestjs/common';
+import type { Request, Response } from 'express';
+import { z } from 'zod';
+import { config } from '../../config';
+import { cookieOptions, CurrentUser, Platform, Public, SESSION_COOKIE, SessionUser, SignedIn, signSession } from '../../common/auth';
+import { flagsFor } from '../../common/platform';
+import { createWorkspace } from '../onboarding/workspace';
+import { sendSignInLink } from './signin-link';
+import { logActivity, parse, requireId, sha256, token } from '../../common/util';
+import { db } from '../../db/db';
+import { AiService } from '../ai/ai.service';
+
+const homeFor = (u: { platformRole?: string | null; companyId?: unknown; role?: string; setupPending?: boolean }) => {
+  if (u.platformRole === 'staff' && !u.companyId) return '/console';
+  if (u.role === 'member') return '/m';
+  return u.setupPending ? '/setup' : '/app';
+};
+
+/** Owners and admins of a self-serve sign-up finish the setup steps before the dashboard. */
+const setupPending = async (u: { companyId?: unknown; role?: string }) =>
+  !!u.companyId && u.role !== 'member' && !!(await db.Company.exists({ _id: u.companyId, 'setup.done': false }));
+
+const demoEnabled = () => !config.isProd || process.env.DEMO_LOGIN === '1';
+const SIGNUP_COOKIE = 'vl_signup';
+
+const OAUTH = {
+  google: {
+    auth: 'https://accounts.google.com/o/oauth2/v2/auth',
+    token: 'https://oauth2.googleapis.com/token',
+    scope: 'openid email profile',
+  },
+  microsoft: {
+    auth: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
+    token: 'https://login.microsoftonline.com/common/oauth2/v2.0/token',
+    scope: 'openid email profile',
+  },
+} as const;
+type OAuthProvider = keyof typeof OAUTH;
+
+@Controller('auth')
+export class AuthController {
+  constructor(private ai: AiService) {}
+
+  private async login(res: Response, user: any) {
+    // A suspended account stays suspended; signing in only turns an invite into an active account
+    if (user.status === 'disabled') throw new ForbiddenException('This account is suspended. Contact your company admin.');
+    await db.User.updateOne({ _id: user._id }, { lastLoginAt: new Date(), status: 'active' });
+    if (user.platformRole === 'staff')
+      await logActivity({
+        actor: user.name || user.email,
+        action: 'staff.signin',
+        text: 'Signed in to the console',
+        platform: true,
+      });
+    res.cookie(SESSION_COOKIE, signSession({ uid: String(user._id) }), cookieOptions);
+    return { redirect: homeFor({ ...(user.toObject?.() ?? user), setupPending: await setupPending(user) }) };
+  }
+
+  @Public()
+  @Get('providers')
+  providers() {
+    return {
+      google: !!config.oauth.google.id,
+      microsoft: !!config.oauth.microsoft.id,
+    };
+  }
+
+  /**
+   * Demo access: one-click sign-in as a demo user, so the product can be seen without the email form.
+   * On in development; in production only when DEMO_LOGIN=1.
+   */
+  @Public()
+  @Get('demo')
+  demoInfo() {
+    return { enabled: demoEnabled() };
+  }
+
+  @Public()
+  @Post('demo')
+  async demo(@Body() body: unknown, @Res({ passthrough: true }) res: Response) {
+    if (!demoEnabled()) throw new BadRequestException('Demo access is turned off');
+    const { as } = parse(z.object({ as: z.enum(['owner', 'employee', 'console']) }), body);
+    let user: any;
+    if (as === 'employee') {
+      // An employee whose card is live, so the app has something to show
+      const members = await db.User.find({
+        role: 'member',
+        status: { $ne: 'disabled' },
+        employeeId: { $ne: null },
+      }).limit(50);
+      for (const m of members) {
+        const e = await db.Employee.findById(m.employeeId).select('cardId').lean<any>();
+        if (e?.cardId && (await db.Card.exists({ _id: e.cardId, status: 'live' }))) {
+          user = m;
+          break;
+        }
+      }
+    } else {
+      const email = as === 'owner' ? 'sara.khan@meridian.com' : config.platformAdmins[0] || 'owner@vellaire.app';
+      user = await db.User.findOne({ email });
+    }
+    if (!user) throw new BadRequestException('Demo data is missing. Run npm run seed first.');
+    return this.login(res, user);
+  }
+
+  @Public()
+  @Post('start')
+  async start(@Body() body: unknown) {
+    const { email } = parse(z.object({ email: z.string().email() }), body);
+    const user = await db.User.findOne({
+      email: email.toLowerCase(),
+    }).lean<any>();
+    const generic = {
+      sent: true,
+      message: 'If this email has a Vellaire account, a sign-in link is on its way.',
+    };
+    if (!user || user.status === 'disabled') return generic;
+    const devLink = await sendSignInLink(user.email);
+    return devLink ? { ...generic, devLink } : generic;
+  }
+
+  @Public()
+  @Post('verify')
+  async verify(@Body() body: unknown, @Res({ passthrough: true }) res: Response) {
+    const { token: t } = parse(z.object({ token: z.string().min(10) }), body);
+    const rec = await db.MagicToken.findOneAndUpdate({ tokenHash: sha256(t), used: false, expiresAt: { $gt: new Date() } }, { used: true });
+    if (!rec) throw new BadRequestException('This link has expired or was already used. Request a new one.');
+    const user = await db.User.findOne({ email: rec.email });
+    if (!user) throw new BadRequestException('Account not found');
+    return this.login(res, user);
+  }
+
+  @Public()
+  @Get('oauth/:provider')
+  oauthStart(@Param('provider') p: string, @Query() q: { company?: string; coupon?: string }, @Res() res: Response) {
+    const provider = p as OAuthProvider;
+    const cfg = config.oauth[provider];
+    if (!OAUTH[provider] || !cfg?.id) return res.redirect(`${config.webUrl}/${q.company ? 'signup' : 'signin'}?error=provider`);
+    const state = token(16);
+    res.cookie('vl_oauth_state', state, {
+      ...cookieOptions,
+      maxAge: 10 * 60_000,
+    });
+    // Sign-up with Google or Microsoft: remember the company until the provider sends the person back
+    if (q.company) res.cookie(SIGNUP_COOKIE, JSON.stringify({ company: q.company.slice(0, 120), coupon: q.coupon?.slice(0, 24) }), { ...cookieOptions, maxAge: 10 * 60_000 });
+    const url = new URL(OAUTH[provider].auth);
+    url.searchParams.set('client_id', cfg.id);
+    url.searchParams.set('redirect_uri', `${config.webUrl}/api/auth/oauth/${provider}/callback`);
+    url.searchParams.set('response_type', 'code');
+    url.searchParams.set('scope', OAUTH[provider].scope);
+    url.searchParams.set('state', state);
+    url.searchParams.set('prompt', 'select_account');
+    return res.redirect(url.toString());
+  }
+
+  @Public()
+  @Get('oauth/:provider/callback')
+  async oauthCallback(@Param('provider') p: string, @Query() q: { code?: string; state?: string }, @Req() req: Request, @Res() res: Response) {
+    const provider = p as OAuthProvider;
+    const cfg = config.oauth[provider];
+    const fail = (code: string) => res.redirect(`${config.webUrl}/signin?error=${code}`);
+    if (!OAUTH[provider] || !cfg?.id || !q.code) return fail('provider');
+    if (!q.state || q.state !== req.cookies?.vl_oauth_state) return fail('state');
+
+    const tokenRes = await fetch(OAUTH[provider].token, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        code: q.code,
+        client_id: cfg.id,
+        client_secret: cfg.secret,
+        redirect_uri: `${config.webUrl}/api/auth/oauth/${provider}/callback`,
+        grant_type: 'authorization_code',
+      }),
+    });
+    if (!tokenRes.ok) return fail('token');
+    const json: any = await tokenRes.json();
+    // The id_token comes straight from the provider over TLS, so its payload can be read directly.
+    const payload = JSON.parse(Buffer.from(String(json.id_token).split('.')[1] || '', 'base64url').toString());
+    const email = String(payload.email || payload.preferred_username || '').toLowerCase();
+    let user = email ? await db.User.findOne({ email }) : null;
+    const signup = req.cookies?.[SIGNUP_COOKIE];
+    if (signup) res.clearCookie(SIGNUP_COOKIE, cookieOptions);
+    if (!user && signup && email) {
+      try {
+        const s = JSON.parse(signup);
+        ({ user } = await createWorkspace({ company: String(s.company), coupon: s.coupon, ownerName: String(payload.name || email.split('@')[0]), email, via: provider }));
+      } catch (e) {
+        return res.redirect(`${config.webUrl}/signup?error=${encodeURIComponent((e as Error).message)}`);
+      }
+    }
+    if (!user || user.status === 'disabled') return fail('no-account');
+    const { redirect } = await this.login(res, user);
+    return res.redirect(`${config.webUrl}${redirect}`);
+  }
+
+  @SignedIn()
+  @Get('me')
+  async me(@CurrentUser() u: SessionUser) {
+    const company = u.companyId
+      ? await db.Company.findById(u.companyId).select('name slug plan seats status dataRegion setup brand.logos brand.colors domain settings.languages').lean<any>()
+      : null;
+    const pending = u.companyId
+      ? await db.Card.countDocuments({
+          companyId: u.companyId,
+          $or: [{ status: 'pending_approval' }, { 'approval.pendingPhoto': { $nin: [null, ''] } }],
+        })
+      : 0;
+    return {
+      user: u,
+      company: company && {
+        id: String(company._id),
+        name: company.name,
+        slug: company.slug,
+        plan: company.plan,
+        seats: company.seats,
+        status: company.status,
+        logo: company.brand?.logos?.icon || company.brand?.logos?.light || null,
+        accent: company.brand?.colors?.[1]?.hex || '#C9A96E',
+        cardHost: company.domain?.verified ? company.domain.host : null,
+        languages: company.settings?.languages || ['en'],
+        // Feature flags turned on for this company (rolled out from the console)
+        flags: await flagsFor(company),
+      },
+      badges: {
+        approvals: pending,
+        // Leads nobody has followed up yet, and HR syncs that need a look
+        leads:
+          u.companyId && u.role !== 'member'
+            ? await db.Lead.countDocuments({
+                companyId: u.companyId,
+                status: 'new',
+              })
+            : 0,
+        sync:
+          u.companyId && u.role !== 'member'
+            ? await db.Integration.countDocuments({
+                companyId: u.companyId,
+                status: { $in: ['error', 'paused'] },
+              })
+            : 0,
+      },
+      features: { ai: this.ai.enabled },
+      home: homeFor({ ...u, companyId: u.impersonating ? null : u.companyId, setupPending: !u.impersonating && company?.setup?.done === false && u.role !== 'member' }),
+    };
+  }
+
+  @Public()
+  @Post('logout')
+  logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie(SESSION_COOKIE, { path: '/' });
+    return { ok: true };
+  }
+
+  /** Vellaire staff: open a customer's dashboard exactly as they see it. Every use is logged. */
+  @Platform()
+  @Post('impersonate/:companyId')
+  async impersonate(@Param('companyId') id: string, @CurrentUser() u: SessionUser, @Res({ passthrough: true }) res: Response) {
+    const company = await db.Company.findById(requireId(id)).lean<any>();
+    if (!company) throw new BadRequestException('Company not found');
+    res.cookie(SESSION_COOKIE, signSession({ uid: u.id, imp: String(company._id) }), cookieOptions);
+    await logActivity({
+      companyId: company._id,
+      actor: u.name,
+      action: 'impersonate',
+      text: `${u.name} (Vellaire) opened the dashboard as customer`,
+      platform: true,
+    });
+    return { redirect: '/app' };
+  }
+
+  @Platform()
+  @Post('impersonate-stop')
+  stop(@CurrentUser() u: SessionUser, @Res({ passthrough: true }) res: Response) {
+    res.cookie(SESSION_COOKIE, signSession({ uid: u.id }), cookieOptions);
+    return { redirect: '/console' };
+  }
+}

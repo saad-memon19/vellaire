@@ -1,0 +1,144 @@
+@import 'tailwindcss';
+
+/* Vellaire brand foundations v0.2 — light, precise, calm */
+@theme {
+  --color-pearl: #f7f5f0;
+  --color-sand: #efe9dd;
+  --color-linen: #e6e0d5;
+  --color-line: #e2dbcd;
+  --color-line-strong: #d8d2c6;
+  --color-ink: #17171b;
+  --color-ink-2: #2a2a30;
+  --color-stone: #5e5952;
+  --color-stone-2: #6e685f;
+  --color-gold: #b08d4f;
+  --color-gold-soft: #c9a96e;
+  --color-gold-text: #876a33;
+  --color-gold-tint: #f6efe1;
+  --color-gold-line: #ebddc0;
+  --color-cream: #f6f1e7;
+
+  --color-ok: #1f7a55;
+  --color-ok-bg: #e5f2eb;
+  --color-warn: #8a5a12;
+  --color-warn-bg: #fbf0dc;
+  --color-err: #a3283a;
+  --color-err-bg: #f8e4e7;
+  --color-info: #2f4a7a;
+  --color-info-bg: #e6ecf6;
+
+  --font-display: var(--font-cormorant), 'Times New Roman', serif;
+  --font-sans: var(--font-instrument), 'Helvetica Neue', Helvetica, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  background: var(--color-pearl);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* In the components layer so utilities (text-gold-text …) can override it */
+@layer components {
+  .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-stone-2);
+    font-weight: 500;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-gold-soft);
+  outline-offset: 2px;
+}
+
+.vl-input:focus {
+  outline: none;
+  border-color: var(--color-gold-soft);
+  box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.25);
+}
+
+/* Seal logo strokes */
+.seal circle,
+.seal rect {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2;
+}
+
+@keyframes vlFloat {
+  0%,
+  100% {
+    transform: perspective(1400px) rotateY(-14deg) rotateX(8deg) translateY(0);
+  }
+  50% {
+    transform: perspective(1400px) rotateY(-8deg) rotateX(5deg) translateY(-10px);
+  }
+}
+.vl-float {
+  animation: vlFloat 10s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+}
+@keyframes vlFade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.vl-fade {
+  animation: vlFade 0.35s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .vl-float,
+  .vl-fade {
+    animation: none;
+  }
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+/* Cormorant's old-style figures make 1 look like I — use lining numbers everywhere */
+.font-display,
+.tabular-nums {
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* Landing page motion (from the M1 design) */
+.lift {
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 300ms;
+}
+.lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 48px rgba(23, 23, 27, 0.1);
+}
+@keyframes vlSheen {
+  0% {
+    background-position: 160% 0;
+  }
+  100% {
+    background-position: -60% 0;
+  }
+}
+.vl-sheen {
+  background: linear-gradient(105deg, transparent 35%, rgba(230, 211, 163, 0.2) 48%, transparent 60%);
+  background-size: 220% 100%;
+  animation: vlSheen 7s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .vl-sheen,
+  .lift {
+    animation: none;
+    transition: none;
+  }
+}

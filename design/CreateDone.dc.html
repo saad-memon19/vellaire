@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Create a card — Published</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&amp;family=Instrument+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0;background:#F7F5F0}
+a{color:#876A33;text-decoration:none}a:hover{color:#17171B}
+.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.seal circle,.seal rect{fill:none;stroke:#C9A96E;stroke-width:1.1}
+.ink:hover{background:#2E2E35 !important}
+.out:hover{border-color:#B08D4F !important}
+@keyframes vlFloat{0%,100%{transform:perspective(1400px) rotateY(-12deg) rotateX(7deg) translateY(0)}50%{transform:perspective(1400px) rotateY(-6deg) rotateX(4deg) translateY(-8px)}}
+@keyframes sheen{0%{background-position:160% 0}100%{background-position:-60% 0}}
+.float{animation:vlFloat 9s cubic-bezier(.45,0,.25,1) infinite}
+.sheen{background:linear-gradient(105deg,transparent 35%,rgba(230,211,163,.22) 48%,transparent 60%);background-size:220% 100%;animation:sheen 5s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){.float,.sheen{animation:none}}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: radial-gradient(50% 40% at 50% 30%, rgba(176,141,79,0.14), rgba(247,245,240,0) 70%), #F7F5F0; color: #17171B; font-family: 'Instrument Sans', 'Helvetica Neue', Helvetica, sans-serif; font-size: 14px; display: flex; flex-direction: column">
+  <header style="background: #FFFFFF; border-bottom: 1px solid #E6E0D5; padding: 14px 32px; display: flex; align-items: center; gap: 16px">
+    <a href="Cards.dc.html" aria-label="Close and go back to all cards" style="width: 40px; height: 40px; border-radius: 8px; border: 1px solid #E6E0D5; display: flex; align-items: center; justify-content: center; color: #4E4A44"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></a>
+    <span style="font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-size: 24px; font-weight: 500">Create a card</span>
+    <span style="margin-left: auto; font-size: 13px; color: #1F7A55; display: flex; gap: 8px; align-items: center"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>All 4 steps complete</span>
+  </header>
+
+  <main style="flex: 1; display: flex; flex-direction: column; align-items: center; padding: 56px 32px 80px; gap: 40px; text-align: center">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 14px; max-width: 620px">
+      <span style="width: 64px; height: 64px; border-radius: 50%; background: #17171B; color: #E6D3A3; display: flex; align-items: center; justify-content: center"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 30px; height: 30px; stroke-width: 1.8"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>
+      <h1 style="margin: 0; font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-weight: 400; font-size: 52px; line-height: 1.05">Omar's card is live</h1>
+      <p style="margin: 0; color: #5E5952; font-size: 16px; line-height: 1.6">We emailed Omar his welcome pack. His metal card is on its way to the Dubai office.</p>
+    </div>
+
+    <div class="float" style="width: 420px; max-width: 100%; aspect-ratio: 1.586; border-radius: 18px; background: linear-gradient(135deg, #1C1C20 0%, #0E0E10 42%, #26262C 56%, #0C0C0E 100%); border: 1px solid rgba(201,169,110,0.4); box-shadow: 0 40px 80px rgba(23,23,27,0.3); position: relative; overflow: hidden; text-align: left">
+      <div class="sheen" style="position: absolute; inset: 0"></div>
+      <div style="position: relative; height: 100%; padding: 28px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; color: #F6F1E7">
+        <div style="display: flex; justify-content: space-between; align-items: center"><div style="display: flex; align-items: center; gap: 10px"><svg class="seal" width="28" height="28" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18.5"></circle><rect x="17.6" y="8" width="4.8" height="21" rx="0.8" transform="rotate(-20 20 29)"></rect><rect x="17.6" y="8" width="4.8" height="21" rx="0.8" transform="rotate(20 20 29)"></rect></svg><span style="font-size: 10px; letter-spacing: 0.3em; color: #C9A96E">MERIDIAN CAPITAL</span></div><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #C9A96E; width: 22px; height: 22px"><path d="M8 8.5a5 5 0 0 1 0 7M11.5 6a8.5 8.5 0 0 1 0 12M15 3.5a12 12 0 0 1 0 17"></path></svg></div>
+        <div style="display: flex; flex-direction: column; gap: 6px"><span style="font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-size: 32px">Omar Haddad</span><span style="height: 1px; width: 48px; background: #C9A96E"></span><span style="font-size: 12px; color: #A9A49A; letter-spacing: 0.06em">Associate · Private Clients</span></div>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center">
+      <button type="button" class="out" style="height: 46px; padding: 0 18px; border-radius: 8px; border: 1px solid #D9D2C4; background: #FFFFFF; color: #17171B; font-family: inherit; font-size: 14px; display: flex; gap: 8px; align-items: center; cursor: pointer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"></path></svg>Copy link</button>
+      <button type="button" class="out" style="height: 46px; padding: 0 18px; border-radius: 8px; border: 1px solid #D9D2C4; background: #FFFFFF; color: #17171B; font-family: inherit; font-size: 14px; display: flex; gap: 8px; align-items: center; cursor: pointer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM20 14v1M14 20h1M18 18h3v3"></path></svg>Download QR code</button>
+      <a href="PublicCard.dc.html" class="out" style="height: 46px; padding: 0 18px; border-radius: 8px; border: 1px solid #D9D2C4; background: #FFFFFF; color: #17171B; font-size: 14px; display: inline-flex; gap: 8px; align-items: center; box-sizing: border-box"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path></svg>View public card</a>
+      <a href="CreateStep1.dc.html" class="ink" style="height: 46px; padding: 0 20px; border-radius: 8px; background: #17171B; color: #FFFFFF; font-size: 14px; font-weight: 600; display: inline-flex; gap: 8px; align-items: center; box-sizing: border-box"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #E6D3A3"><path d="M12 5v14M5 12h14"></path></svg>Create another card</a>
+    </div>
+
+    <section style="width: 100%; max-width: 720px; background: #FFFFFF; border: 1px solid #E6E0D5; border-radius: 14px; overflow: hidden; text-align: left">
+      <div style="padding: 18px 22px; font-size: 16px; font-weight: 600">What happened</div>
+      <div style="display: flex; align-items: center; gap: 14px; padding: 14px 22px; border-top: 1px solid #F0EBE2"><span style="width: 28px; height: 28px; border-radius: 50%; background: #E5F2EB; color: #1F7A55; display: flex; align-items: center; justify-content: center"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 15px; height: 15px; stroke-width: 2"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span><span style="flex: 1">Card published at cards.meridian.com/omar-haddad</span><span style="font-size: 12.5px; color: #6E685F">Just now</span></div>
+      <div style="display: flex; align-items: center; gap: 14px; padding: 14px 22px; border-top: 1px solid #F0EBE2"><span style="width: 28px; height: 28px; border-radius: 50%; background: #E5F2EB; color: #1F7A55; display: flex; align-items: center; justify-content: center"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 15px; height: 15px; stroke-width: 2"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span><span style="flex: 1">Welcome email with wallet buttons sent to Omar</span><span style="font-size: 12.5px; color: #6E685F">Just now</span></div>
+      <div style="display: flex; align-items: center; gap: 14px; padding: 14px 22px; border-top: 1px solid #F0EBE2"><span style="width: 28px; height: 28px; border-radius: 50%; background: #E5F2EB; color: #1F7A55; display: flex; align-items: center; justify-content: center"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 15px; height: 15px; stroke-width: 2"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span><span style="flex: 1">Email signature added to his Outlook mailbox</span><span style="font-size: 12.5px; color: #6E685F">Just now</span></div>
+      <div style="display: flex; align-items: center; gap: 14px; padding: 14px 22px; border-top: 1px solid #F0EBE2"><span style="width: 28px; height: 28px; border-radius: 50%; background: #FBF0DC; color: #8A5A12; display: flex; align-items: center; justify-content: center"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 15px; height: 15px; stroke-width: 2"><path d="M12 7v5l3 2"></path></svg></span><span style="flex: 1">Obsidian Metal NFC card ordered · track it in NFC cards</span><span style="font-size: 12.5px; color: #8A5A12">In production</span></div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1180}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

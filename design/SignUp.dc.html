@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Vellaire — Create account</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&amp;family=Instrument+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#7A5C2A}a:hover{color:#16161A}
+.seal circle,.seal rect{fill:none;stroke:#C9A96E;stroke-width:1.1}
+.seal-gold circle,.seal-gold rect{fill:none;stroke:#B08D4F;stroke-width:1.2}
+.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.vl-in:focus{outline:none;border-color:#C9A96E !important;box-shadow:0 0 0 3px rgba(201,169,110,0.25)}
+.vl-dark:hover{background:#2A2A30 !important}
+.vl-out:hover{border-color:#16161A !important}
+@keyframes vlFloat{0%,100%{transform:perspective(1400px) rotateY(-14deg) rotateX(8deg) translateY(0)}50%{transform:perspective(1400px) rotateY(-8deg) rotateX(5deg) translateY(-10px)}}
+.vl-float{animation:vlFloat 10s cubic-bezier(.45,0,.25,1) infinite}
+@media (prefers-reduced-motion: reduce){.vl-float{animation:none}}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; font-family: 'Instrument Sans', 'Helvetica Neue', Helvetica, sans-serif">
+  <aside style="flex: 11 1 520px; background: radial-gradient(60% 50% at 50% 45%, rgba(176,141,79,0.2), rgba(239,233,221,0) 70%), #EFE9DD; color: #17171B; padding: 48px 56px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; gap: 48px; min-height: 560px">
+    <div style="display: flex; align-items: center; gap: 12px">
+      <svg class="seal-gold" width="30" height="30" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18.5"></circle><rect x="17.6" y="8" width="4.8" height="21" rx="0.8" transform="rotate(-20 20 29)"></rect><rect x="17.6" y="8" width="4.8" height="21" rx="0.8" transform="rotate(20 20 29)"></rect></svg>
+      <span style="font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-size: 20px; letter-spacing: 0.24em; font-weight: 600">VELLAIRE</span>
+    </div>
+    <div style="display: flex; justify-content: center">
+      <div class="vl-float" style="width: 420px; max-width: 90%; aspect-ratio: 1.586; border-radius: 18px; background: linear-gradient(135deg, #1C1C20 0%, #0E0E10 42%, #26262C 56%, #0C0C0E 100%); border: 1px solid rgba(201,169,110,0.38); box-shadow: 0 50px 90px rgba(23,23,27,0.3); color: #F6F1E7; padding: 30px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between">
+        <div style="display: flex; justify-content: space-between; align-items: center">
+          <svg class="seal" width="30" height="30" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18.5"></circle><rect x="17.6" y="8" width="4.8" height="21" rx="0.8" transform="rotate(-20 20 29)"></rect><rect x="17.6" y="8" width="4.8" height="21" rx="0.8" transform="rotate(20 20 29)"></rect></svg>
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #C9A96E; width: 24px; height: 24px"><path d="M8 8.5a5 5 0 0 1 0 7M11.5 6a8.5 8.5 0 0 1 0 12M15 3.5a12 12 0 0 1 0 17"></path></svg>
+        </div>
+        <div style="font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-size: 30px">Welcome back</div>
+      </div>
+    </div>
+    <figure style="margin: 0; display: flex; flex-direction: column; gap: 12px; max-width: 480px">
+      <blockquote style="margin: 0; font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-style: italic; font-weight: 300; font-size: 26px; line-height: 1.35; color: #17171B">Set up in minutes.<br>Branded cards for your whole company.</blockquote>
+    </figure>
+  </aside>
+
+  <main style="flex: 9 1 420px; background: #FFFFFF; color: #16161A; display: flex; align-items: center; justify-content: center; padding: 48px 32px; box-sizing: border-box">
+    <div style="width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 22px">
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <h1 style="margin: 0; font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-weight: 400; font-size: 44px; line-height: 1.05">Create your account</h1>
+        <p style="margin: 0; color: #5E5A52; font-size: 15px">Start with your company. You can invite your team after setup.</p>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px">
+        <div style="display: flex; flex-direction: column; gap: 8px"><label for="fn" style="font-size: 13px; font-weight: 500; color: #3A3A42">First name</label><input id="fn" class="vl-in" value="Sara" style="height: 48px; border: 1px solid #D8D2C6; border-radius: 6px; background: #FFFFFF; padding: 0 14px; font-family: inherit; font-size: 15px; color: #16161A; min-width: 0"></div>
+        <div style="display: flex; flex-direction: column; gap: 8px"><label for="ln" style="font-size: 13px; font-weight: 500; color: #3A3A42">Last name</label><input id="ln" class="vl-in" value="Khan" style="height: 48px; border: 1px solid #D8D2C6; border-radius: 6px; background: #FFFFFF; padding: 0 14px; font-family: inherit; font-size: 15px; color: #16161A; min-width: 0"></div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px"><label for="em" style="font-size: 13px; font-weight: 500; color: #3A3A42">Work email</label><input id="em" class="vl-in" type="email" value="sara.khan@meridian.com" style="height: 48px; border: 1px solid #D8D2C6; border-radius: 6px; background: #FFFFFF; padding: 0 14px; font-family: inherit; font-size: 15px; color: #16161A"></div>
+      <div style="display: flex; flex-direction: column; gap: 8px"><label for="co" style="font-size: 13px; font-weight: 500; color: #3A3A42">Company</label><input id="co" class="vl-in" value="Meridian Capital" style="height: 48px; border: 1px solid #D8D2C6; border-radius: 6px; background: #FFFFFF; padding: 0 14px; font-family: inherit; font-size: 15px; color: #16161A"></div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <label for="pw" style="font-size: 13px; font-weight: 500; color: #3A3A42">Password</label>
+        <input id="pw" class="vl-in" type="password" value="xxxxxxxxxxxx" style="height: 48px; border: 1px solid #D8D2C6; border-radius: 6px; background: #FFFFFF; padding: 0 14px; font-family: inherit; font-size: 15px; color: #16161A">
+        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px"><span style="height: 4px; border-radius: 999px; background: #1F7A55"></span><span style="height: 4px; border-radius: 999px; background: #1F7A55"></span><span style="height: 4px; border-radius: 999px; background: #1F7A55"></span><span style="height: 4px; border-radius: 999px; background: #E2DCD0"></span></div>
+        <div style="display: flex; gap: 14px; flex-wrap: wrap; font-size: 12.5px; color: #1F7A55"><span>✓ 12+ characters</span><span>✓ A number</span><span>✓ A symbol</span></div>
+      </div>
+      <label style="display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; color: #4E4A44; line-height: 1.5; cursor: pointer"><input type="checkbox" checked style="width: 17px; height: 17px; accent-color: #16161A; margin-top: 2px">I agree to the <a href="#">Terms</a> and <a href="#">Privacy policy</a></label>
+      <a href="OnboardCompany.dc.html" class="vl-dark" style="height: 50px; border-radius: 6px; background: #16161A; color: #F6F1E7; font-size: 15px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 10px">Create account <svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #C9A96E"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+        <button type="button" class="vl-out" style="height: 46px; border: 1px solid #D8D2C6; border-radius: 6px; background: transparent; font-family: inherit; font-size: 14px; color: #16161A; cursor: pointer">Sign up with Google</button>
+        <button type="button" class="vl-out" style="height: 46px; border: 1px solid #D8D2C6; border-radius: 6px; background: transparent; font-family: inherit; font-size: 14px; color: #16161A; cursor: pointer">Sign up with Microsoft</button>
+      </div>
+      <div style="font-size: 14px; color: #5E5A52">Already have an account? <a href="SignIn.dc.html">Sign in</a></div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":980}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
