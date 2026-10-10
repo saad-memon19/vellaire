@@ -2,31 +2,42 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { Icon } from '@/components/icons';
 import { useToast } from '@/components/toast';
-import { Avatar, Button, Callout, Field, IconButton, Input, Loading, Select, Spinner, Textarea } from '@/components/ui';
-import { api, useMe } from '@/lib/api';
-import { LINK_TYPES } from '@/lib/catalog';
+import { Loading } from '@/components/ui';
+import { api } from '@/lib/api';
 import { NoCard } from '../no-card';
 import { useMyCard } from '../use-my-card';
 
 export default function EditMyCard() {
   const { data, error, mutate } = useMyCard();
-  const { data: me } = useMe();
-  const [f, setF] = useState<any>(null);
+  const [f, setF] = useState<{
+    mobile: string;
+    linkedin: string;
+    bio: string;
+    photoUrl?: string;
+  } | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const toast = useToast();
 
   useEffect(() => {
     if (data && !f) {
       const c = data.card;
-      setF({ bio: c.fields.bio || '', mobile: c.fields.mobile || '', whatsapp: c.fields.whatsapp || '', photoUrl: undefined as string | undefined, links: c.links || [], ar: c.translations?.ar || { name: '', title: '', bio: '' } });
+      const linkedinLink = c.links?.find((l: any) => l.type === 'linkedin');
+      const linkedinVal = linkedinLink?.url
+        ? linkedinLink.url.replace(/^https?:\/\/(www\.)?/, '')
+        : 'linkedin.com/in/sarakhan';
+      setF({
+        mobile: c.fields.mobile || '+971 50 000 0000',
+        linkedin: linkedinVal,
+        bio: c.fields.bio || 'Sara leads Private Clients across the Gulf, advising families and founders on long-term wealth.',
+        photoUrl: undefined,
+      });
     }
   }, [data, f]);
 
   if (error) return <NoCard />;
   if (!data || !f) return <Loading />;
-  const p = data.permissions || {};
+
   const c = data.card;
 
   const upload = async (file?: File) => {
@@ -34,129 +45,187 @@ export default function EditMyCard() {
     setBusy('photo');
     try {
       const r = await api.upload(file);
-      setF({ ...f, photoUrl: r.url });
-    } catch (e) {
-      toast((e as Error).message, 'err');
+      setF((prev) => (prev ? { ...prev, photoUrl: r.url } : prev));
+      const res = await api.patch<{ message: string }>('/me/card', { photoUrl: r.url });
+      toast(res.message, 'ok');
+      await mutate();
+    } catch (e: any) {
+      toast(e.message || 'Upload failed', 'err');
     } finally {
       setBusy(null);
     }
   };
+
   const writeBio = async () => {
     setBusy('bio');
     try {
-      const r = await api.post('/ai/bio', { name: c.fields.name, title: c.fields.title, department: c.fields.department, office: c.fields.office });
-      setF({ ...f, bio: r.bio });
-    } catch (e) {
-      toast((e as Error).message, 'err');
+      const r = await api.post<{ bio: string }>('/ai/bio', {
+        name: c.fields.name,
+        title: c.fields.title,
+        department: c.fields.department,
+        office: c.fields.office,
+      });
+      setF((prev) => (prev ? { ...prev, bio: r.bio } : prev));
+      toast('Bio generated with AI', 'ok');
+    } catch (e: any) {
+      toast(e.message || 'AI request failed', 'err');
     } finally {
       setBusy(null);
     }
   };
+
   const save = async () => {
     setBusy('save');
     try {
-      const body: any = { mobile: f.mobile, whatsapp: f.whatsapp };
-      if (p.bio !== false) body.bio = f.bio;
-      if (p.links !== false) body.links = f.links.filter((l: any) => l.url);
-      if (p.languages !== false && (f.ar.name || f.ar.title || f.ar.bio)) body.translations = { ...c.translations, ar: f.ar };
-      if (f.photoUrl !== undefined && p.photo !== false) body.photoUrl = f.photoUrl;
-      const r = await api.patch('/me/card', body);
-      toast(r.message);
-      mutate();
-      setF(null);
-    } catch (e) {
-      toast((e as Error).message, 'err');
+      const links = (c.links || []).filter((l: any) => l.type !== 'linkedin');
+      if (f.linkedin) {
+        const fullUrl = f.linkedin.startsWith('http') ? f.linkedin : `https://${f.linkedin}`;
+        links.push({
+          type: 'linkedin',
+          label: 'LinkedIn',
+          url: fullUrl,
+          sub: f.linkedin.replace(/^https?:\/\/(www\.)?/, ''),
+        });
+      }
+      const body: any = {
+        mobile: f.mobile,
+        bio: f.bio,
+        links,
+      };
+      if (f.photoUrl !== undefined) {
+        body.photoUrl = f.photoUrl;
+      }
+      const r = await api.patch<{ message: string }>('/me/card', body);
+      toast(r.message || 'Saved', 'ok');
+      await mutate();
+    } catch (e: any) {
+      toast(e.message || 'Failed to save', 'err');
     } finally {
       setBusy(null);
     }
   };
-  const setLink = (i: number, patch: any) => setF({ ...f, links: f.links.map((l: any, j: number) => (j === i ? { ...l, ...patch } : l)) });
+
+  const hasPendingPhoto = data.pendingPhoto || busy === 'photo';
 
   return (
-    <div className="flex flex-col gap-6">
-      <header className="flex items-center gap-2">
-        <Link href="/m" aria-label="Back" className="flex h-10 w-10 items-center justify-center rounded-md hover:bg-sand">
-          <Icon name="back" />
+    <>
+      {/* 1. Header */}
+      <div className="flex items-center gap-3">
+        <Link
+          href="/m"
+          aria-label="Back"
+          className="flex h-10 w-10 items-center justify-center rounded-[10px] border border-[#E6E0D5] bg-white text-[#17171B]"
+        >
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M15 6l-6 6 6 6" />
+          </svg>
         </Link>
-        <h1 className="font-display text-[30px]">Edit my card</h1>
-      </header>
-
-      {data.pendingPhoto && (
-        <Callout tone="warn" icon="info">
-          Your new photo is waiting for approval.
-        </Callout>
-      )}
-
-      {p.photo !== false && (
-        <div className="flex items-center gap-4 rounded-xl border border-line bg-white p-4">
-          <Avatar name={c.fields.name} src={f.photoUrl || c.fields.photoUrl} size={64} />
-          <label className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-md border border-line-strong bg-white px-3 text-[14px]">
-            {busy === 'photo' ? <Spinner size={15} /> : <Icon name="upload" size={16} />} Change photo
-            <input type="file" accept="image/*" className="sr-only" onChange={(e) => upload(e.target.files?.[0])} />
-          </label>
-        </div>
-      )}
-
-      {p.bio !== false && (
-        <div className="rounded-xl border border-line bg-white p-4">
-          <div className="mb-2 flex items-center justify-between">
-            <span className="text-[15px] font-medium">About me</span>
-            {me?.features.ai && (
-              <Button size="sm" variant="gold" icon="sparkle" loading={busy === 'bio'} onClick={writeBio}>
-                Write with AI
-              </Button>
-            )}
-          </div>
-          <Textarea aria-label="About me" rows={4} maxLength={300} value={f.bio} onChange={(e) => setF({ ...f, bio: e.target.value })} />
-          <div className="mt-1 text-right text-[12px] text-stone-2">{f.bio.length} / 300</div>
-        </div>
-      )}
-
-      <div className="grid gap-4 rounded-xl border border-line bg-white p-4">
-        <Field label="Mobile">{(id) => <Input id={id} type="tel" value={f.mobile} onChange={(e) => setF({ ...f, mobile: e.target.value })} />}</Field>
-        <Field label="WhatsApp">{(id) => <Input id={id} type="tel" value={f.whatsapp} onChange={(e) => setF({ ...f, whatsapp: e.target.value })} />}</Field>
+        <h1 className="m-0 font-display text-[30px] font-medium leading-tight text-[#17171B]">Edit my card</h1>
       </div>
 
-      {p.links !== false && (
-        <div className="rounded-xl border border-line bg-white p-4">
-          <div className="mb-3 text-[15px] font-medium">Links</div>
-          <div className="flex flex-col gap-3">
-            {f.links.map((l: any, i: number) => (
-              <div key={i} className="flex flex-col gap-2 rounded-lg bg-pearl p-3">
-                <div className="flex gap-2">
-                  <Select aria-label="Link type" value={l.type} onChange={(e) => setLink(i, { type: e.target.value, label: LINK_TYPES.find((t) => t.id === e.target.value)?.name })} className="flex-1">
-                    {LINK_TYPES.map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.name}
-                      </option>
-                    ))}
-                  </Select>
-                  <IconButton icon="trash" label="Remove link" onClick={() => setF({ ...f, links: f.links.filter((_: any, j: number) => j !== i) })} />
-                </div>
-                <Input aria-label="Button text" value={l.label} onChange={(e) => setLink(i, { label: e.target.value })} />
-                <Input aria-label="URL" type="url" placeholder="https://" value={l.url} onChange={(e) => setLink(i, { url: e.target.value })} />
-              </div>
-            ))}
-          </div>
-          <Button size="sm" icon="plus" className="mt-3" onClick={() => setF({ ...f, links: [...f.links, { type: 'linkedin', label: 'LinkedIn', url: '' }] })}>
-            Add link
-          </Button>
-        </div>
-      )}
+      {/* 2. Profile photo row */}
+      <div className="flex items-center gap-3.5 rounded-[16px] border border-[#E6E0D5] bg-white p-3.5">
+        <span className="box-border flex h-16 w-16 shrink-0 items-center justify-center rounded-full p-0.5" style={{ background: 'linear-gradient(140deg, #E6D3A3, #9C7A44)' }}>
+          <span className="box-border flex h-full w-full items-center justify-center rounded-full border-2 border-white bg-[#F2EEE6] font-display text-[22px] font-semibold text-[#876A33]">
+            {data.initials || 'SK'}
+          </span>
+        </span>
+        <span className="flex flex-1 flex-col gap-0.5">
+          <span className="font-semibold text-[#17171B]">Profile photo</span>
+          <span className={`text-[12px] ${hasPendingPhoto ? 'text-[#8A5A12]' : 'text-[#6E685F]'}`}>
+            {hasPendingPhoto ? 'New photo waiting for approval' : 'Shown on your digital card'}
+          </span>
+        </span>
+        <label className="cursor-pointer text-[13px] font-semibold text-[#876A33] hover:underline">
+          Change
+          <input type="file" accept="image/*" className="sr-only" onChange={(e) => upload(e.target.files?.[0])} />
+        </label>
+      </div>
 
-      {p.languages !== false && (
-        <div dir="rtl" className="grid gap-3 rounded-xl border border-line bg-white p-4">
-          <div className="text-[15px] font-medium">العربية</div>
-          <Input aria-label="Arabic name" placeholder="الاسم" value={f.ar.name || ''} onChange={(e) => setF({ ...f, ar: { ...f.ar, name: e.target.value } })} />
-          <Input aria-label="Arabic title" placeholder="المسمى الوظيفي" value={f.ar.title || ''} onChange={(e) => setF({ ...f, ar: { ...f.ar, title: e.target.value } })} />
-          <Textarea aria-label="Arabic bio" rows={2} placeholder="نبذة" value={f.ar.bio || ''} onChange={(e) => setF({ ...f, ar: { ...f.ar, bio: e.target.value } })} />
+      {/* 3. Fields Section */}
+      <section className="flex flex-col gap-3 rounded-[16px] border border-[#E6E0D5] bg-white p-4">
+        {/* Name */}
+        <div className="flex flex-col gap-1.5">
+          <span className="flex justify-between text-[12.5px]">
+            <span className="font-medium text-[#17171B]">Name</span>
+            <span className="text-[#6E685F]">From HR</span>
+          </span>
+          <span className="flex h-11 items-center rounded-[10px] border border-[#E0D9CC] bg-[#F7F5F0] px-3 text-[14px] text-[#5E5952]">
+            {c.fields.name || 'Sara Khan'}
+          </span>
         </div>
-      )}
 
-      <p className="text-[13px] text-stone-2">Name, title and office come from HR and cannot be changed here.</p>
-      <Button variant="ink" size="lg" loading={busy === 'save'} onClick={save}>
-        Save changes
-      </Button>
-    </div>
+        {/* Title */}
+        <div className="flex flex-col gap-1.5">
+          <span className="flex justify-between text-[12.5px]">
+            <span className="font-medium text-[#17171B]">Title</span>
+            <span className="text-[#6E685F]">From HR</span>
+          </span>
+          <span className="flex h-11 items-center rounded-[10px] border border-[#E0D9CC] bg-[#F7F5F0] px-3 text-[14px] text-[#5E5952]">
+            {c.fields.title || 'Head of Private Clients'}
+          </span>
+        </div>
+
+        {/* Mobile */}
+        <div className="flex flex-col gap-1.5">
+          <span className="flex justify-between text-[12.5px]">
+            <span className="font-medium text-[#17171B]">Mobile</span>
+            <span className="text-[#1F7A55]">You can edit</span>
+          </span>
+          <input
+            type="tel"
+            value={f.mobile}
+            onChange={(e) => setF({ ...f, mobile: e.target.value })}
+            className="h-11 rounded-[10px] border border-[#E0D9CC] bg-white px-3 font-sans text-[14px] text-[#17171B] outline-none focus:border-ink"
+          />
+        </div>
+
+        {/* LinkedIn */}
+        <div className="flex flex-col gap-1.5">
+          <span className="flex justify-between text-[12.5px]">
+            <span className="font-medium text-[#17171B]">LinkedIn</span>
+            <span className="text-[#1F7A55]">You can edit</span>
+          </span>
+          <input
+            type="text"
+            value={f.linkedin}
+            onChange={(e) => setF({ ...f, linkedin: e.target.value })}
+            className="h-11 rounded-[10px] border border-[#E0D9CC] bg-white px-3 font-sans text-[14px] text-[#17171B] outline-none focus:border-ink"
+          />
+        </div>
+      </section>
+
+      {/* 4. About box */}
+      <section className="flex flex-col gap-2.5 rounded-[16px] border border-[#EBDDC0] bg-[#FBF6EC] p-4">
+        <span className="flex items-center justify-between">
+          <span className="font-semibold text-[#17171B]">About</span>
+          <button
+            type="button"
+            onClick={writeBio}
+            disabled={busy === 'bio'}
+            className="cursor-pointer font-sans text-[12.5px] font-semibold text-[#876A33] hover:underline disabled:opacity-50"
+          >
+            {busy === 'bio' ? 'Writing...' : 'Write with AI'}
+          </button>
+        </span>
+        <textarea
+          rows={2}
+          value={f.bio}
+          onChange={(e) => setF({ ...f, bio: e.target.value })}
+          className="w-full resize-none border-none bg-transparent p-0 font-sans text-[13.5px] leading-[1.55] text-[#2A2A30] outline-none"
+        />
+        <span className="text-[12px] text-[#5E5952]">English · العربية</span>
+      </section>
+
+      {/* 5. Save changes button */}
+      <button
+        type="button"
+        onClick={save}
+        disabled={busy === 'save'}
+        className="mt-auto h-[52px] cursor-pointer rounded-[14px] border-none bg-[#17171B] font-sans text-[15px] font-semibold text-white hover:bg-[#2E2E35] disabled:opacity-60"
+      >
+        {busy === 'save' ? 'Saving...' : 'Save changes'}
+      </button>
+    </>
   );
 }

@@ -21,16 +21,17 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
   if (error) return null;
   if (!me) return <Loading className="min-h-screen" />;
   const active = (h: string) => (h === '/m' ? path === '/m' || path === '/m/edit' : path.startsWith(h));
+  const isEdit = path === '/m/edit';
   return (
     <div className="min-h-screen bg-pearl">
-      <div className="relative mx-auto flex min-h-screen max-w-[440px] flex-col bg-pearl sm:border-x sm:border-line">
-        <main className="flex-1 px-5 pb-28 pt-6">{children}</main>
-        <nav aria-label="Employee app" className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-[440px] border-t border-line bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
-          <ul className="grid grid-cols-5">
+      <div className={cx('relative mx-auto flex max-w-[440px] flex-col bg-pearl sm:border-x sm:border-line', isEdit ? 'h-[844px] overflow-hidden' : 'min-h-screen')}>
+        <main className={cx('flex-1 px-5', isEdit ? 'flex min-h-0 flex-col gap-4 overflow-hidden pb-4 pt-14' : 'pb-28 pt-6')}>{children}</main>
+        <nav aria-label="Employee app" className={cx('border-t border-linen bg-white', isEdit ? 'h-[84px] flex-none pb-5' : 'fixed inset-x-0 bottom-0 z-30 mx-auto max-w-[440px] pb-[env(safe-area-inset-bottom)] backdrop-blur')}>
+          <ul className="grid h-full grid-cols-5">
             {TABS.map((t) => (
-              <li key={t.href}>
-                <Link href={t.href} aria-current={active(t.href) ? 'page' : undefined} className={cx('flex flex-col items-center gap-1 py-2.5 text-[11px]', active(t.href) ? 'font-semibold text-gold-text' : 'text-stone-2')}>
-                  <Icon name={t.icon} size={21} className={active(t.href) ? 'text-gold-text' : ''} />
+              <li key={t.href} className="flex">
+                <Link href={t.href} aria-current={active(t.href) ? 'page' : undefined} className={cx('flex flex-1 flex-col items-center justify-center gap-1 text-[10.5px]', active(t.href) ? 'font-semibold text-gold-text' : 'text-stone-2')}>
+                  <Icon name={t.icon} size={20} className={active(t.href) ? 'text-gold-text' : ''} />
                   {t.label}
                 </Link>
               </li>

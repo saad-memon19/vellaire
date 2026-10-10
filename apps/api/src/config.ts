@@ -30,6 +30,12 @@ export const config = {
     microsoft: { id: process.env.MICROSOFT_CLIENT_ID || '', secret: process.env.MICROSOFT_CLIENT_SECRET || '' },
   },
   uploadDir: process.env.UPLOAD_DIR || 'uploads',
+  // Vercel Blob for uploads in production; without a token files go to uploadDir on disk
+  blobToken: process.env.BLOB_READ_WRITE_TOKEN || '',
+  // Running as a Vercel function: no timers, no disk
+  serverless: !!process.env.VERCEL,
+  // Shared secret Vercel Cron sends to /cron/<task>
+  cronSecret: process.env.CRON_SECRET || '',
 };
 
 export type PlanId = 'starter' | 'professional' | 'enterprise';

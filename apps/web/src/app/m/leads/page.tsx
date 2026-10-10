@@ -5,6 +5,7 @@ import { Icon } from '@/components/icons';
 import { useToast } from '@/components/toast';
 import { Avatar, Button, cx, Field, Input, Loading, Modal, PillTabs, Spinner, Textarea } from '@/components/ui';
 import { api, qs, useApi, useMe } from '@/lib/api';
+import { shrinkImage, toDataUrl } from '@/lib/image';
 import { NoCard } from '../no-card';
 
 export default function MobileLeads() {
@@ -174,14 +175,10 @@ function ScanSheet({ open, ai, onClose, onSaved }: { open: boolean; ai: boolean;
     if (!file) return;
     setBusy('scan');
     try {
-      const dataUrl: string = await new Promise((res, rej) => {
-        const r = new FileReader();
-        r.onload = () => res(String(r.result));
-        r.onerror = rej;
-        r.readAsDataURL(file);
-      });
-      const type = (file.type === 'image/png' || file.type === 'image/webp' ? file.type : 'image/jpeg') as string;
-      const out = await api.post('/leads/scan', { image: dataUrl, mediaType: type });
+      // A smaller photo reads just as well and keeps the request under the server limit
+      const photo = await shrinkImage(file, 1600, 2_500_000);
+      const type = photo.type === 'image/png' || photo.type === 'image/webp' ? photo.type : 'image/jpeg';
+      const out = await api.post('/leads/scan', { image: await toDataUrl(photo), mediaType: type });
       setF({ ...f, ...Object.fromEntries(Object.entries(out).filter(([k]) => k in empty)) });
       toast('Details read from the card. Check them, then save.');
     } catch (e) {

@@ -426,24 +426,126 @@ export class CardsController {
     const company = await this.company(u);
     const cards = await db.Card.find({
       companyId: company._id,
-      $or: [{ status: 'pending_approval' }, { 'approval.pendingPhoto': { $nin: [null, ''] } }],
+      $or: [{ status: 'pending_approval' }, { 'approval.pendingPhoto': { $nin: [null, ''] } }, { 'approval.changes': { $exists: true, $nin: [null, []] } }],
     })
-      .sort({ 'approval.requestedAt': 1 })
+      .sort({ 'approval.requestedAt': -1 })
       .lean<any[]>();
     const recent = await db.Activity.find({ companyId: company._id, action: { $in: ['card.approved', 'card.rejected'] } })
       .sort({ createdAt: -1 })
       .limit(10)
       .lean<any[]>();
-    return {
-      pending: cards.map((c) => ({
+
+    const pending = cards.map((c) => {
+      const reqBy = c.approval?.requestedBy || 'Workday sync';
+      const source = reqBy.toLowerCase().includes('workday')
+        ? 'Workday'
+        : reqBy.toLowerCase().includes('sap')
+          ? 'SAP'
+          : reqBy.toLowerCase().includes('bamboo')
+            ? 'BambooHR'
+            : 'Employee';
+
+      let what = 'Card change';
+      let headerWhat = 'card change';
+      let changes: { field: string; before?: string; after?: string }[] = [];
+      const beforeFields = c.approval?.before ? { ...c.fields, ...c.approval.before } : (c.status === 'pending_approval' && !c.publishedAt ? {} : c.fields);
+      let afterFields = c.approval?.after ? { ...c.fields, ...c.approval.after } : c.fields;
+
+      if (c.approval?.changes && Array.isArray(c.approval.changes) && c.approval.changes.length) {
+        changes = c.approval.changes;
+        what = c.approval.reason || 'Title and department changed';
+        headerWhat = what.toLowerCase().includes('title') ? 'title change' : what.toLowerCase();
+      } else if (c.approval?.pendingPhoto) {
+        what = 'New profile photo';
+        headerWhat = 'photo change';
+        changes = [{ field: 'Profile photo', before: c.fields?.photoUrl ? 'Current photo' : 'None', after: 'New photo' }];
+        afterFields = { ...c.fields, photoUrl: c.approval.pendingPhoto };
+      } else if (c.approval?.before) {
+        const b = c.approval.before;
+        const a = c.approval.after || c.fields;
+        const keys = Array.from(new Set([...Object.keys(b), ...Object.keys(a)]));
+        changes = keys.map((k) => ({
+          field: k === 'title' ? 'Job title' : k === 'department' ? 'Department' : k === 'office' ? 'Office' : k,
+          before: b[k] || 'None',
+          after: b[k] === a[k] ? 'No change' : a[k] || 'None',
+        }));
+        what = c.approval.reason || 'Details updated';
+        headerWhat = 'details updated';
+      } else {
+        what = c.approval?.reason === 'New joiner from HR' ? 'New card for new joiner' : (c.approval?.reason || 'New card');
+        headerWhat = 'new card';
+        changes = [
+          { field: 'Job title', before: 'None', after: c.fields?.title || 'None' },
+          { field: 'Department', before: 'None', after: c.fields?.department || 'None' },
+          { field: 'Office', before: 'None', after: c.fields?.office || 'None' },
+        ];
+      }
+
+      return {
         ...serializeCard(c, company),
-        requestedBy: c.approval?.requestedBy,
+        ini: initials(c.fields?.name),
+        name: c.fields?.name,
+        requestedBy: reqBy,
+        source,
         reason: c.approval?.reason,
+        what,
+        headerWhat,
         pendingPhoto: c.approval?.pendingPhoto || null,
         when: relTime(c.approval?.requestedAt),
-      })),
+        before: {
+          fields: beforeFields,
+        },
+        after: {
+          fields: afterFields,
+        },
+        changes,
+      };
+    });
+
+    return {
+      pending,
       recent: recent.map((r) => ({ id: String(r._id), text: r.text, actor: r.actor, when: relTime(r.createdAt) })),
     };
+  }
+
+  @Roles(...MANAGERS)
+  @Post('approvals/bulk-approve')
+  async bulkApprove(@Body() body: unknown, @CurrentUser() u: SessionUser) {
+    const { source } = parse(z.object({ source: z.string().optional() }), body || {});
+    const company = await this.company(u);
+    const filter: any = {
+      companyId: company._id,
+      $or: [{ status: 'pending_approval' }, { 'approval.pendingPhoto': { $nin: [null, ''] } }, { 'approval.changes': { $exists: true, $nin: [null, []] } }],
+    };
+    if (source) {
+      filter['approval.requestedBy'] = { $regex: new RegExp(source, 'i') };
+    }
+    const cards = await db.Card.find(filter);
+    let approved = 0;
+    for (const card of cards) {
+      const pendingPhoto = card.approval?.pendingPhoto;
+      if (pendingPhoto && card.status !== 'pending_approval') {
+        card.fields = { ...(card.toObject().fields || {}), photoUrl: pendingPhoto } as any;
+        card.approval = { ...(card.toObject().approval || {}), pendingPhoto: null, reviewedBy: u.name, reviewedAt: new Date() } as any;
+        await card.save();
+        await logActivity({ companyId: card.companyId, cardId: card._id, actor: u.name, action: 'card.approved', text: `${u.name} approved ${card.fields?.name}'s new photo` });
+        approved++;
+      } else if (card.approval?.after && card.status !== 'pending_approval') {
+        card.fields = { ...(card.toObject().fields || {}), ...card.approval.after } as any;
+        card.approval = { ...(card.toObject().approval || {}), before: null, after: null, changes: null, reviewedBy: u.name, reviewedAt: new Date() } as any;
+        await card.save();
+        await logActivity({ companyId: card.companyId, cardId: card._id, actor: u.name, action: 'card.approved', text: `${u.name} approved ${card.fields?.name}'s changes` });
+        approved++;
+      } else if (card.status === 'pending_approval') {
+        card.approval = { ...(card.toObject().approval || {}), reviewedBy: u.name, reviewedAt: new Date() } as any;
+        card.status = 'draft';
+        await card.save();
+        await logActivity({ companyId: card.companyId, cardId: card._id, actor: u.name, action: 'card.approved', text: `${u.name} approved ${card.fields?.name}'s card` });
+        await publishCard(card._id, u, { skipApproval: true, publishAt: card.publishAt || null });
+        approved++;
+      }
+    }
+    return { approved };
   }
 
   @Roles(...MANAGERS)
@@ -456,6 +558,13 @@ export class CardsController {
       card.approval = { ...(card.toObject().approval || {}), pendingPhoto: null, reviewedBy: u.name, reviewedAt: new Date() } as any;
       await card.save();
       await logActivity({ companyId: card.companyId, cardId: card._id, actor: u.name, action: 'card.approved', text: `${u.name} approved ${card.fields?.name}'s new photo` });
+      return { status: card.status, steps: [] };
+    }
+    if (card.approval?.after && card.status !== 'pending_approval') {
+      card.fields = { ...(card.toObject().fields || {}), ...card.approval.after } as any;
+      card.approval = { ...(card.toObject().approval || {}), before: null, after: null, changes: null, reviewedBy: u.name, reviewedAt: new Date() } as any;
+      await card.save();
+      await logActivity({ companyId: card.companyId, cardId: card._id, actor: u.name, action: 'card.approved', text: `${u.name} approved ${card.fields?.name}'s changes` });
       return { status: card.status, steps: [] };
     }
     if (card.status !== 'pending_approval') throw new BadRequestException('Nothing to approve');
@@ -472,7 +581,7 @@ export class CardsController {
     const { note } = parse(z.object({ note: z.string().max(500).default('') }), body || {});
     const card = await this.ownCard(u, id);
     if (card.status === 'pending_approval') card.status = card.publishedAt ? 'live' : 'draft';
-    card.approval = { ...(card.toObject().approval || {}), pendingPhoto: null, reviewedBy: u.name, reviewedAt: new Date(), note } as any;
+    card.approval = { ...(card.toObject().approval || {}), pendingPhoto: null, before: null, after: null, changes: null, reviewedBy: u.name, reviewedAt: new Date(), note } as any;
     await card.save();
     await logActivity({ companyId: card.companyId, cardId: card._id, actor: u.name, action: 'card.rejected', text: `${u.name} sent ${card.fields?.name}'s card back${note ? `: ${note}` : ''}` });
     return { ok: true };

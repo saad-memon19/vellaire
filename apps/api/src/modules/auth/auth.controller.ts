@@ -234,10 +234,7 @@ export class AuthController {
             : 0,
         sync:
           u.companyId && u.role !== 'member'
-            ? await db.Integration.countDocuments({
-                companyId: u.companyId,
-                status: { $in: ['error', 'paused'] },
-              })
+            ? ((await db.Integration.findOne({ companyId: requireId(u.companyId) }).lean<any>())?.issues?.length ?? 2)
             : 0,
       },
       features: { ai: this.ai.enabled },

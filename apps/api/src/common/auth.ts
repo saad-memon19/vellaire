@@ -15,7 +15,7 @@ import { requestContext } from './context';
 
 export const SESSION_COOKIE = 'vl_session';
 
-export type Role = 'owner' | 'admin' | 'brand_manager' | 'member';
+export type Role = 'owner' | 'admin' | 'brand_manager' | 'hr_manager' | 'dept_manager' | 'member';
 export interface SessionUser {
   id: string;
   email: string;
@@ -60,7 +60,7 @@ export const SignedIn = () => SetMetadata(SIGNED_IN, true);
 export const Platform = () => SetMetadata(PLATFORM, true);
 
 export const ADMINS: Role[] = ['owner', 'admin'];
-export const MANAGERS: Role[] = ['owner', 'admin', 'brand_manager'];
+export const MANAGERS: Role[] = ['owner', 'admin', 'brand_manager', 'hr_manager', 'dept_manager'];
 
 export async function loadSession(token?: string): Promise<SessionUser | null> {
   if (!token) return null;

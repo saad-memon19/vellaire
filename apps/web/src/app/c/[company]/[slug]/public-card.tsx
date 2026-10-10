@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { OnlineCard, OnlineCardData } from '@/components/card/online-card';
@@ -11,6 +12,10 @@ export interface PublicCard extends OnlineCardData {
   status: string;
   id: string;
   companyName: string;
+  companySlug?: string;
+  website?: string | null;
+  logo?: string | null;
+  teamPage?: boolean;
   url: string;
 }
 
@@ -115,14 +120,74 @@ export function PublicCardView({ card }: { card: PublicCard }) {
   );
 }
 
-export function InactiveCard({ companyName }: { companyName?: string }) {
+export function InactiveCard({
+  companyName,
+  companySlug,
+  website,
+  logo,
+  teamPage,
+}: {
+  companyName?: string;
+  companySlug?: string;
+  website?: string | null;
+  logo?: string | null;
+  teamPage?: boolean;
+}) {
+  const cleanWebsite = website ? website.replace(/^https?:\/\//, '').replace(/\/$/, '') : null;
+  const webHref = website ? (website.startsWith('http') ? website : `https://${website}`) : undefined;
+  const contactHref = webHref || (companySlug ? `/c/${companySlug}` : '#');
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-pearl px-6 text-center">
-      <Seal size={48} className="text-gold" />
-      <h1 className="mt-6 font-display text-[36px]">This card is no longer active</h1>
-      <p className="mt-2 max-w-sm text-[15px] text-stone">
-        {companyName ? `Please contact ${companyName} directly to reach the right person.` : 'Please contact the company directly.'}
-      </p>
+    <main className="relative min-h-screen w-full bg-[#F7F5F0] text-[#17171B] font-sans flex items-center justify-center">
+      <div
+        className="mx-auto flex min-h-screen w-full max-w-[390px] flex-col items-center justify-center gap-6 px-7 py-10 text-center box-border"
+        style={{
+          background: 'radial-gradient(60% 40% at 50% 30%, rgba(176,141,79,0.16), rgba(247,245,240,0) 70%), #F7F5F0',
+        }}
+      >
+        <span className="flex h-[88px] w-[88px] shrink-0 items-center justify-center overflow-hidden rounded-[22px] bg-[#17171B] font-display text-[40px] text-[#C9A96E] shadow-[0_18px_36px_rgba(23,23,27,0.2)]">
+          {logo ? <img src={logo} alt="" className="max-h-14 max-w-14 object-contain" /> : (companyName || 'V')[0]}
+        </span>
+        <span className="text-[11px] font-semibold tracking-[0.3em] text-[#876A33]">
+          {companyName ? companyName.toUpperCase() : 'VELLAIRE'}
+        </span>
+        <h1 className="m-0 font-display text-[36px] font-medium leading-[1.1] text-[#17171B]">
+          This card is no longer active
+        </h1>
+        <p className="m-0 text-[15px] leading-[1.6] text-[#5E5952]">
+          The person you are looking for has moved on. Our team will be glad to help you.
+        </p>
+        <div className="flex w-full flex-col gap-2.5 pt-2">
+          <a
+            href={contactHref}
+            className="flex h-[54px] items-center justify-center rounded-[14px] bg-[#17171B] text-[15px] font-semibold text-white transition-opacity hover:opacity-90"
+          >
+            {companyName ? `Contact ${companyName}` : 'Contact us'}
+          </a>
+          {teamPage && companySlug && (
+            <Link
+              href={`/c/${companySlug}`}
+              className="flex h-[52px] items-center justify-center rounded-[14px] border border-[#D9D2C4] bg-white text-[15px] text-[#17171B] transition-colors hover:bg-[#FAF8F5]"
+            >
+              Find someone in our team
+            </Link>
+          )}
+          {cleanWebsite && webHref && (
+            <a
+              href={webHref}
+              target="_blank"
+              rel="noreferrer"
+              className="flex h-[52px] items-center justify-center rounded-[14px] text-[15px] text-[#876A33] hover:underline"
+            >
+              {cleanWebsite}
+            </a>
+          )}
+        </div>
+        <span className="mt-5 flex items-center gap-1.5 text-[10px] tracking-[0.24em] text-[#8E887E]">
+          <Seal size={14} className="text-[#B08D4F]" />
+          VELLAIRE
+        </span>
+      </div>
     </main>
   );
 }

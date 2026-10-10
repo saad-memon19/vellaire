@@ -8,6 +8,7 @@ import { sendMail } from '../../common/mail';
 import { parse } from '../../common/util';
 import { db } from '../../db/db';
 import { isOid } from '../../db/schemas';
+import { flagsFor } from '../../common/platform';
 import { applePass, appleReady, googleReady, googleSaveUrl } from './wallet';
 
 const CHANNELS = ['nfc', 'qr', 'link', 'wallet', 'email', 'signature'];
@@ -61,11 +62,20 @@ function vcard(card: any, company: any) {
 @Public()
 @Controller('public')
 export class PublicController {
-  private shape(card: any, company: any) {
+  private async shape(card: any, company: any) {
+    const flags = await flagsFor(company);
+    const teamPage = Boolean(company?.settings?.teamPage && flags.includes('public.team_page'));
+    const website = company?.brand?.website || (company?.domain?.verified && company.domain.host ? `https://${company.domain.host}` : undefined) || null;
+    const logo = company?.brand?.logos?.icon || company?.brand?.logos?.light || null;
+
     if (card.status === 'deactivated') {
       return {
         status: 'deactivated',
         companyName: company.name,
+        companySlug: company.slug,
+        website,
+        logo,
+        teamPage,
         brand: brandOf(company),
       };
     }
@@ -84,6 +94,9 @@ export class PublicController {
       displayUrl: displayUrl(url),
       companyName: company.name,
       companySlug: company.slug,
+      website,
+      logo,
+      teamPage,
       brand: brandOf(company),
       wallet: { apple: appleReady(), google: googleReady() },
     };
@@ -262,7 +275,11 @@ export class PublicController {
     const card = d.cardId ? await db.Card.findById(d.cardId).lean<any>() : null;
     const company = await db.Company.findById(d.companyId).lean<any>();
     if (d.status !== 'active' || !card || card.status !== 'live') {
-      return { active: false, companyName: company?.name };
+      const flags = company ? await flagsFor(company) : [];
+      const teamPage = Boolean(company?.settings?.teamPage && flags.includes('public.team_page'));
+      const website = company?.brand?.website || (company?.domain?.verified && company.domain.host ? `https://${company.domain.host}` : undefined) || null;
+      const logo = company?.brand?.logos?.icon || company?.brand?.logos?.light || null;
+      return { active: false, companyName: company?.name, companySlug: company?.slug, website, logo, teamPage };
     }
     await db.NfcDevice.updateOne({ _id: d._id }, { lastTapAt: new Date() });
     return { active: true, url: `${cardUrl(company, card.slug)}?src=nfc` };

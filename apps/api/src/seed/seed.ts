@@ -206,7 +206,7 @@ async function seedMeridian() {
         address: `[Office address], ${e.office}`,
         bio:
           e.name === 'Sara Khan'
-            ? 'Sara leads Private Clients across the Gulf, advising families and founders on long-term wealth. Fifteen years in Dubai, London and Geneva.'
+            ? 'Sara leads Private Clients across the Gulf, advising families and founders on long-term wealth.'
             : `${e.firstName} works in ${e.department} at Meridian Capital in ${e.city}.`,
       },
       translations: isArabic || e.name === 'Sara Khan' ? { ar: { name: e.name === 'Sara Khan' ? 'سارة خان' : e.name, title: e.name === 'Sara Khan' ? 'رئيسة العملاء الخاصين' : e.title } } : {},
@@ -226,8 +226,22 @@ async function seedMeridian() {
       createdAt: day(int(5, 240)),
     });
   });
-  // One photo change waiting for approval
+  // One photo change waiting for approval (Sara Khan matching EditMyCard design)
+  cardDocs[0].approval = { pendingPhoto: '/files/demo-photo.svg', requestedBy: cardDocs[0].fields.name, requestedAt: day(0), reason: 'New profile photo' };
   cardDocs[5].approval = { pendingPhoto: '/files/demo-photo.svg', requestedBy: cardDocs[5].fields.name, requestedAt: day(0), reason: 'New profile photo' };
+  // Title & department change waiting for approval
+  cardDocs[2].approval = {
+    requestedBy: 'Workday sync',
+    requestedAt: new Date(Date.now() - 3600_000),
+    reason: 'Title and department changed',
+    before: { title: 'Director', department: 'Corporate Finance', office: 'Riyadh' },
+    after: { title: 'Managing Director', department: 'Investment Banking', office: 'Riyadh' },
+    changes: [
+      { field: 'Job title', before: 'Director', after: 'Managing Director' },
+      { field: 'Department', before: 'Corporate Finance', after: 'Investment Banking' },
+      { field: 'Office', before: 'Riyadh', after: 'No change' },
+    ],
+  };
   const cards = await db.Card.insertMany(cardDocs);
   await db.Employee.bulkWrite(cards.map((c: any) => ({ updateOne: { filter: { _id: c.employeeId }, update: { cardId: c._id } } })));
   const live = cards.filter((c: any) => c.status === 'live');
@@ -235,9 +249,12 @@ async function seedMeridian() {
 
   /* Users */
   await db.User.insertMany([
-    { email: 'sara.khan@meridian.com', name: 'Sara Khan', companyId: company._id, role: 'owner', employeeId: empDocs[0]!._id, lastLoginAt: day(0) },
-    { email: 'layla.mansour@meridian.com', name: 'Layla Mansour', companyId: company._id, role: 'brand_manager', employeeId: empDocs[2]!._id, lastLoginAt: day(1) },
-    { email: 'it.admin@meridian.com', name: 'Rashid Aziz', companyId: company._id, role: 'admin', lastLoginAt: day(4) },
+    { email: 'sara.khan@meridian.com', name: 'Sara Khan', companyId: company._id, role: 'owner', scope: 'Whole company', employeeId: empDocs[0]!._id, lastLoginAt: day(0) },
+    { email: 'david.asante@meridian.com', name: 'David Asante', companyId: company._id, role: 'admin', scope: 'Whole company', lastLoginAt: day(0) },
+    { email: 'nour.hamdan@meridian.com', name: 'Nour Hamdan', companyId: company._id, role: 'brand_manager', scope: 'Whole company', employeeId: empDocs[2]!._id, lastLoginAt: day(1) },
+    { email: 'priya.shah@meridian.com', name: 'Priya Shah', companyId: company._id, role: 'hr_manager', scope: 'Whole company', lastLoginAt: day(2) },
+    { email: 'tom.allerton@meridian.com', name: 'Tom Allerton', companyId: company._id, role: 'dept_manager', scope: 'Corporate Finance', lastLoginAt: day(3) },
+    { email: 'hana.qureshi@meridian.com', name: 'Hana Qureshi', companyId: company._id, role: 'dept_manager', scope: 'Karachi office', lastLoginAt: day(7) },
     { email: 'omar.haddad@meridian.com', name: 'Omar Haddad', companyId: company._id, role: 'member', employeeId: empDocs[1]!._id, status: 'invited' },
     ...empDocs.slice(3, 40).map((e: any) => ({ email: e.email, name: e.name, companyId: company._id, role: 'member', employeeId: e._id })),
   ]);
@@ -362,26 +379,103 @@ async function seedMeridian() {
     rules: { templateByCountry: [{ countries: ['United Arab Emirates', 'Saudi Arabia'], layout: 'arabic' }], skipWorkerTypes: ['Contractor'], joinersToApproval: true },
     guardPct: 10,
     lastSyncAt: new Date(Date.now() - 4 * 60_000),
-    credentials: {},
+    issues: [
+      { id: '1', who: 'Zara Ahmed · Karachi', why: 'No work email in Workday, so no card can be created.', fix: 'Add email' },
+      { id: '2', who: 'Marco Lenz · Dubai', why: 'Department code ORG-CMP-DXB is not mapped to a department.', fix: 'Map department' },
+    ],
     pendingRecords: feed,
   });
   // Arabic rule shown in the design applies to Saudi Arabia only in practice
   await db.Integration.updateOne({ companyId: company._id, provider: 'workday' }, { 'rules.templateByCountry': [{ countries: ['Saudi Arabia'], layout: 'arabic' }] });
-  await db.SyncRun.insertMany(
-    [0, 1, 2, 3, 4, 5].map((i) => ({
+  const seedNow = Date.now();
+  const seedDayMs = 86400_000;
+  await db.SyncRun.insertMany([
+    {
       companyId: company._id,
       provider: 'workday',
       status: 'done',
-      created: i === 0 ? 0 : int(0, 4),
-      updated: int(2, 14),
-      deactivated: int(0, 2),
-      skipped: 5,
-      issues: ['4 workers have no work email. Fix them in your HR system or add emails here.'],
+      created: 1,
+      updated: 4,
+      deactivated: 0,
+      skipped: 0,
       trigger: 'Hourly sync',
-      createdAt: new Date(Date.now() - (4 + i * 60) * 60_000),
-      finishedAt: new Date(Date.now() - (3 + i * 60) * 60_000),
-    })),
-  );
+      createdAt: new Date(seedNow - 25 * 60_000),
+      finishedAt: new Date(seedNow - 24 * 60_000),
+    },
+    {
+      companyId: company._id,
+      provider: 'workday',
+      status: 'done',
+      created: 0,
+      updated: 2,
+      deactivated: 0,
+      skipped: 0,
+      trigger: 'Hourly sync',
+      createdAt: new Date(seedNow - 40 * 60_000),
+      finishedAt: new Date(seedNow - 39 * 60_000),
+    },
+    {
+      companyId: company._id,
+      provider: 'workday',
+      status: 'paused',
+      created: 9,
+      updated: 12,
+      deactivated: 1,
+      skipped: 2,
+      trigger: 'Hourly sync',
+      createdAt: new Date(seedNow - 160 * 60_000),
+      finishedAt: new Date(seedNow - 159 * 60_000),
+    },
+    {
+      companyId: company._id,
+      provider: 'workday',
+      status: 'done',
+      created: 0,
+      updated: 3,
+      deactivated: 0,
+      skipped: 0,
+      trigger: 'Hourly sync',
+      createdAt: new Date(seedNow - seedDayMs - 30 * 60_000),
+      finishedAt: new Date(seedNow - seedDayMs - 29 * 60_000),
+    },
+    {
+      companyId: company._id,
+      provider: 'workday',
+      status: 'done',
+      created: 0,
+      updated: 31,
+      deactivated: 0,
+      skipped: 0,
+      trigger: 'Manual · Sara Khan',
+      createdAt: new Date(seedNow - seedDayMs - 8 * 3600_000),
+      finishedAt: new Date(seedNow - seedDayMs - 8 * 3600_000 + 45_000),
+    },
+    {
+      companyId: company._id,
+      provider: 'workday',
+      status: 'done',
+      created: 2,
+      updated: 5,
+      deactivated: 0,
+      skipped: 0,
+      trigger: 'Hourly sync',
+      createdAt: new Date(seedNow - 7 * seedDayMs),
+      finishedAt: new Date(seedNow - 7 * seedDayMs + 60_000),
+    },
+    {
+      companyId: company._id,
+      provider: 'workday',
+      status: 'failed',
+      created: 0,
+      updated: 0,
+      deactivated: 0,
+      skipped: 0,
+      issues: ['Authentication token expired'],
+      trigger: 'Hourly sync',
+      createdAt: new Date(seedNow - 8 * seedDayMs),
+      finishedAt: new Date(seedNow - 8 * seedDayMs + 30_000),
+    },
+  ]);
 
   /* Activity */
   await db.Activity.insertMany([

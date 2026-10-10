@@ -4,17 +4,25 @@ import { cardUrl } from '../../common/cards';
 
 /**
  * Wallet passes.
- * Apple: needs a Pass Type ID certificate (APPLE_PASS_* env vars).
+ * Apple: needs a Pass Type ID certificate. Give each certificate as a file path (APPLE_*_PATH, for servers)
+ *   or as base64 text (APPLE_WWDR_CERT, APPLE_SIGNER_CERT, APPLE_SIGNER_KEY, for Vercel, which has no files).
  * Google: needs a Google Wallet issuer and service account (GOOGLE_WALLET_* env vars).
  * Without them the buttons show a friendly "not set up yet" message.
  */
+/** A certificate from NAME (base64 text) or NAME_PATH (a file); null when neither is set. */
+function certificate(name: string): Buffer | null {
+  if (process.env[name]) return Buffer.from(process.env[name]!, 'base64');
+  const path = process.env[`${name}_PATH`];
+  return path && existsSync(path) ? readFileSync(path) : null;
+}
+
 export const walletConfig = {
   apple: {
     passTypeId: process.env.APPLE_PASS_TYPE_ID || '',
     teamId: process.env.APPLE_TEAM_ID || '',
-    wwdr: process.env.APPLE_WWDR_CERT_PATH || '',
-    signerCert: process.env.APPLE_SIGNER_CERT_PATH || '',
-    signerKey: process.env.APPLE_SIGNER_KEY_PATH || '',
+    wwdr: certificate('APPLE_WWDR_CERT'),
+    signerCert: certificate('APPLE_SIGNER_CERT'),
+    signerKey: certificate('APPLE_SIGNER_KEY'),
     keyPassphrase: process.env.APPLE_SIGNER_KEY_PASSPHRASE || '',
   },
   google: {
@@ -26,7 +34,7 @@ export const walletConfig = {
 
 export const appleReady = () => {
   const a = walletConfig.apple;
-  return !!(a.passTypeId && a.teamId && [a.wwdr, a.signerCert, a.signerKey].every((p) => p && existsSync(p)));
+  return !!(a.passTypeId && a.teamId && a.wwdr && a.signerCert && a.signerKey);
 };
 export const googleReady = () => !!(walletConfig.google.issuerId && walletConfig.google.serviceEmail && walletConfig.google.privateKey);
 
@@ -46,9 +54,9 @@ export async function applePass(card: any, company: any): Promise<Buffer> {
   const pass = new PKPass(
     {},
     {
-      wwdr: readFileSync(a.wwdr),
-      signerCert: readFileSync(a.signerCert),
-      signerKey: readFileSync(a.signerKey),
+      wwdr: a.wwdr!,
+      signerCert: a.signerCert!,
+      signerKey: a.signerKey!,
       signerKeyPassphrase: a.keyPassphrase || undefined,
     },
     {

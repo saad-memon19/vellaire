@@ -25,7 +25,17 @@ export default async function Page({ params }: { params: Params }) {
   const { company, slug } = await params;
   const card = await load(company, slug);
   if (!card) notFound();
-  if (card.status !== 'live') return <InactiveCard companyName={card.companyName} />;
+  if (card.status !== 'live') {
+    return (
+      <InactiveCard
+        companyName={card.companyName}
+        companySlug={card.companySlug || company}
+        website={card.website}
+        logo={card.logo}
+        teamPage={card.teamPage}
+      />
+    );
+  }
   return (
     <Suspense>
       <PublicCardView card={card} />

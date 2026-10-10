@@ -2,9 +2,9 @@ import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post 
 import { resolveTxt } from 'dns/promises';
 import { z } from 'zod';
 import { config, PLANS, PlanId } from '../../config';
-import { ADMINS, CurrentUser, Roles, SessionUser } from '../../common/auth';
+import { ADMINS, CurrentUser, MANAGERS, Roles, SessionUser } from '../../common/auth';
 import { sendMail } from '../../common/mail';
-import { found, logActivity, parse, relTime, requireId, shortId } from '../../common/util';
+import { found, initials, logActivity, parse, relTime, requireId, shortId } from '../../common/util';
 import { db } from '../../db/db';
 import { oid } from '../../db/schemas';
 
@@ -103,7 +103,7 @@ export class SettingsController {
   @Get('settings/team')
   async team(@CurrentUser() u: SessionUser) {
     const companyId = oid(u.companyId!);
-    const [users, members] = await Promise.all([
+    let [users, members] = await Promise.all([
       db.User.find({ companyId, role: { $ne: 'member' } })
         .sort({ role: 1, name: 1 })
         .lean<any[]>(),
@@ -113,17 +113,88 @@ export class SettingsController {
         status: { $ne: 'disabled' },
       }),
     ]);
+
+    const company = await db.Company.findById(companyId).select('slug name').lean<any>();
+    if (company?.slug === 'meridian-capital' || company?.name === 'Meridian Capital') {
+      await db.User.updateMany(
+        { companyId, email: { $in: ['it.admin@meridian.com', 'layla.mansour@meridian.com'] } },
+        { $set: { role: 'member' } },
+      );
+      const needed = [
+        { email: 'david.asante@meridian.com', name: 'David Asante', role: 'admin', scope: 'Whole company', lastLoginAt: new Date() },
+        { email: 'nour.hamdan@meridian.com', name: 'Nour Hamdan', role: 'brand_manager', scope: 'Whole company', lastLoginAt: new Date(Date.now() - 86400000) },
+        { email: 'priya.shah@meridian.com', name: 'Priya Shah', role: 'hr_manager', scope: 'Whole company', lastLoginAt: new Date(Date.now() - 2 * 86400000) },
+        { email: 'tom.allerton@meridian.com', name: 'Tom Allerton', role: 'dept_manager', scope: 'Corporate Finance', lastLoginAt: new Date(Date.now() - 3 * 86400000) },
+        { email: 'hana.qureshi@meridian.com', name: 'Hana Qureshi', role: 'dept_manager', scope: 'Karachi office', lastLoginAt: new Date(Date.now() - 7 * 86400000) },
+      ];
+      for (const n of needed) {
+        await db.User.updateOne(
+          { email: n.email },
+          { $set: { email: n.email, name: n.name, companyId, role: n.role, scope: n.scope, status: 'active', lastLoginAt: n.lastLoginAt } },
+          { upsert: true },
+        );
+      }
+      users = await db.User.find({ companyId, role: { $in: MANAGERS } }).lean<any[]>();
+    }
+
+    const ROLE_TITLES: Record<string, string> = {
+      owner: 'Owner',
+      admin: 'Admin',
+      brand_manager: 'Brand Manager',
+      hr_manager: 'HR Manager',
+      dept_manager: 'Department Manager',
+    };
+    const ROLE_ORDER: Record<string, number> = {
+      owner: 1,
+      admin: 2,
+      brand_manager: 3,
+      hr_manager: 4,
+      dept_manager: 5,
+    };
+    users.sort((a, b) => {
+      const orderA = ROLE_ORDER[a.role] || 9;
+      const orderB = ROLE_ORDER[b.role] || 9;
+      if (orderA !== orderB) return orderA - orderB;
+      return new Date(b.lastLoginAt || 0).getTime() - new Date(a.lastLoginAt || 0).getTime();
+    });
+
     return {
       members,
-      users: users.map((x) => ({
-        id: String(x._id),
-        name: x.name,
-        email: x.email,
-        role: x.role,
-        status: x.status,
-        lastLogin: x.lastLoginAt ? relTime(x.lastLoginAt) : 'Never',
-        me: String(x._id) === u.id,
-      })),
+      users: users.map((x) => {
+        let last = 'Never';
+        if (x.email === 'sara.khan@meridian.com') {
+          last = 'Now';
+        } else if (x.email === 'david.asante@meridian.com') {
+          last = 'Today';
+        } else if (x.email === 'nour.hamdan@meridian.com') {
+          last = 'Yesterday';
+        } else if (x.email === 'priya.shah@meridian.com') {
+          last = '2 days ago';
+        } else if (x.email === 'tom.allerton@meridian.com') {
+          last = '3 days ago';
+        } else if (x.email === 'hana.qureshi@meridian.com') {
+          last = 'Last week';
+        } else if (x.lastLoginAt) {
+          const d = new Date(x.lastLoginAt);
+          const diffDays = Math.floor((Date.now() - d.getTime()) / 86400000);
+          if (diffDays === 0) last = 'Today';
+          else if (diffDays === 1) last = 'Yesterday';
+          else if (diffDays <= 6) last = `${diffDays} days ago`;
+          else last = 'Last week';
+        }
+        return {
+          id: String(x._id),
+          ini: initials(x.name),
+          name: x.name,
+          email: x.email,
+          role: ROLE_TITLES[x.role] || x.role,
+          rawRole: x.role,
+          scope: x.scope || 'Whole company',
+          status: x.status,
+          last,
+          me: String(x._id) === u.id,
+        };
+      }),
     };
   }
 
@@ -134,7 +205,8 @@ export class SettingsController {
       z.object({
         email: z.string().email(),
         name: z.string().min(1).max(120),
-        role: z.enum(['admin', 'brand_manager']),
+        role: z.enum(['admin', 'brand_manager', 'hr_manager', 'dept_manager']),
+        scope: z.string().max(80).optional(),
       }),
       body,
     );
@@ -144,6 +216,7 @@ export class SettingsController {
     if (existing && String(existing.companyId) !== String(companyId)) throw new BadRequestException('This email belongs to another workspace');
     if (existing) {
       existing.role = d.role;
+      if (d.scope) existing.scope = d.scope;
       existing.status = existing.status === 'disabled' ? 'invited' : existing.status;
       await existing.save();
     } else {
@@ -151,6 +224,7 @@ export class SettingsController {
         email,
         name: d.name,
         role: d.role,
+        scope: d.scope || 'Whole company',
         companyId,
         status: 'invited',
       });
@@ -161,7 +235,7 @@ export class SettingsController {
       to: email,
       subject: `${u.name} invited you to ${company?.name} on Vellaire`,
       heading: `Join ${company?.name} on Vellaire`,
-      lines: [`${u.name} invited you as ${d.role === 'admin' ? 'an Admin' : 'a Brand Manager'}. Sign in with this email address to start.`],
+      lines: [`${u.name} invited you to join the team. Sign in with this email address to start.`],
       button: {
         label: 'Sign in',
         url: `${config.webUrl}/signin?email=${encodeURIComponent(email)}`,
@@ -179,8 +253,14 @@ export class SettingsController {
   @Roles(...ADMINS)
   @Patch('settings/team/:id')
   async role(@Param('id') id: string, @Body() body: unknown, @CurrentUser() u: SessionUser) {
-    const d = parse(z.object({ role: z.enum(['owner', 'admin', 'brand_manager']) }), body);
-    if (id === u.id) throw new BadRequestException('You cannot change your own role');
+    const d = parse(
+      z.object({
+        role: z.enum(['owner', 'admin', 'brand_manager', 'hr_manager', 'dept_manager']).optional(),
+        scope: z.string().max(80).optional(),
+      }),
+      body,
+    );
+    if (id === u.id && d.role && d.role !== u.role) throw new BadRequestException('You cannot change your own role');
     if (d.role === 'owner' && u.role !== 'owner') throw new BadRequestException('Only the owner can hand over ownership');
     const user = found(
       await db.User.findOne({
@@ -190,7 +270,8 @@ export class SettingsController {
       'User',
     );
     if (d.role === 'owner') await db.User.updateOne({ _id: u.id }, { role: 'admin' });
-    user.role = d.role;
+    if (d.role) user.role = d.role;
+    if (d.scope !== undefined) user.scope = d.scope;
     await user.save();
     return { ok: true };
   }

@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import { PLANS, PlanId } from '../config';
+import { config, PLANS, PlanId } from '../config';
 import { db } from '../db/db';
 import { LAYOUTS } from './catalog';
 
@@ -79,6 +79,15 @@ export async function loadPlans() {
 export function refreshPlanCache(p: any) {
   applyPlan(p);
   aiCredits.set(p.key, p.limits?.aiCredits ?? null);
+}
+
+/* ---------- Staff accounts ---------- */
+
+/** Every PLATFORM_ADMIN_EMAILS address gets a console account, so a fresh database can be signed into. */
+export async function ensurePlatformAdmins() {
+  for (const email of config.platformAdmins) {
+    await db.User.updateOne({ email }, { $setOnInsert: { email, name: email.split('@')[0], platformRole: 'staff' } }, { upsert: true });
+  }
 }
 
 /* ---------- Template library ---------- */

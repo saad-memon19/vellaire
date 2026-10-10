@@ -1,6 +1,7 @@
 'use client';
 
 import useSWR, { SWRConfiguration } from 'swr';
+import { shrinkImage } from './image';
 
 export class ApiError extends Error {
   constructor(
@@ -37,7 +38,7 @@ export const api = {
   del: <T = any>(p: string) => request<T>('DELETE', p),
   async upload(file: File): Promise<{ url: string; name: string }> {
     const fd = new FormData();
-    fd.append('file', file);
+    fd.append('file', await shrinkImage(file));
     const res = await fetch('/api/uploads', { method: 'POST', body: fd });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new ApiError(data.message || 'Upload failed', res.status);

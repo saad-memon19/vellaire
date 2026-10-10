@@ -86,7 +86,8 @@ export const UserSchema = new Schema(
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     name: String,
     companyId: { type: ObjectId, ref: 'Company', index: true },
-    role: { type: String, enum: ['owner', 'admin', 'brand_manager', 'member'], default: 'member' },
+    role: { type: String, enum: ['owner', 'admin', 'brand_manager', 'hr_manager', 'dept_manager', 'member'], default: 'member' },
+    scope: { type: String, default: 'Whole company' },
     platformRole: { type: String, enum: ['staff', null], default: null },
     employeeId: { type: ObjectId, ref: 'Employee' },
     status: { type: String, enum: ['active', 'invited', 'disabled'], default: 'active' },
@@ -204,6 +205,9 @@ export const CardSchema = new Schema(
       reviewedAt: Date,
       note: String,
       pendingPhoto: String, // employee photo change waiting for approval (card stays live)
+      before: Schema.Types.Mixed,
+      after: Schema.Types.Mixed,
+      changes: Schema.Types.Mixed,
     },
     lastViewedAt: Date,
   },
@@ -318,6 +322,15 @@ export const IntegrationSchema = new Schema(
     guardPct: { type: Number, default: 10 },
     lastSyncAt: Date,
     lastError: String,
+    issues: [
+      {
+        id: String,
+        who: String,
+        why: String,
+        fix: String,
+        _id: false,
+      },
+    ],
     // Records waiting in the provider (used by CSV / SCIM / pushed data)
     pendingRecords: { type: [Schema.Types.Mixed], select: false },
   },

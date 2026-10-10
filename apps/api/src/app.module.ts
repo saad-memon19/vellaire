@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './common/auth';
-import { Jobs } from './jobs';
+import { CronController, Jobs } from './jobs';
 import { AiController } from './modules/ai/ai.controller';
 import { AiService } from './modules/ai/ai.service';
 import { AnalyticsController } from './modules/analytics/analytics.controller';
@@ -31,6 +31,7 @@ import { SettingsController } from './modules/settings/settings.controller';
 @Module({
   controllers: [
     AuthController,
+    CronController,
     CoreController,
     CardsController,
     PeopleController,

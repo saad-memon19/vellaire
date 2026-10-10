@@ -1,11 +1,11 @@
 import { BadRequestException, Controller, Get, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { mkdirSync, writeFileSync } from 'fs';
-import { extname, join } from 'path';
-import { config, PLANS } from '../../config';
+import { extname } from 'path';
+import { PLANS } from '../../config';
 import { AllowMember, CurrentUser, Public, SessionUser } from '../../common/auth';
 import { LAYOUTS, LINK_TYPES, MATERIALS, THEMES } from '../../common/catalog';
 import { cardUrl, displayUrl } from '../../common/cards';
+import { saveFile } from '../../common/storage';
 import { daysAgo, escapeRegex, relTime, shortId } from '../../common/util';
 import { db } from '../../db/db';
 import { oid } from '../../db/schemas';
@@ -31,19 +31,17 @@ export class CoreController {
     return { layouts: LAYOUTS, themes: THEMES, materials: MATERIALS, plans: PLANS, linkTypes: LINK_TYPES, ai: this.ai.enabled, wallet: { apple: appleReady(), google: googleReady() } };
   }
 
-  /** Files are stored on disk in UPLOAD_DIR and served at /files/<name>. */
+  /** Logos, photos and fonts. Vercel functions accept bodies up to 4.5 MB, so files stay under 4 MB. */
   @AllowMember()
   @Post('uploads')
-  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 8 * 1024 * 1024 } }))
-  upload(@UploadedFile() file: Express.Multer.File, @CurrentUser() u: SessionUser) {
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 4 * 1024 * 1024 } }))
+  async upload(@UploadedFile() file: Express.Multer.File, @CurrentUser() u: SessionUser) {
     if (!file) throw new BadRequestException('No file');
     const ext = extname(file.originalname).toLowerCase();
     if (!ALLOWED.includes(ext)) throw new BadRequestException('This file type is not allowed');
-    const dir = join(process.cwd(), config.uploadDir);
-    mkdirSync(dir, { recursive: true });
     const name = `${u.companyId || 'x'}-${Date.now()}-${shortId(6)}${ext}`;
-    writeFileSync(join(dir, name), file.buffer);
-    return { url: `/files/${name}`, name: file.originalname, size: file.size };
+    const url = await saveFile(name, file.buffer, file.mimetype);
+    return { url, name: file.originalname, size: file.size };
   }
 
   @Get('home')
