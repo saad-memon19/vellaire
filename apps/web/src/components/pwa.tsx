@@ -30,14 +30,19 @@ if (typeof window !== 'undefined') {
   });
 }
 
-export type InstallState = 'installed' | 'prompt' | 'ios' | 'unsupported';
+export type InstallState = 'installed' | 'prompt' | 'manual';
+type Platform = 'ios' | 'android' | 'desktop';
 
 function currentState(): InstallState {
   if (installedNow || window.matchMedia('(display-mode: standalone)').matches || (navigator as { standalone?: boolean }).standalone) return 'installed';
-  if (deferred) return 'prompt';
-  // iPhone and iPad: no install button exists, people add it from the Share menu
-  if (/iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) return 'ios';
-  return 'unsupported';
+  // With the browser's own prompt it is one tap; otherwise people install from the browser menu
+  return deferred ? 'prompt' : 'manual';
+}
+
+function platform(): Platform {
+  const ua = navigator.userAgent;
+  if (/iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) return 'ios';
+  return /android/i.test(ua) ? 'android' : 'desktop';
 }
 
 /** Whether the app can be installed here, and how. */
@@ -48,13 +53,12 @@ export function useInstallApp() {
       return () => listeners.delete(cb);
     },
     currentState,
-    () => 'unsupported',
+    () => 'installed',
   );
-  const [showIosHelp, setShowIosHelp] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
   const install = async () => {
-    if (state === 'ios') return setShowIosHelp(true);
-    if (!deferred) return;
+    if (!deferred) return setShowHelp(true);
     await deferred.prompt();
     const { outcome } = await deferred.userChoice;
     if (outcome === 'accepted') installedNow = true;
@@ -62,36 +66,94 @@ export function useInstallApp() {
     notify();
   };
 
-  const help = <IosInstallHelp open={showIosHelp} onClose={() => setShowIosHelp(false)} />;
-  return { state, canInstall: state === 'prompt' || state === 'ios', install, help };
+  const help = <InstallHelp open={showHelp} onClose={() => setShowHelp(false)} />;
+  return { state, canInstall: state !== 'installed', install, help };
 }
 
-function IosInstallHelp({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const steps: [string, React.ReactNode][] = [
-    [
-      'iosShare',
-      <>
-        Tap the <strong>Share</strong> button at the bottom of Safari
-      </>,
+const STEPS: Record<Platform, { title: string; steps: [string, React.ReactNode][]; note: string }> = {
+  ios: {
+    title: 'Install on iPhone',
+    steps: [
+      [
+        'iosShare',
+        <>
+          Tap the <strong>Share</strong> button at the bottom of Safari
+        </>,
+      ],
+      [
+        'plus',
+        <>
+          Scroll and tap <strong>Add to Home Screen</strong>
+        </>,
+      ],
+      [
+        'check',
+        <>
+          Tap <strong>Add</strong>. Vellaire is now on your home screen
+        </>,
+      ],
     ],
-    [
-      'plus',
-      <>
-        Scroll and tap <strong>Add to Home Screen</strong>
-      </>,
+    note: 'Use Safari for this. Other browsers on iPhone may not show the option.',
+  },
+  android: {
+    title: 'Install on Android',
+    steps: [
+      [
+        'more',
+        <>
+          Tap the <strong>menu</strong> (three dots) at the top right of Chrome
+        </>,
+      ],
+      [
+        'download',
+        <>
+          Tap <strong>Install app</strong> or <strong>Add to Home screen</strong>
+        </>,
+      ],
+      [
+        'check',
+        <>
+          Tap <strong>Install</strong>. Vellaire is now with your apps
+        </>,
+      ],
     ],
-    [
-      'check',
-      <>
-        Tap <strong>Add</strong>. Vellaire is now on your home screen
-      </>,
+    note: 'Already installed? Open Vellaire from your home screen.',
+  },
+  desktop: {
+    title: 'Install on this computer',
+    steps: [
+      [
+        'download',
+        <>
+          Click the <strong>install icon</strong> at the right end of the address bar, if you see it
+        </>,
+      ],
+      [
+        'more',
+        <>
+          Or open the browser <strong>menu</strong> (three dots): in Chrome choose <strong>Cast, save and share → Install page as app</strong>; in Edge choose{' '}
+          <strong>Apps → Install this site as an app</strong>
+        </>,
+      ],
+      [
+        'check',
+        <>
+          Click <strong>Install</strong>. Vellaire opens in its own window
+        </>,
+      ],
     ],
-  ];
+    note: 'Already installed? Open Vellaire from your Start menu, Dock or desktop. Safari and Firefox on a computer cannot install apps.',
+  },
+};
+
+function InstallHelp({ open, onClose }: { open: boolean; onClose: () => void }) {
+  if (!open) return null;
+  const { title, steps, note } = STEPS[platform()];
   return (
     <Modal
-      open={open}
+      open
       onClose={onClose}
-      title="Install on iPhone"
+      title={title}
       footer={
         <Button variant="ink" onClick={onClose}>
           Got it
@@ -108,7 +170,7 @@ function IosInstallHelp({ open, onClose }: { open: boolean; onClose: () => void 
           </li>
         ))}
       </ol>
-      <p className="mt-4 text-[13px] text-stone-2">Use Safari for this. Other browsers on iPhone may not show the option.</p>
+      <p className="mt-4 text-[13px] text-stone-2">{note}</p>
     </Modal>
   );
 }
