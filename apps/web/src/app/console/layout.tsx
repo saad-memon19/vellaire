@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Icon, IconName, Seal } from '@/components/icons';
-import { cx, Loading } from '@/components/ui';
+import { cx, Loading, ScreenError } from '@/components/ui';
 import { api, useMe } from '@/lib/api';
 
 /* Console shell built to the "Command center" artboard: gold staff banner, white sidebar. */
@@ -55,7 +55,7 @@ const NAV: { group?: string; items: { label: string; href: string; icon: IconNam
 const HREFS = NAV.flatMap((g) => g.items.map((i) => i.href));
 
 export default function ConsoleLayout({ children }: { children: React.ReactNode }) {
-  const { data: me, error } = useMe();
+  const { data: me, error, mutate: reloadMe } = useMe();
   const router = useRouter();
   const path = usePathname();
   const [drawer, setDrawer] = useState(false);
@@ -65,7 +65,7 @@ export default function ConsoleLayout({ children }: { children: React.ReactNode 
   useEffect(() => {
     if (me && me.user.platformRole !== 'staff') router.replace(me.home);
   }, [me, router]);
-  if (error) return null;
+  if (error) return <ScreenError error={error} retry={() => reloadMe()} />;
   if (!me || me.user.platformRole !== 'staff') return <Loading className="min-h-screen" />;
 
   // The most specific link that contains the current page is the active one

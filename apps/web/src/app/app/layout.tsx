@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { AnnouncementBar } from '@/components/announcement-bar';
 import { CommandPalette } from '@/components/command';
 import { Icon, IconName, Seal } from '@/components/icons';
-import { cx, Kbd, Loading } from '@/components/ui';
+import { cx, Kbd, Loading, ScreenError } from '@/components/ui';
 import { api, isAdmin, useMe } from '@/lib/api';
 
 /* Shell built to the dashboard artboards: white sidebar, sand active item, white header. */
@@ -74,7 +74,7 @@ const NAV: { group?: string; items: NavItem[] }[] = [
 const PLAN: Record<string, string> = { starter: 'Starter', professional: 'Professional', enterprise: 'Enterprise' };
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const { data: me, error } = useMe();
+  const { data: me, error, mutate: reloadMe } = useMe();
   const path = usePathname();
   const router = useRouter();
   const [drawer, setDrawer] = useState(false);
@@ -87,7 +87,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     else if (!me.company && me.user.platformRole === 'staff') router.replace('/console');
   }, [me, router]);
 
-  if (error) return null; // api() sends the browser to /signin on 401
+  if (error) return <ScreenError error={error} retry={() => reloadMe()} />;
   if (!me || !me.company || me.user.role === 'member') return <Loading className="min-h-screen" />;
 
   // The create-a-card wizard is a full-screen flow with its own header (as designed)

@@ -135,7 +135,7 @@ function SignInForm() {
     window.location.href = `/api/auth/oauth/${p}`;
   };
 
-  if (sent) return <LinkSent message={sent.message} devLink={sent.devLink} onBack={() => setSent(null)} backLabel="Use a different email" />;
+  if (sent) return <LinkSent email={email} message={sent.message} devLink={sent.devLink} onBack={() => setSent(null)} backLabel="Use a different email" />;
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-8">

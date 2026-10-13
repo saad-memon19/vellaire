@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Cormorant_Garamond, Instrument_Sans, JetBrains_Mono } from 'next/font/google';
+import { ServiceWorker } from '@/components/pwa';
 import { ToastProvider } from '@/components/toast';
 import './globals.css';
 
@@ -16,7 +17,9 @@ export const metadata: Metadata = {
   title: { default: 'Vellaire — Every introduction, perfected', template: '%s · Vellaire' },
   description: 'Branded digital business cards for your entire company — created from your HR system, shared by tap, scan or wallet.',
   manifest: '/manifest.webmanifest',
-  icons: { icon: '/icon.svg', apple: '/icon.svg' },
+  icons: { icon: '/icon.svg', apple: '/apple-touch-icon.png' },
+  // Installed on an iPhone home screen: open full screen, with the app's own name
+  appleWebApp: { capable: true, title: 'Vellaire', statusBarStyle: 'default' },
 };
 
 export const viewport: Viewport = { themeColor: '#17171B', width: 'device-width', initialScale: 1 };
@@ -38,6 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       )}
       <body suppressHydrationWarning>
         <ToastProvider>{children}</ToastProvider>
+        <ServiceWorker />
       </body>
     </html>
   );

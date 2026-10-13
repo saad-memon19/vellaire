@@ -5,7 +5,7 @@ import { config } from '../../config';
 import { cookieOptions, CurrentUser, Platform, Public, SESSION_COOKIE, SessionUser, SignedIn, signSession } from '../../common/auth';
 import { flagsFor } from '../../common/platform';
 import { createWorkspace } from '../onboarding/workspace';
-import { sendSignInLink } from './signin-link';
+import { codeHash, MAX_CODE_ATTEMPTS, sendSignInLink } from './signin-link';
 import { logActivity, parse, requireId, sha256, token } from '../../common/util';
 import { db } from '../../db/db';
 import { AiService } from '../ai/ai.service';
@@ -117,6 +117,26 @@ export class AuthController {
     if (!user || user.status === 'disabled') return generic;
     const devLink = await sendSignInLink(user.email);
     return devLink ? { ...generic, devLink } : generic;
+  }
+
+  /** The 6-digit code from the sign-in email; five wrong tries and that code stops working. */
+  @Public()
+  @Post('verify-code')
+  async verifyCode(@Body() body: unknown, @Res({ passthrough: true }) res: Response) {
+    const d = parse(z.object({ email: z.string().email(), code: z.string().regex(/^\d{6}$/, 'Enter the 6-digit code') }), body);
+    const email = d.email.toLowerCase();
+    const rec = await db.MagicToken.findOne({ email, used: false, expiresAt: { $gt: new Date() }, codeHash: { $exists: true } }).sort({ createdAt: -1 });
+    if (!rec || rec.attempts >= MAX_CODE_ATTEMPTS) throw new BadRequestException('This code has expired. Request a new one.');
+    if (rec.codeHash !== codeHash(email, d.code)) {
+      rec.attempts += 1;
+      await rec.save();
+      throw new BadRequestException(rec.attempts >= MAX_CODE_ATTEMPTS ? 'Too many tries. Request a new code.' : 'That code is not right. Check the email and try again.');
+    }
+    rec.used = true;
+    await rec.save();
+    const user = await db.User.findOne({ email });
+    if (!user) throw new BadRequestException('Account not found');
+    return this.login(res, user);
   }
 
   @Public()

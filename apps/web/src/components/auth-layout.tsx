@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Icon, Seal, Wordmark } from './icons';
+import { SignInCode } from './sign-in-code';
 
 /** Split screen shared by sign in and create account: sand panel with the floating card, white form side. */
 export function AuthLayout({ cardText, quote, children }: { cardText: string; quote: React.ReactNode; children: React.ReactNode }) {
@@ -36,7 +37,7 @@ export function AuthLayout({ cardText, quote, children }: { cardText: string; qu
 }
 
 /** "Check your email", with the link itself when no email service is connected (development). */
-export function LinkSent({ message, devLink, onBack, backLabel }: { message: string; devLink?: string; onBack: () => void; backLabel: string }) {
+export function LinkSent({ email, message, devLink, onBack, backLabel }: { email: string; message: string; devLink?: string; onBack: () => void; backLabel: string }) {
   return (
     <div className="vl-fade flex flex-col gap-6">
       <span className="flex h-12 w-12 items-center justify-center rounded-full bg-gold-tint text-gold-text">
@@ -46,6 +47,7 @@ export function LinkSent({ message, devLink, onBack, backLabel }: { message: str
         <h1 className="font-display text-[44px] font-normal leading-[1.05]">Check your email</h1>
         <p className="mt-2 text-[15px] text-stone">{message} It expires in 15 minutes.</p>
       </div>
+      <SignInCode email={email} />
       {devLink && (
         <div className="rounded-lg border border-dashed border-gold-line bg-gold-tint p-4 text-[14px]">
           <div className="mb-2 font-medium text-gold-text">Development mode</div>

@@ -12,14 +12,22 @@ export class ApiError extends Error {
   }
 }
 
+/** Sign-in endpoints answer 401 as part of their job; everything else (including /auth/me) means "go sign in". */
+const isSignInCall = (path: string) => path.startsWith('/auth/') && !path.startsWith('/auth/me');
+
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
-  const res = await fetch(`/api${path}`, {
-    method,
-    headers: body !== undefined ? { 'Content-Type': 'application/json' } : undefined,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-    credentials: 'same-origin',
-  });
-  if (res.status === 401 && typeof window !== 'undefined' && !path.startsWith('/auth/')) {
+  let res: Response;
+  try {
+    res = await fetch(`/api${path}`, {
+      method,
+      headers: body !== undefined ? { 'Content-Type': 'application/json' } : undefined,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+      credentials: 'same-origin',
+    });
+  } catch {
+    throw new ApiError('You are offline. Check your connection and try again.', 0);
+  }
+  if (res.status === 401 && typeof window !== 'undefined' && !isSignInCall(path)) {
     window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname + window.location.search)}`;
   }
   const text = await res.text();

@@ -81,6 +81,7 @@ function SignUpForm() {
   if (sent)
     return (
       <LinkSent
+        email={f.email}
         message={`Your workspace for ${f.company} is ready. We sent a sign-in link to ${f.email}.`}
         devLink={sent.devLink}
         onBack={() => setSent(null)}

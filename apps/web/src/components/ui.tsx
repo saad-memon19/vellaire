@@ -588,6 +588,19 @@ export function Skeleton({ className }: { className?: string }) {
   return <div className={cx('animate-pulse rounded-md bg-sand', className)} />;
 }
 
+/**
+ * Full-screen fallback for a signed-in area whose session check failed.
+ * 401: the browser is already on its way to /signin, so keep the spinner instead of a blank page.
+ */
+export function ScreenError({ error, retry }: { error: unknown; retry: () => void }) {
+  if ((error as { status?: number })?.status === 401) return <Loading className="min-h-screen" />;
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-pearl px-6">
+      <ErrorState error={error} retry={retry} />
+    </div>
+  );
+}
+
 export function ErrorState({ error, retry }: { error: unknown; retry?: () => void }) {
   return (
     <Empty

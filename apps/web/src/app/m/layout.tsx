@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Icon, IconName } from '@/components/icons';
-import { cx, Loading } from '@/components/ui';
+import { cx, Loading, ScreenError } from '@/components/ui';
 import { useMe } from '@/lib/api';
 
 const TABS: { href: string; label: string; icon: IconName }[] = [
@@ -17,8 +17,8 @@ const TABS: { href: string; label: string; icon: IconName }[] = [
 /** The employee app: mobile first, installable (PWA), centred on larger screens. */
 export default function EmployeeLayout({ children }: { children: React.ReactNode }) {
   const path = usePathname();
-  const { data: me, error } = useMe();
-  if (error) return null;
+  const { data: me, error, mutate: reloadMe } = useMe();
+  if (error) return <ScreenError error={error} retry={() => reloadMe()} />;
   if (!me) return <Loading className="min-h-screen" />;
   const active = (h: string) => (h === '/m' ? path === '/m' || path === '/m/edit' : path.startsWith(h));
   const isEdit = path === '/m/edit';

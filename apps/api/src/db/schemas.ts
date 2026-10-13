@@ -100,6 +100,9 @@ export const MagicTokenSchema = new Schema(
   {
     email: { type: String, index: true },
     tokenHash: { type: String, unique: true },
+    // The same sign-in as a 6-digit code, for installed apps where the email link opens in another browser
+    codeHash: String,
+    attempts: { type: Number, default: 0 },
     expiresAt: { type: Date, index: { expires: 0 } },
     used: { type: Boolean, default: false },
   },
