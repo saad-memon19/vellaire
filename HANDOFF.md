@@ -1,7 +1,7 @@
 # Vellaire — handoff for the next developer or AI agent
 
 Read this first, then `README.md` (setup, accounts, environment variables).
-Last updated: 9 October 2026.
+Last updated: 13 October 2026.
 
 Vellaire is a digital business card product for companies. It has five parts, all in this repo:
 
@@ -83,60 +83,64 @@ tools/design-check/          screenshot design vs built page, and crawl all rout
 
 ---
 
-## 4. Status against the design
+## 4. Status (13 October 2026)
 
-Checked on 9 October 2026: all 52 routes open with no console errors, failed requests or crashes for every role (`tools/design-check/crawl.mjs`).
+**Everything in this table is built and connected to the database.** Do not rebuild it or treat it as pending. All routes were last crawled without errors on 9 October; pages changed after that are marked.
 
-| Design file (`design/`) | Route | Status |
+| Area | Routes | Status |
 |---|---|---|
-| Main | `/` | ✅ matches |
-| SignIn, SignUp | `/signin`, `/signup` | ✅ (sign-up uses email links, no password: see §6) |
-| OnboardCompany … OnboardDone | `/setup` | ✅ |
-| Overview, Cards, Editor, Employees, BrandKit, NFC, Analytics, Leads, Integrations | `/app`, `/app/cards`, `/app/cards/:id`, `/app/employees`, `/app/brand`, `/app/nfc`, `/app/analytics`, `/app/leads`, `/app/integrations/workday` | ✅ (Cards, Brand kit, NFC are locked: rule 1) |
-| CreateStep1–4, CreateDone | `/app/create` | ✅ step 1 checked; 2–4 not compared yet |
-| MyCard, Share, MobileLeads, MobileInsights | `/m`, `/m/share`, `/m/leads`, `/m/insights` | ✅ |
-| PublicCard, TeamPage | `/c/:company/:slug`, `/c/:company` | ✅ |
-| Console, ConsoleCompanies, ConsoleCompany, ConsoleNFC, ConsoleSupport | `/console`, `/console/companies(/:id)`, `/console/nfc`, `/console/support` | ✅ |
-| ConsoleUsers, Plans, Revenue, Partners, Integrations, Templates, AI, Announcements, Security, Flags, Health | `/console/users`, `/plans`, `/revenue-analytics`, `/partners`, `/integrations`, `/templates`, `/ai`, `/announcements`, `/security`, `/flags`, `/health` | ✅ |
-| ConsoleSubscriptions | `/console/revenue` | ⚠️ built before its design; left as is |
-| Templates | `/app/templates` | ⚠️ differs — 🔒 locked, do not change |
-| Approvals | `/app/approvals` | ⚠️ differs — **next task** |
-| InactiveCard | deactivated card at `/c/:company/:slug` | ⚠️ differs — **next task** |
-| SyncActivity | `/app/integrations/activity` | ⚠️ differs — **next task** |
-| EditMyCard | `/m/edit` | ⚠️ differs — **next task** |
-| Team | `/app/settings/team` | ⚠️ differs — **next task** |
-| Departments, Settings | `/app/departments`, `/app/settings/company` | ⚠️ differs — later |
-| QRStudio, WalletPasses, Signatures, Security, Billing | `/app/qr`, `/app/wallet`, `/app/signatures`, `/app/settings/security`, `/app/settings/billing` | ⚠️ the designs need new features (see §5C) |
-| ShareDetails | modal on the public card | built as a modal |
-| Brand | — | brand reference sheet, not a page |
+| Website, sign in, sign up | `/`, `/signin`, `/signup` | ✅ done (sign-up uses email links, no password: see §6) |
+| Setup wizard (5 steps) | `/setup` | ✅ done and tested end to end |
+| Company dashboard | `/app/*` | ✅ done |
+| Employee app | `/m`, `/m/share`, `/m/leads`, `/m/insights`, `/m/edit`, `/m/settings` | ✅ done |
+| Public card, Save contact (vCard), Share your details, team page, inactive card | `/c/:company/:slug`, `/c/:company` | ✅ done |
+| NFC tap link | `/t/:uid` → the live card, tap counted | ✅ done (software side; see §5C for real chips) |
+| Owner console (17 pages) | `/console/*` | ✅ done |
+| Vercel production setup | `apps/api/vercel.json`, `DEPLOY.md` | ✅ code ready; projects are linked; live status unknown |
+
+Design alignment done by Antigravity on 10–12 October: Approvals, Sync activity, Edit my card, Team and roles, Inactive card, QR codes, Company settings, Billing, Security, Wallet passes, Email signatures, Employees, Leads, Analytics, HR integrations. **Some of these pages look finished but have buttons that do nothing yet: see §5A.**
+
+Still different from the design: Templates (🔒 locked, leave it), Departments, Console "Subscriptions & invoices". Create card steps 2–4 were never compared.
 
 ---
 
-## 5. What to do next (agreed priority)
+## 5. What to do next (in this order)
 
-### A. Now — bring five pages to their design (the owner's go-ahead is still needed; ask first)
+### A. Fix buttons that only pretend to work (before any customer sees them)
 
-1. **Inactive card** (`apps/web/src/app/c/[company]/[slug]/public-card.tsx` → `InactiveCard`). Design: company logo tile, company name eyebrow, "This card is no longer active", short text, buttons "Contact {company}" (company website or email), "Find someone in our team" (only when the team page is on), the website link, small Vellaire mark. The public card API must return the company's website, logo and whether the team page is available.
-2. **Approvals** (`apps/web/src/app/app/approvals/page.tsx`). Design: list on the left (avatar, name, what changed, source pill Workday/Employee, time; the selected row has a gold left border), and a detail panel on the right with NOW and AFTER APPROVAL cards side by side, a field table (Field / Before struck through / After highlighted), an optional note, then Reject and "Approve and publish". Plus a header button "Approve all N from Workday". The API must return the before and after values per change.
-3. **Sync activity** (`/app/integrations/activity`). Design: an amber "N people need your help" box (missing work email → Add email / Skip; unmapped department → Map department / Skip), a "Recent syncs" list with created / updated / switched off / skipped and a status pill, the sync-guard note, and the buttons "Download log" and "Sync now".
-4. **Edit my card** (`/m/edit`). Design: profile photo row ("New photo waiting for approval" / Change); fields that come from HR (name, title) shown read-only and labelled "From HR"; editable fields labelled "You can edit"; a light-gold About box with "Write with AI" and the languages; Save changes at the bottom.
-5. **Team and roles** (`/app/settings/team`). Design: a people table (person, role pill, scope, last active, Edit) and a "What each role can do" permission matrix (Owner / Admin / Brand / Manager).
+These buttons show a success message without saving or sending anything. Either make them real, or disable them with a short "Coming soon" note. Never show success for something that did not happen.
 
-Use `tools/design-check` to compare each page with its design before and after.
+| Page | File | Problem |
+|---|---|---|
+| Email signatures | `apps/web/src/app/app/signatures/page.tsx` | "Deploy to all mailboxes" says "deployed to all 1,248 mailboxes"; Google Workspace "connect" does nothing. Design options (photo, QR, phone, legal line) are not saved |
+| Wallet passes | `apps/web/src/app/app/wallet/page.tsx` | "Save design" does not save; "Send to everyone without a pass" always says 232 employees. Unused `analytics` variable |
+| QR codes | `apps/web/src/app/app/qr/page.tsx` | "Save as company style" does not save |
+| Billing | `apps/web/src/app/app/settings/billing/page.tsx` | "Card ending 4021" and "finance@meridian.com" are hard-coded for every company; invoice "Download" and "update payment method" only show a message |
+| Company settings | `apps/web/src/app/app/settings/company/page.tsx` | Leaver redirect is hard-coded to `meridian.com/contact`; unused `setRedirectUrl` |
+| Security | `apps/web/src/app/app/settings/security/page.tsx` | "Save changes" sends an empty request; certificate upload and "Download audit log" only show a message |
 
-### B. Later
-Departments (managers, offices), Company settings (leaver rules, data retention, workspace deletion), Create card steps 2–4 comparison.
+### B. Small clean-ups
+- Add `apps/web/tsconfig.tsbuildinfo` to `.gitignore`.
+- `npx tsc --noEmit -p . --noUnusedLocals` in `apps/web` must pass (2 unused variables above).
+- Departments: managers and offices from the design. Compare Create card steps 2–4.
 
-### C. New features the designs ask for (bigger work, plan with the owner)
-QR style studio, Wallet pass designer, Email signature deployment to Outlook and Gmail, two-step sign-in and network rules (Security), card payments (Billing).
+### C. Real-world setup (needs the owner or the client)
+1. **NFC cards.** Software is done: ordering, production stages, the `/t/<uid>` tap link, lost / switch off. Missing:
+   - an export of each order's chip links (`https://<web domain>/t/<uid>` per person) for the supplier, in the console NFC board;
+   - NFC chips (NTAG 213/215/216, or NTAG 424 DNA for anti-cloning) written with those links, then a tap test on iPhone and Android.
+2. **Wallet passes.** Code is done; it needs accounts and keys:
+   - Apple: Apple Developer Program, a Pass Type ID, its signing certificate and Apple's WWDR certificate → `APPLE_*` variables (base64 on Vercel; see `apps/api/.env.example`).
+   - Google: Google Wallet API issuer account and a Google Cloud service account with its key → `GOOGLE_WALLET_*` variables.
+3. **Before launch:**
+   - Rotate the MongoDB password (it was shared in a screenshot).
+   - Add `RESEND_API_KEY` (email), Google/Microsoft sign-in keys, and optionally AI keys.
+   - Decide email-link vs password sign-in, then turn off the demo buttons.
+   - Write Terms and Privacy pages (TODO in `apps/web/src/app/signup/page.tsx`).
+   - Payments (Stripe) for plans and NFC orders.
+   - PWA install and offline, backups, monitoring.
 
-### D. Before launch
-1. **Rotate the MongoDB password** (it was shared in a screenshot) and update `apps/api/.env`.
-2. Add keys in `.env`: `RESEND_API_KEY` (email), Google and Microsoft OAuth, Apple and Google Wallet certificates, optional AI key and `AI_COST_*`.
-3. Owner decision: keep email-link sign-in or add passwords; then turn off the demo buttons.
-4. Write Terms and Privacy pages and link them from the landing footer and `/signup` (there is a TODO in `apps/web/src/app/signup/page.tsx`).
-5. Payments (for example Stripe) for plans and NFC orders.
-6. Finish the PWA (install, offline), NFC supplier export and chip encoding test, cloud storage for uploads, deployment (web, API, domain, HTTPS), backups and monitoring.
+### D. New features the designs show (plan with the owner first)
+Signature deployment to Outlook and Gmail, two-step sign-in and network rules, card payments.
 
 ---
 
