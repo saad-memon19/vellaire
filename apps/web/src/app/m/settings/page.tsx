@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { Icon } from '@/components/icons';
+import { useInstallApp } from '@/components/pwa';
 import { useToast } from '@/components/toast';
 import { Avatar, Button, copyText, Loading } from '@/components/ui';
 import { api, useMe } from '@/lib/api';
@@ -12,6 +13,7 @@ export default function MobileSettings() {
   const { data: me } = useMe();
   const { data } = useMyCard();
   const [sig, setSig] = useState<string | null>(null);
+  const installApp = useInstallApp();
   const toast = useToast();
   if (!me) return <Loading />;
 
@@ -70,7 +72,9 @@ export default function MobileSettings() {
         {data && <Row icon="mail" label="Copy my email signature" sub="For Outlook and Gmail" onClick={copySignature} />}
         {data && <Row icon="external" label="Open my public card" onClick={() => window.open(data.card.url, '_blank')} />}
         {me.user.role !== 'member' && <Row icon="home" label="Company dashboard" href="/app" />}
+        {installApp.canInstall && <Row icon="download" label="Install the app" sub="Add Vellaire to your home screen" onClick={installApp.install} />}
       </div>
+      {installApp.help}
       <p className="px-1 text-[13px] text-stone-2">Your name, title and office come from your company’s HR system. Ask HR to change them.</p>
       <Button size="lg" icon="logout" onClick={signOut}>
         Sign out

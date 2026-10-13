@@ -96,7 +96,7 @@ tools/design-check/          screenshot design vs built page, and crawl all rout
 | Public card, Save contact (vCard), Share your details, team page, inactive card | `/c/:company/:slug`, `/c/:company` | ✅ done |
 | NFC tap link | `/t/:uid` → the live card, tap counted | ✅ done (software side; see §5C for real chips) |
 | Owner console (17 pages) | `/console/*` | ✅ done |
-| Installable app (PWA) | manifest, PNG icons, `public/sw.js` offline page, iPhone home-screen settings | ✅ done 13 Oct. Signed-out app goes to `/signin` instead of a blank screen. Sign-in emails carry a 6-digit code (`/auth/verify-code`) because on iPhone the email link opens Safari, not the installed app |
+| Installable app (PWA) | manifest, PNG icons, `public/sw.js` offline page, iPhone home-screen settings | ✅ done 13 Oct. Signed-out app goes to `/signin` instead of a blank screen. Sign-in emails carry a 6-digit code (`/auth/verify-code`) because on iPhone the email link opens Safari, not the installed app. An "Install the app" banner (dashboard and employee app, `components/pwa.tsx`) and a Settings row offer installing; on iPhone they show Add to Home Screen steps. The app starts at `/open`, which sends each person to their own home |
 | Vercel production setup | `apps/api/vercel.json`, `DEPLOY.md` | ✅ code ready; projects are linked; live status unknown |
 
 Design alignment done by Antigravity on 10–12 October: Approvals, Sync activity, Edit my card, Team and roles, Inactive card, QR codes, Company settings, Billing, Security, Wallet passes, Email signatures, Employees, Leads, Analytics, HR integrations. **Some of these pages look finished but have buttons that do nothing yet: see §5A.**

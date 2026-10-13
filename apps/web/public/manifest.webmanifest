@@ -1,9 +1,9 @@
 {
-  "id": "/m",
+  "id": "/open",
   "name": "Vellaire",
   "short_name": "Vellaire",
   "description": "Your business card, always in your pocket.",
-  "start_url": "/m?source=pwa",
+  "start_url": "/open?source=pwa",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",

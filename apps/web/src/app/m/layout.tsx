@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Icon, IconName } from '@/components/icons';
+import { InstallBanner } from '@/components/pwa';
 import { cx, Loading, ScreenError } from '@/components/ui';
 import { useMe } from '@/lib/api';
 
@@ -25,7 +26,10 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
   return (
     <div className="min-h-screen bg-pearl">
       <div className={cx('relative mx-auto flex max-w-[440px] flex-col bg-pearl sm:border-x sm:border-line', isEdit ? 'h-[844px] overflow-hidden' : 'min-h-screen')}>
-        <main className={cx('flex-1 px-5', isEdit ? 'flex min-h-0 flex-col gap-4 overflow-hidden pb-4 pt-14' : 'pb-28 pt-6')}>{children}</main>
+        <main className={cx('flex-1 px-5', isEdit ? 'flex min-h-0 flex-col gap-4 overflow-hidden pb-4 pt-14' : 'pb-28 pt-6')}>
+          {!isEdit && <InstallBanner className="mb-4" />}
+          {children}
+        </main>
         <nav aria-label="Employee app" className={cx('border-t border-linen bg-white', isEdit ? 'h-[84px] flex-none pb-5' : 'fixed inset-x-0 bottom-0 z-30 mx-auto max-w-[440px] pb-[env(safe-area-inset-bottom)] backdrop-blur')}>
           <ul className="grid h-full grid-cols-5">
             {TABS.map((t) => (

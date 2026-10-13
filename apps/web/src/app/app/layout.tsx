@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AnnouncementBar } from '@/components/announcement-bar';
+import { InstallBanner } from '@/components/pwa';
 import { CommandPalette } from '@/components/command';
 import { Icon, IconName, Seal } from '@/components/icons';
 import { cx, Kbd, Loading, ScreenError } from '@/components/ui';
@@ -256,6 +257,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </header>
         <main className="w-full max-w-[1280px] px-4 pb-14 pt-9 sm:px-10">
           <AnnouncementBar />
+          <InstallBanner className="mb-6" />
           {children}
         </main>
       </div>
