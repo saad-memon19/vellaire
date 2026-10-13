@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AnnouncementBar } from '@/components/announcement-bar';
-import { InstallBanner } from '@/components/pwa';
+import { InstallBanner, useInstalledApp } from '@/components/pwa';
 import { CommandPalette } from '@/components/command';
 import { Icon, IconName, Seal } from '@/components/icons';
 import { cx, Kbd, Loading, ScreenError } from '@/components/ui';
@@ -80,16 +80,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [drawer, setDrawer] = useState(false);
   const [menu, setMenu] = useState(false);
+  const installed = useInstalledApp();
 
   useEffect(() => setDrawer(false), [path]);
   useEffect(() => {
+    // The dashboard is browser only: the installed app is the employee card app
+    if (installed) return router.replace('/m');
     if (!me) return;
     if (me.user.role === 'member' && !me.user.impersonating) router.replace('/m');
     else if (!me.company && me.user.platformRole === 'staff') router.replace('/console');
-  }, [me, router]);
+  }, [me, router, installed]);
 
   if (error) return <ScreenError error={error} retry={() => reloadMe()} />;
-  if (!me || !me.company || me.user.role === 'member') return <Loading className="min-h-screen" />;
+  if (installed || !me || !me.company || me.user.role === 'member') return <Loading className="min-h-screen" />;
 
   // The create-a-card wizard is a full-screen flow with its own header (as designed)
   if (path.startsWith('/app/create')) return <div className="min-h-screen bg-pearl text-[14px]">{children}</div>;

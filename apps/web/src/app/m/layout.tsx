@@ -6,6 +6,7 @@ import { Icon, IconName } from '@/components/icons';
 import { InstallBanner } from '@/components/pwa';
 import { cx, Loading, ScreenError } from '@/components/ui';
 import { useMe } from '@/lib/api';
+import { NoCompany } from './no-card';
 
 const TABS: { href: string; label: string; icon: IconName }[] = [
   { href: '/m', label: 'My card', icon: 'dCard' },
@@ -21,6 +22,7 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
   const { data: me, error, mutate: reloadMe } = useMe();
   if (error) return <ScreenError error={error} retry={() => reloadMe()} />;
   if (!me) return <Loading className="min-h-screen" />;
+  if (!me.company) return <NoCompany />;
   const active = (h: string) => (h === '/m' ? path === '/m' || path === '/m/edit' : path.startsWith(h));
   const isEdit = path === '/m/edit';
   return (

@@ -33,8 +33,26 @@ if (typeof window !== 'undefined') {
 export type InstallState = 'installed' | 'prompt' | 'manual';
 type Platform = 'ios' | 'android' | 'desktop';
 
+const STANDALONE = '(display-mode: standalone)';
+
+/** True inside the installed app's own window, false in a browser tab. */
+export const inInstalledApp = () => window.matchMedia(STANDALONE).matches || !!(navigator as { standalone?: boolean }).standalone;
+
+/** The installed app is only the employee card app; the dashboard and the console stay in the browser. */
+export function useInstalledApp() {
+  return useSyncExternalStore(
+    (cb) => {
+      const mq = window.matchMedia(STANDALONE);
+      mq.addEventListener('change', cb);
+      return () => mq.removeEventListener('change', cb);
+    },
+    inInstalledApp,
+    () => false,
+  );
+}
+
 function currentState(): InstallState {
-  if (installedNow || window.matchMedia('(display-mode: standalone)').matches || (navigator as { standalone?: boolean }).standalone) return 'installed';
+  if (installedNow || inInstalledApp()) return 'installed';
   // With the browser's own prompt it is one tap; otherwise people install from the browser menu
   return deferred ? 'prompt' : 'manual';
 }
@@ -67,7 +85,7 @@ export function useInstallApp() {
   };
 
   const help = <InstallHelp open={showHelp} onClose={() => setShowHelp(false)} />;
-  return { state, canInstall: state !== 'installed', install, help };
+  return { state, canInstall: state !== 'installed', inApp: useInstalledApp(), install, help };
 }
 
 const STEPS: Record<Platform, { title: string; steps: [string, React.ReactNode][]; note: string }> = {

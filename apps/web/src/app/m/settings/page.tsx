@@ -71,7 +71,7 @@ export default function MobileSettings() {
         <Row icon="edit" label="Edit my card" sub="Bio, photo, links and languages" href="/m/edit" />
         {data && <Row icon="mail" label="Copy my email signature" sub="For Outlook and Gmail" onClick={copySignature} />}
         {data && <Row icon="external" label="Open my public card" onClick={() => window.open(data.card.url, '_blank')} />}
-        {me.user.role !== 'member' && <Row icon="home" label="Company dashboard" href="/app" />}
+        {me.user.role !== 'member' && !installApp.inApp && <Row icon="home" label="Company dashboard" href="/app" />}
         {installApp.canInstall && <Row icon="download" label="Install the app" sub="Add Vellaire to your home screen" onClick={installApp.install} />}
       </div>
       {installApp.help}

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Icon, IconName, Seal } from '@/components/icons';
+import { useInstalledApp } from '@/components/pwa';
 import { cx, Loading, ScreenError } from '@/components/ui';
 import { api, useMe } from '@/lib/api';
 
@@ -60,13 +61,16 @@ export default function ConsoleLayout({ children }: { children: React.ReactNode 
   const path = usePathname();
   const [drawer, setDrawer] = useState(false);
   const [q, setQ] = useState('');
+  const installed = useInstalledApp();
 
   useEffect(() => setDrawer(false), [path]);
   useEffect(() => {
-    if (me && me.user.platformRole !== 'staff') router.replace(me.home);
-  }, [me, router]);
+    // The console is browser only: the installed app is the employee card app
+    if (installed) router.replace('/m');
+    else if (me && me.user.platformRole !== 'staff') router.replace(me.home);
+  }, [me, router, installed]);
   if (error) return <ScreenError error={error} retry={() => reloadMe()} />;
-  if (!me || me.user.platformRole !== 'staff') return <Loading className="min-h-screen" />;
+  if (installed || !me || me.user.platformRole !== 'staff') return <Loading className="min-h-screen" />;
 
   // The most specific link that contains the current page is the active one
   const current = HREFS.filter((h) => path === h || (h !== '/console' && path.startsWith(`${h}/`))).sort((a, b) => b.length - a.length)[0];
