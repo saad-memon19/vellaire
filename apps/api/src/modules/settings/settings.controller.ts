@@ -7,6 +7,7 @@ import { sendMail } from '../../common/mail';
 import { found, initials, logActivity, parse, relTime, requireId, shortId } from '../../common/util';
 import { db } from '../../db/db';
 import { oid } from '../../db/schemas';
+import { createResetLink } from '../auth/signin-link';
 
 const CNAME_TARGET = process.env.CARD_CNAME_TARGET || 'cards.vellaire.app';
 
@@ -235,11 +236,8 @@ export class SettingsController {
       to: email,
       subject: `${u.name} invited you to ${company?.name} on Vellaire`,
       heading: `Join ${company?.name} on Vellaire`,
-      lines: [`${u.name} invited you to join the team. Sign in with this email address to start.`],
-      button: {
-        label: 'Sign in',
-        url: `${config.webUrl}/signin?email=${encodeURIComponent(email)}`,
-      },
+      lines: [`${u.name} invited you to join the team. Choose a password to start; then sign in with this email and that password.`, 'The link works once and expires in 7 days.'],
+      button: { label: 'Choose a password', url: await createResetLink(email, 7 * 24 * 60) },
     });
     await logActivity({
       companyId,

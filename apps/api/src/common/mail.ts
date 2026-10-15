@@ -1,3 +1,4 @@
+import nodemailer from 'nodemailer';
 import { config } from '../config';
 import { db } from '../db/db';
 import { getSetting } from './platform';
@@ -7,6 +8,7 @@ export const EMAIL_TEMPLATES = {
   card_ready: { name: 'Welcome to your card', when: 'A new card is published' },
   invite: { name: 'Invitation to join', when: 'An admin invites a colleague' },
   signin: { name: 'Sign-in link', when: 'Someone signs in with email' },
+  password_reset: { name: 'Reset password', when: 'Someone forgets their password' },
   workspace_ready: {
     name: 'Workspace ready',
     when: 'Your team creates a trial workspace',
@@ -70,25 +72,42 @@ export async function sendMail(mail: Mail) {
   return result;
 }
 
-/** Sends with Resend when RESEND_API_KEY is set; otherwise prints the email to the API console. */
+/** True once an email provider is set in .env (Resend or SMTP). Until then nothing is sent and every flow still works. */
+export const mailReady = () => !!(config.mail.resendKey || config.mail.smtp.host);
+
+let smtp: nodemailer.Transporter | null = null;
+const smtpTransport = () =>
+  (smtp ??= nodemailer.createTransport({
+    host: config.mail.smtp.host,
+    port: config.mail.smtp.port,
+    secure: config.mail.smtp.port === 465,
+    auth: config.mail.smtp.user ? { user: config.mail.smtp.user, pass: config.mail.smtp.pass } : undefined,
+  }));
+
+/**
+ * Sends with Resend (RESEND_API_KEY) or SMTP (SMTP_HOST...); otherwise prints the email to the API console.
+ * A failed send is logged and never breaks the action that sent it.
+ */
 async function deliver(m: Mail) {
-  if (!config.mail.resendKey) {
-    console.log(`\n✉  [dev mail] to ${m.to}\n   ${m.subject}\n   ${m.lines.join('\n   ')}${m.button ? `\n   → ${m.button.url}` : ''}\n`);
+  const text = `${m.lines.join('\n\n')}${m.button ? `\n\n${m.button.label}: ${m.button.url}` : ''}`;
+  if (!mailReady()) {
+    console.log(`\n✉  [mail not set up] to ${m.to}\n   ${m.subject}\n   ${m.lines.join('\n   ')}${m.button ? `\n   → ${m.button.url}` : ''}\n`);
     return { delivered: false };
   }
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${config.mail.resendKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from: config.mail.from,
-      to: [m.to],
-      subject: m.subject,
-      html: render(m),
-    }),
-  });
-  if (!res.ok) console.error('mail failed', res.status, await res.text());
-  return { delivered: res.ok };
+  try {
+    if (config.mail.resendKey) {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${config.mail.resendKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from: config.mail.from, to: [m.to], subject: m.subject, html: render(m), text }),
+      });
+      if (!res.ok) console.error('mail failed', res.status, await res.text());
+      return { delivered: res.ok };
+    }
+    await smtpTransport().sendMail({ from: config.mail.from, to: m.to, subject: m.subject, html: render(m), text });
+    return { delivered: true };
+  } catch (e) {
+    console.error('mail failed', (e as Error).message);
+    return { delivered: false };
+  }
 }

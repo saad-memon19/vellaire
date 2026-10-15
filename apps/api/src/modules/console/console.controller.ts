@@ -9,6 +9,7 @@ import { db } from '../../db/db';
 import { AiService } from '../ai/ai.service';
 import { serializeOrder } from '../nfc/nfc.controller';
 import { healthOf, mrrOf } from './health';
+import { createResetLink } from '../auth/signin-link';
 
 const money = (n: number) => `$${Math.round(n).toLocaleString()}`;
 const STATUS: Record<string, string> = {
@@ -306,11 +307,8 @@ export class ConsoleController {
       to: email,
       subject: `Your Vellaire workspace for ${d.name} is ready`,
       heading: `Welcome to Vellaire, ${d.ownerName.split(' ')[0]}`,
-      lines: [`Your ${d.trialDays}-day trial for ${d.name} has started. Sign in with this email to set up your brand kit and create your first cards.`],
-      button: {
-        label: 'Sign in',
-        url: `${config.webUrl}/signin?email=${encodeURIComponent(email)}`,
-      },
+      lines: [`Your ${d.trialDays}-day trial for ${d.name} has started. Choose a password, then set up your brand kit and create your first cards.`, 'The link works once and expires in 7 days.'],
+      button: { label: 'Choose a password', url: await createResetLink(email, 7 * 24 * 60) },
     });
     await logActivity({
       companyId: company._id,

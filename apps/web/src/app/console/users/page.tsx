@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Icon } from '@/components/icons';
+import { usePasswordLink } from '@/components/password-link';
 import { ErrorState, FilterChip, LinkButton, Loading, PageHeader, Pagination } from '@/components/ui';
 import { api, qs, useApi } from '@/lib/api';
 import { EmptyRow, GridRow, GridTable, Kpis, Pill, RowButton, Section, useAction } from '../parts';
@@ -28,6 +29,7 @@ export default function UsersDirectory() {
   const query = qs({ q, company, role, status });
   const { data, error, mutate } = useApi<any>(`/console/users${qs({ q, company, role, status, page })}`);
   const { busy, run } = useAction(mutate);
+  const passwordLink = usePasswordLink();
   const filter = (set: (v: string) => void) => (v: string) => {
     set(v);
     setPage(1);
@@ -87,6 +89,7 @@ export default function UsersDirectory() {
                     <Pill status={r.statusId} />
                   </span>
                   <span className="flex justify-end gap-1.5">
+                    {r.statusId !== 'disabled' && <RowButton onClick={() => passwordLink.make(`/auth/reset-link/${r.id}`, r.name)}>Password link</RowButton>}
                     {r.statusId === 'invited' && (
                       <RowButton disabled={busy === r.id} onClick={() => run(r.id, () => api.post(`/console/users/${r.id}/resend-invite`), 'Invite sent again')}>
                         Resend
@@ -116,6 +119,7 @@ export default function UsersDirectory() {
           </Section>
         </>
       )}
+      {passwordLink.modal}
     </div>
   );
 }

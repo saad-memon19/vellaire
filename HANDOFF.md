@@ -34,7 +34,7 @@ npm run dev             # API on :4000, web on :3000
 npm run seed:platform -w apps/api   # only the console demo data, nothing wiped
 ```
 
-Sign in at `/signin` (without an email key the sign-in link is shown on screen):
+Sign in at `/signin` with email and password. In local development without an email provider, sign-in and reset links are also shown on screen:
 `sara.khan@meridian.com` (company owner), `layla.mansour@meridian.com` (brand manager), `owner@vellaire.app` (Vellaire staff).
 
 Type-check before you finish any change:
@@ -89,7 +89,7 @@ tools/design-check/          screenshot design vs built page, and crawl all rout
 
 | Area | Routes | Status |
 |---|---|---|
-| Website, sign in, sign up | `/`, `/signin`, `/signup` | ✅ done (sign-up uses email links, no password: see §6) |
+| Website, sign in, sign up | `/`, `/signin`, `/signup` | ✅ done 15 Oct: email + password (12+ characters, a number, a symbol), forgot/reset password, email link and 6-digit code, Google/Microsoft. See §6 |
 | Setup wizard (5 steps) | `/setup` | ✅ done and tested end to end |
 | Company dashboard | `/app/*` | ✅ done |
 | Employee app | `/m`, `/m/share`, `/m/leads`, `/m/insights`, `/m/edit`, `/m/settings` | ✅ done |
@@ -134,8 +134,8 @@ These buttons show a success message without saving or sending anything. Either 
    - Google: Google Wallet API issuer account and a Google Cloud service account with its key → `GOOGLE_WALLET_*` variables.
 3. **Before launch:**
    - Rotate the MongoDB password (it was shared in a screenshot).
-   - Add `RESEND_API_KEY` (email), Google/Microsoft sign-in keys, and optionally AI keys.
-   - Decide email-link vs password sign-in, then turn off the demo buttons.
+   - Email: set `RESEND_API_KEY`, or `SMTP_HOST`/`SMTP_PORT`/`SMTP_USER`/`SMTP_PASS`, plus `MAIL_FROM` (see `apps/api/.env.example`). Nothing else changes in code. Add Google/Microsoft sign-in keys and optionally AI keys.
+   - Remove `DEMO_LOGIN` from Vercel before launch (it shows the demo buttons on `/signin`).
    - Write Terms and Privacy pages (TODO in `apps/web/src/app/signup/page.tsx`).
    - Payments (Stripe) for plans and NFC orders.
    - Backups and monitoring.
@@ -147,7 +147,10 @@ Signature deployment to Outlook and Gmail, two-step sign-in and network rules, c
 
 ## 6. Decisions already made (do not undo without asking)
 
-- Sign-up has no password field: sign-in everywhere is an email link or Google/Microsoft. Google/Microsoft sign-up keeps the company name in a short cookie until the provider returns.
+- Sign-in is email + password (scrypt hash, `common/password.ts`); 5 wrong passwords lock the account for 15 minutes. Email links and the 6-digit code also work once email is set up. Google/Microsoft sign-up keeps the company name in a short cookie until the provider returns.
+- Works without email: sign-up signs in straight away; "Forgot password" says to ask an admin. Admins make a one-time 24-hour **password link** to share by hand: dashboard Employees (select one person → Password link), Settings → Team (edit → Make a password link), console Users (Password link). The owner gets one from the terminal: `npm run password-link -w apps/api -- owner@email` (uses the database in `apps/api/.env`).
+- Sign-in and reset links are never shown on screen in production; only in local development without an email provider.
+- Invite and welcome emails carry a 7-day "Choose a password" link.
 - New sign-ups get a 14-day Professional trial and go through `/setup`. `company.setup.done` decides whether sign-in lands on `/setup` or `/app`.
 - The team page is off by default. It needs both the `public.team_page` feature flag and the company's own switch in Company settings.
 - Users directory has Suspend/Reactivate instead of "Reset 2FA" (there is no 2FA yet). A suspended user cannot sign in.

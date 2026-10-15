@@ -1,11 +1,14 @@
-import { BadRequestException, Body, ForbiddenException, Controller, Get, Param, Post, Query, Req, Res } from '@nestjs/common';
+import { BadRequestException, Body, ForbiddenException, Controller, Get, HttpException, HttpStatus, Param, Post, Query, Req, Res } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { z } from 'zod';
 import { config } from '../../config';
-import { cookieOptions, CurrentUser, Platform, Public, SESSION_COOKIE, SessionUser, SignedIn, signSession } from '../../common/auth';
+import { cookieOptions, CurrentUser, Platform, Public, Roles, SESSION_COOKIE, SessionUser, SignedIn, signSession } from '../../common/auth';
+import { ensureMemberUser } from '../../common/cards';
 import { flagsFor } from '../../common/platform';
 import { createWorkspace } from '../onboarding/workspace';
-import { codeHash, MAX_CODE_ATTEMPTS, sendSignInLink } from './signin-link';
+import { mailReady } from '../../common/mail';
+import { checkPassword, hashPassword, passwordSchema } from '../../common/password';
+import { codeHash, createResetLink, MAX_CODE_ATTEMPTS, sendResetLink, sendSignInLink, showLinksOnScreen } from './signin-link';
 import { logActivity, parse, requireId, sha256, token } from '../../common/util';
 import { db } from '../../db/db';
 import { AiService } from '../ai/ai.service';
@@ -22,6 +25,7 @@ const setupPending = async (u: { companyId?: unknown; role?: string }) =>
 
 const demoEnabled = () => !config.isProd || process.env.DEMO_LOGIN === '1';
 const SIGNUP_COOKIE = 'vl_signup';
+const MAX_PASSWORD_TRIES = 5;
 
 const OAUTH = {
   google: {
@@ -37,23 +41,28 @@ const OAUTH = {
 } as const;
 type OAuthProvider = keyof typeof OAUTH;
 
+/** Signs a person in: sets the session cookie and says where they land. Used by every way of signing in. */
+export async function startSession(res: Response, user: any) {
+  // A suspended account stays suspended; signing in only turns an invite into an active account
+  if (user.status === 'disabled') throw new ForbiddenException('This account is suspended. Contact your company admin.');
+  await db.User.updateOne({ _id: user._id }, { lastLoginAt: new Date(), status: 'active' });
+  if (user.platformRole === 'staff')
+    await logActivity({
+      actor: user.name || user.email,
+      action: 'staff.signin',
+      text: 'Signed in to the console',
+      platform: true,
+    });
+  res.cookie(SESSION_COOKIE, signSession({ uid: String(user._id) }), cookieOptions);
+  return { redirect: homeFor({ ...(user.toObject?.() ?? user), setupPending: await setupPending(user) }) };
+}
+
 @Controller('auth')
 export class AuthController {
   constructor(private ai: AiService) {}
 
-  private async login(res: Response, user: any) {
-    // A suspended account stays suspended; signing in only turns an invite into an active account
-    if (user.status === 'disabled') throw new ForbiddenException('This account is suspended. Contact your company admin.');
-    await db.User.updateOne({ _id: user._id }, { lastLoginAt: new Date(), status: 'active' });
-    if (user.platformRole === 'staff')
-      await logActivity({
-        actor: user.name || user.email,
-        action: 'staff.signin',
-        text: 'Signed in to the console',
-        platform: true,
-      });
-    res.cookie(SESSION_COOKIE, signSession({ uid: String(user._id) }), cookieOptions);
-    return { redirect: homeFor({ ...(user.toObject?.() ?? user), setupPending: await setupPending(user) }) };
+  private login(res: Response, user: any) {
+    return startSession(res, user);
   }
 
   @Public()
@@ -62,7 +71,110 @@ export class AuthController {
     return {
       google: !!config.oauth.google.id,
       microsoft: !!config.oauth.microsoft.id,
+      // Email sign-in links work once an email provider is set (or on screen in local development)
+      email: mailReady() || showLinksOnScreen(),
     };
+  }
+
+  /** Email and password. Five wrong tries lock the account for 15 minutes. */
+  @Public()
+  @Post('password')
+  async passwordLogin(@Body() body: unknown, @Res({ passthrough: true }) res: Response) {
+    const d = parse(z.object({ email: z.string().email('Enter your email'), password: z.string().min(1, 'Enter your password').max(200) }), body);
+    const wrong = new BadRequestException('Email or password is not right. No password yet? Use “Forgot password”.');
+    const user = await db.User.findOne({ email: d.email.toLowerCase() }).select('+passwordHash');
+    if (!user) throw wrong;
+    if (user.lockedUntil && user.lockedUntil > new Date()) throw new HttpException('Too many wrong passwords. Try again in 15 minutes, or reset your password.', HttpStatus.TOO_MANY_REQUESTS);
+    if (!(await checkPassword(d.password, user.passwordHash))) {
+      const failed = (user.failedLogins || 0) + 1;
+      await db.User.updateOne({ _id: user._id }, failed >= MAX_PASSWORD_TRIES ? { failedLogins: 0, lockedUntil: new Date(Date.now() + 15 * 60_000) } : { failedLogins: failed });
+      throw wrong;
+    }
+    await db.User.updateOne({ _id: user._id }, { failedLogins: 0, $unset: { lockedUntil: 1 } });
+    return this.login(res, user);
+  }
+
+  /** "Forgot password": emails a reset link. The answer is the same whether or not the email has an account. */
+  @Public()
+  @Post('forgot')
+  async forgot(@Body() body: unknown) {
+    const { email } = parse(z.object({ email: z.string().email('Enter your email') }), body);
+    if (!mailReady() && !showLinksOnScreen())
+      return {
+        sent: false,
+        message: 'Email is not set up yet, so we cannot send a reset link. Ask your company admin for a password link.',
+      };
+    const generic = { sent: true, message: 'If this email has a Vellaire account, a reset link is on its way.' };
+    const user = await db.User.findOne({ email: email.toLowerCase() }).lean<any>();
+    if (!user || user.status === 'disabled') return generic;
+    const devLink = await sendResetLink(user.email);
+    return devLink ? { ...generic, devLink } : generic;
+  }
+
+  /** Sets a new password from a reset link, then signs in. */
+  @Public()
+  @Post('reset')
+  async reset(@Body() body: unknown, @Res({ passthrough: true }) res: Response) {
+    const d = parse(z.object({ token: z.string().min(10), password: passwordSchema }), body);
+    const rec = await db.MagicToken.findOneAndUpdate({ tokenHash: sha256(d.token), purpose: 'reset', used: false, expiresAt: { $gt: new Date() } }, { used: true });
+    if (!rec) throw new BadRequestException('This link has expired or was already used. Ask for a new one.');
+    const user = await db.User.findOne({ email: rec.email });
+    if (!user) throw new BadRequestException('Account not found');
+    await db.User.updateOne({ _id: user._id }, { passwordHash: await hashPassword(d.password), failedLogins: 0, $unset: { lockedUntil: 1 } });
+    return this.login(res, user);
+  }
+
+  /** Set or change your own password. Changing one needs the current password. */
+  @SignedIn()
+  @Post('change-password')
+  async changePassword(@Body() body: unknown, @CurrentUser() u: SessionUser) {
+    const d = parse(z.object({ current: z.string().max(200).optional(), password: passwordSchema }), body);
+    const user = await db.User.findById(u.id).select('+passwordHash');
+    if (!user) throw new BadRequestException('Account not found');
+    if (user.passwordHash && !(await checkPassword(d.current || '', user.passwordHash))) throw new BadRequestException('Your current password is not right');
+    await db.User.updateOne({ _id: user._id }, { passwordHash: await hashPassword(d.password) });
+    return { ok: true };
+  }
+
+  /** Whether you have a password yet, for the Settings screen. */
+  @SignedIn()
+  @Get('password')
+  async hasPassword(@CurrentUser() u: SessionUser) {
+    const user = await db.User.findById(u.id).select('+passwordHash').lean<any>();
+    return { hasPassword: !!user?.passwordHash };
+  }
+
+  /**
+   * A password link an admin shares by hand (WhatsApp, chat) when email is not set up or did not arrive.
+   * Company admins and HR can make one for their own people; Vellaire staff for anyone. Valid for 24 hours.
+   */
+  @SignedIn()
+  @Post('reset-link/:userId')
+  async resetLinkFor(@Param('userId') id: string, @CurrentUser() u: SessionUser) {
+    const target = await db.User.findById(requireId(id)).lean<any>();
+    if (!target) throw new BadRequestException('Person not found');
+    const staff = u.platformRole === 'staff' && !u.impersonating;
+    const sameCompany = !!u.companyId && String(target.companyId) === u.companyId && !target.platformRole;
+    const canManage = ['owner', 'admin', 'hr_manager'].includes(u.role) && (target.role !== 'owner' || u.role === 'owner');
+    if (!staff && !(sameCompany && canManage)) throw new ForbiddenException('You cannot make a password link for this person');
+    if (target.status === 'disabled') throw new BadRequestException('This account is suspended');
+    const url = await createResetLink(target.email, 24 * 60);
+    await logActivity({ companyId: target.companyId, actor: u.name, action: 'user.reset_link', text: `Password link made for ${target.name || target.email}`, platform: staff });
+    return { url, expiresInHours: 24 };
+  }
+
+  /** The same for an employee, from the Employees list. Makes their app account first if they have none yet. */
+  @Roles('owner', 'admin', 'hr_manager')
+  @Post('reset-link/employee/:employeeId')
+  async resetLinkForEmployee(@Param('employeeId') id: string, @CurrentUser() u: SessionUser) {
+    const employee = await db.Employee.findOne({ _id: requireId(id), companyId: u.companyId }).lean<any>();
+    if (!employee) throw new BadRequestException('Person not found');
+    if (!employee.email) throw new BadRequestException('Add an email for this person first');
+    const company = await db.Company.findById(u.companyId).lean<any>();
+    await ensureMemberUser(company, employee);
+    const user = await db.User.findOne({ email: employee.email.toLowerCase() }).lean<any>();
+    if (!user || String(user.companyId) !== u.companyId || user.platformRole) throw new ForbiddenException('This email belongs to an account outside your company');
+    return this.resetLinkFor(String(user._id), u);
   }
 
   /**
@@ -114,6 +226,7 @@ export class AuthController {
       sent: true,
       message: 'If this email has a Vellaire account, a sign-in link is on its way.',
     };
+    if (!mailReady() && !showLinksOnScreen()) throw new BadRequestException('Email sign-in is not set up yet. Sign in with your password.');
     if (!user || user.status === 'disabled') return generic;
     const devLink = await sendSignInLink(user.email);
     return devLink ? { ...generic, devLink } : generic;
@@ -125,7 +238,7 @@ export class AuthController {
   async verifyCode(@Body() body: unknown, @Res({ passthrough: true }) res: Response) {
     const d = parse(z.object({ email: z.string().email(), code: z.string().regex(/^\d{6}$/, 'Enter the 6-digit code') }), body);
     const email = d.email.toLowerCase();
-    const rec = await db.MagicToken.findOne({ email, used: false, expiresAt: { $gt: new Date() }, codeHash: { $exists: true } }).sort({ createdAt: -1 });
+    const rec = await db.MagicToken.findOne({ email, purpose: { $ne: 'reset' }, used: false, expiresAt: { $gt: new Date() }, codeHash: { $exists: true } }).sort({ createdAt: -1 });
     if (!rec || rec.attempts >= MAX_CODE_ATTEMPTS) throw new BadRequestException('This code has expired. Request a new one.');
     if (rec.codeHash !== codeHash(email, d.code)) {
       rec.attempts += 1;
@@ -143,7 +256,8 @@ export class AuthController {
   @Post('verify')
   async verify(@Body() body: unknown, @Res({ passthrough: true }) res: Response) {
     const { token: t } = parse(z.object({ token: z.string().min(10) }), body);
-    const rec = await db.MagicToken.findOneAndUpdate({ tokenHash: sha256(t), used: false, expiresAt: { $gt: new Date() } }, { used: true });
+    // A password-reset link is not a sign-in link
+    const rec = await db.MagicToken.findOneAndUpdate({ tokenHash: sha256(t), purpose: { $ne: 'reset' }, used: false, expiresAt: { $gt: new Date() } }, { used: true });
     if (!rec) throw new BadRequestException('This link has expired or was already used. Request a new one.');
     const user = await db.User.findOne({ email: rec.email });
     if (!user) throw new BadRequestException('Account not found');

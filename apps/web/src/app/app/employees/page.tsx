@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 import { Icon } from '@/components/icons';
+import { usePasswordLink } from '@/components/password-link';
 import { useToast } from '@/components/toast';
 import {
   Button,
@@ -97,6 +98,7 @@ function Employees() {
   const toast = useToast();
   const { data: me } = useMe();
   const manager = isManager(me?.user.role);
+  const passwordLink = usePasswordLink();
   const { data, error, mutate } = useApi<any>(`/employees${qs({ filter: filter === 'all' ? '' : filter, q, department, office, cardStatus, source, page })}`);
 
   useEffect(() => setSel(new Set()), [filter, q, department, office, cardStatus, source, page]);
@@ -311,6 +313,18 @@ function Employees() {
             >
               Assign template
             </button>
+            {sel.size === 1 && ['owner', 'admin', 'hr_manager'].includes(me?.user.role || '') && (
+              <button
+                type="button"
+                onClick={() => {
+                  const r = data?.rows.find((x: any) => sel.has(x.id));
+                  if (r) passwordLink.make(`/auth/reset-link/employee/${r.id}`, r.name);
+                }}
+                className="text-[13.5px] text-white hover:underline"
+              >
+                Password link
+              </button>
+            )}
             <a
               href="/api/employees/export"
               className="text-[13.5px] text-white hover:underline"
@@ -507,6 +521,7 @@ function Employees() {
       </section>
 
       {/* Modals */}
+      {passwordLink.modal}
       <ImportModal open={modal === 'import'} onClose={() => setModal(null)} onDone={() => mutate()} />
       <AddPersonModal open={modal === 'add'} onClose={() => setModal(null)} onDone={() => mutate()} departments={data?.departments || []} offices={data?.offices || []} />
       <NfcModal open={modal === 'nfc'} count={sel.size} busy={busy} onClose={() => setModal(null)} onOrder={(material) => bulk('order-nfc', { material })} />

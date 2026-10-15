@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Icon, IconName, Seal } from '@/components/icons';
+import { ChangePassword } from '@/components/change-password';
 import { useInstalledApp } from '@/components/pwa';
 import { cx, Loading, ScreenError } from '@/components/ui';
 import { api, useMe } from '@/lib/api';
@@ -61,6 +62,7 @@ export default function ConsoleLayout({ children }: { children: React.ReactNode 
   const path = usePathname();
   const [drawer, setDrawer] = useState(false);
   const [q, setQ] = useState('');
+  const [pwOpen, setPwOpen] = useState(false);
   const installed = useInstalledApp();
 
   useEffect(() => setDrawer(false), [path]);
@@ -119,9 +121,13 @@ export default function ConsoleLayout({ children }: { children: React.ReactNode 
           </div>
         ))}
       </div>
+      <button type="button" onClick={() => setPwOpen(true)} className="flex items-center gap-3 rounded-lg px-3 py-2 text-[14px] text-[#4E4A44] hover:bg-[#F7F3EA] hover:text-ink">
+        <Icon name="lock" size={18} className="text-[#8E887E]" /> Password
+      </button>
       <button type="button" onClick={signOut} className="flex items-center gap-3 rounded-lg px-3 py-2 text-[14px] text-[#4E4A44] hover:bg-[#F7F3EA] hover:text-ink">
         <Icon name="logout" size={18} className="text-[#8E887E]" /> Sign out
       </button>
+      <ChangePassword open={pwOpen} onClose={() => setPwOpen(false)} />
     </nav>
   );
 

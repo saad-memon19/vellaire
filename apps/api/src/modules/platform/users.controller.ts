@@ -1,10 +1,10 @@
 import { BadRequestException, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
 import type { Response } from 'express';
-import { config } from '../../config';
 import { CurrentUser, Platform, SessionUser } from '../../common/auth';
 import { sendMail } from '../../common/mail';
 import { daysAgo, escapeRegex, found, initials, logActivity, paging, relTime, requireId, toCsv } from '../../common/util';
 import { db } from '../../db/db';
+import { createResetLink } from '../auth/signin-link';
 
 const ROLE: Record<string, string> = { owner: 'Company Owner', admin: 'Company Admin', brand_manager: 'Brand Manager', member: 'Card holder' };
 const STATUS: Record<string, string> = { active: 'Active', invited: 'Invited', disabled: 'Suspended' };
@@ -130,8 +130,8 @@ export class ConsoleUsersController {
       to: user.email,
       subject: `Your invitation to ${company?.name} on Vellaire`,
       heading: `Join ${company?.name} on Vellaire`,
-      lines: ['You were invited to Vellaire. Sign in with this email address to start.'],
-      button: { label: 'Sign in', url: `${config.webUrl}/signin?email=${encodeURIComponent(user.email)}` },
+      lines: ['You were invited to Vellaire. Choose a password to start; then sign in with this email and that password.', 'The link works once and expires in 7 days.'],
+      button: { label: 'Choose a password', url: await createResetLink(user.email, 7 * 24 * 60) },
     });
     await logActivity({ companyId: user.companyId, actor: u.name, action: 'user.invite_resent', text: `Resent invite to ${mask(user.email)}`, platform: true });
     return { ok: true };

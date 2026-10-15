@@ -1,8 +1,8 @@
 import { BadRequestException, Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { z } from 'zod';
-import { config, PLANS, PlanId } from '../../config';
+import { PLANS, PlanId } from '../../config';
 import { AllowMember, CurrentUser, Platform, SessionUser } from '../../common/auth';
-import { EMAIL_TEMPLATES, EmailCopy, EmailTemplate } from '../../common/mail';
+import { EMAIL_TEMPLATES, EmailCopy, EmailTemplate, mailReady } from '../../common/mail';
 import { getSetting, setSetting } from '../../common/platform';
 import { daysAgo, found, logActivity, parse, requireId } from '../../common/util';
 import { db } from '../../db/db';
@@ -53,7 +53,7 @@ export class ConsoleAnnouncementsController {
           key,
           ...EMAIL_TEMPLATES[key],
           sent: s?.sent || 0,
-          delivered: s && config.mail.resendKey ? share(s.delivered, s.sent) : null,
+          delivered: s && mailReady() ? share(s.delivered, s.sent) : null,
           copy,
           edited: !!(copy.heading || copy.note),
         };
@@ -61,7 +61,7 @@ export class ConsoleAnnouncementsController {
     );
     return {
       // Without an email key, emails only print to the API log, so there is no delivery rate to show
-      mailReady: !!config.mail.resendKey,
+      mailReady: !!mailReady(),
       announcements: items.map((a) => {
         const status = effectiveStatus(a);
         const when =

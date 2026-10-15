@@ -3,8 +3,9 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
-import { AuthLayout, LinkSent } from '@/components/auth-layout';
+import { AuthLayout } from '@/components/auth-layout';
 import { Icon } from '@/components/icons';
+import { PasswordField, passwordOk } from '@/components/password-field';
 import { Button, Input } from '@/components/ui';
 import { api } from '@/lib/api';
 
@@ -45,7 +46,7 @@ function SignUpForm() {
   const [showCode, setShowCode] = useState(!!params.get('code'));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(params.get('error') === 'provider' ? 'That sign-up option is not set up yet. Use your work email instead.' : params.get('error') || '');
-  const [sent, setSent] = useState<{ devLink?: string } | null>(null);
+  const [password, setPassword] = useState('');
   const [providers, setProviders] = useState({ google: false, microsoft: false });
   useEffect(() => {
     api
@@ -62,10 +63,11 @@ function SignUpForm() {
     setBusy(true);
     setError('');
     try {
-      setSent(await api.post('/auth/signup', { ...f, coupon: f.coupon || undefined, agree }));
+      // The new workspace is signed in straight away and goes to the setup steps
+      const r = await api.post<{ redirect: string }>('/auth/signup', { ...f, password, coupon: f.coupon || undefined, agree });
+      window.location.href = r.redirect;
     } catch (err) {
       setError((err as Error).message);
-    } finally {
       setBusy(false);
     }
   }
@@ -77,17 +79,6 @@ function SignUpForm() {
     if (!agree) return setError('Please agree to the terms to continue.');
     window.location.href = `/api/auth/oauth/${p}?company=${encodeURIComponent(f.company.trim())}${f.coupon ? `&coupon=${encodeURIComponent(f.coupon)}` : ''}`;
   };
-
-  if (sent)
-    return (
-      <LinkSent
-        email={f.email}
-        message={`Your workspace for ${f.company} is ready. We sent a sign-in link to ${f.email}.`}
-        devLink={sent.devLink}
-        onBack={() => setSent(null)}
-        backLabel="Change details"
-      />
-    );
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-5.5">
@@ -101,6 +92,7 @@ function SignUpForm() {
       </div>
       {field('Work email', input('email', { type: 'email', required: true, autoComplete: 'email', placeholder: 'name@company.com' }), 'su-email')}
       {field('Company', input('company', { required: true, autoComplete: 'organization' }), 'su-company')}
+      <PasswordField id="su-password" value={password} onChange={setPassword} />
       {showCode ? (
         field('Partner or coupon code', input('coupon', { className: 'h-12 font-mono uppercase', autoComplete: 'off' }), 'su-coupon')
       ) : (
@@ -118,7 +110,7 @@ function SignUpForm() {
           {error}
         </p>
       )}
-      <Button type="submit" variant="ink" size="lg" loading={busy} disabled={!agree} className="h-12.5">
+      <Button type="submit" variant="ink" size="lg" loading={busy} disabled={!agree || !passwordOk(password)} className="h-12.5">
         Create account <Icon name="arrow" size={18} className="text-gold-soft" />
       </Button>
       <div className="grid grid-cols-2 gap-2.5">

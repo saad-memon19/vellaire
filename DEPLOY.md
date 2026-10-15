@@ -32,7 +32,7 @@ The browser only talks to the web domain. The web project forwards `/api/*` to t
 | `WEB_URL` | `https://app.vellaire.com` (the web project's domain, no trailing slash) |
 | `PLATFORM_ADMIN_EMAILS` | your email(s); these accounts get the owner console |
 | `CRON_SECRET` | random |
-| `RESEND_API_KEY`, `MAIL_FROM` | to send email (without them nobody receives sign-in links) |
+| `RESEND_API_KEY` or `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, and `MAIL_FROM` | to send email. Without them sign-in still works with passwords; admins share password links by hand |
 | optional | `AI_PROVIDER`, `AI_API_KEY`, `GOOGLE_CLIENT_*`, `MICROSOFT_CLIENT_*`, wallet variables (see `apps/api/.env.example`) |
 
 5. Deploy. Open `https://<api domain>/meta`; it should return JSON.
@@ -52,7 +52,7 @@ The browser only talks to the web domain. The web project forwards `/api/*` to t
 
 ## 4. After the first deploy
 
-- **First sign-in:** go to `/signin` with an email from `PLATFORM_ADMIN_EMAILS`. The API creates these staff accounts when it starts.
+- **First sign-in:** the API creates staff accounts for `PLATFORM_ADMIN_EMAILS` when it starts. Get a password link for yours with `npm run password-link -w apps/api -- you@email` (it uses the database in `apps/api/.env`), open it on the live address, choose a password, then sign in at `/signin`.
 - **Do not run `npm run seed` against the live database.** It wipes everything and loads demo data.
 - **Google / Microsoft sign-in:** set the redirect URLs in their consoles to
   `https://app.vellaire.com/api/auth/oauth/google/callback` and `.../microsoft/callback`.

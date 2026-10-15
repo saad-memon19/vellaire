@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { usePasswordLink } from '@/components/password-link';
 import { useToast } from '@/components/toast';
 import { Button, ErrorState, Field, Input, Loading, Modal, Select } from '@/components/ui';
 import { api, isAdmin, useApi, useMe } from '@/lib/api';
@@ -70,6 +71,7 @@ export default function Team() {
   const [editForm, setEditForm] = useState({ role: 'admin', scope: 'Whole company' });
   const [busy, setBusy] = useState(false);
   const toast = useToast();
+  const passwordLink = usePasswordLink();
   const admin = isAdmin(me?.user.role);
 
   const handleInvite = async () => {
@@ -312,6 +314,11 @@ export default function Team() {
             <div>
               <div className="text-[14px] font-semibold text-[#17171B]">{editUser.name}</div>
               <div className="text-[13px] text-[#6E685F]">{editUser.email}</div>
+              {!editUser.me && (
+                <button type="button" onClick={() => passwordLink.make(`/auth/reset-link/${editUser.id}`, editUser.name)} className="mt-2 text-[13px] text-gold-text underline underline-offset-4">
+                  Make a password link
+                </button>
+              )}
             </div>
             <Field label="Role">
               {(id) => (
@@ -330,6 +337,7 @@ export default function Team() {
           </div>
         )}
       </Modal>
+      {passwordLink.modal}
     </div>
   );
 }

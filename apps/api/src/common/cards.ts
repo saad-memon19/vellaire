@@ -121,8 +121,8 @@ export async function createCardForEmployee(company: any, employee: any, opts: {
   return card;
 }
 
-/** Make sure the card holder can sign in to the employee app. */
-async function ensureMemberUser(company: any, employee: any) {
+/** Make sure the card holder can sign in to the employee app (card published, password link). */
+export async function ensureMemberUser(company: any, employee: any) {
   if (!employee?.email) return;
   const existing = await db.User.findOne({
     email: employee.email.toLowerCase(),

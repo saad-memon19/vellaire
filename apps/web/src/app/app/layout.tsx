@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AnnouncementBar } from '@/components/announcement-bar';
 import { InstallBanner, useInstalledApp } from '@/components/pwa';
+import { ChangePassword } from '@/components/change-password';
 import { CommandPalette } from '@/components/command';
 import { Icon, IconName, Seal } from '@/components/icons';
 import { cx, Kbd, Loading, ScreenError } from '@/components/ui';
@@ -80,6 +81,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [drawer, setDrawer] = useState(false);
   const [menu, setMenu] = useState(false);
+  const [pwOpen, setPwOpen] = useState(false);
   const installed = useInstalledApp();
 
   useEffect(() => setDrawer(false), [path]);
@@ -250,12 +252,22 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       <Icon name="globe" size={17} /> Company domain
                     </Link>
                   )}
+                  <button
+                    onClick={() => {
+                      setMenu(false);
+                      setPwOpen(true);
+                    }}
+                    className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-[14px] hover:bg-pearl"
+                  >
+                    <Icon name="lock" size={17} /> Password
+                  </button>
                   <button onClick={signOut} className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-[14px] hover:bg-pearl">
                     <Icon name="logout" size={17} /> Sign out
                   </button>
                 </div>
               </>
             )}
+            <ChangePassword open={pwOpen} onClose={() => setPwOpen(false)} />
           </div>
         </header>
         <main className="w-full max-w-[1280px] px-4 pb-14 pt-9 sm:px-10">

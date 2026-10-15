@@ -1,4 +1,5 @@
-import { BadRequestException, Body, Controller, Get, Patch, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Patch, Post, Res } from '@nestjs/common';
+import type { Response } from 'express';
 import { z } from 'zod';
 import { ADMINS, CurrentUser, Public, Roles, SessionUser } from '../../common/auth';
 import { cardUrl, createCardForEmployee, publishCard } from '../../common/cards';
@@ -6,7 +7,10 @@ import { LAYOUTS, THEMES } from '../../common/catalog';
 import { found, parse } from '../../common/util';
 import { db } from '../../db/db';
 import { oid } from '../../db/schemas';
-import { sendSignInLink } from '../auth/signin-link';
+import { sendMail } from '../../common/mail';
+import { hashPassword, passwordSchema } from '../../common/password';
+import { config } from '../../config';
+import { startSession } from '../auth/auth.controller';
 import { PROVIDERS } from '../integrations/fetchers';
 import { appleReady, googleReady } from '../public/wallet';
 import { createWorkspace } from './workspace';
@@ -17,12 +21,13 @@ const HEX = /^#[0-9a-fA-F]{6}$/;
 export class SignupController {
   @Public()
   @Post('signup')
-  async signup(@Body() body: unknown) {
+  async signup(@Body() body: unknown, @Res({ passthrough: true }) res: Response) {
     const d = parse(
       z.object({
         firstName: z.string().trim().min(1).max(60),
         lastName: z.string().trim().min(1).max(60),
         email: z.string().email(),
+        password: passwordSchema,
         company: z.string().trim().min(2).max(120),
         coupon: z.string().max(24).optional(),
         agree: z.literal(true, { errorMap: () => ({ message: 'Please agree to the terms to continue' }) }),
@@ -30,11 +35,17 @@ export class SignupController {
       body,
     );
     const { user } = await createWorkspace({ company: d.company, ownerName: `${d.firstName} ${d.lastName}`, email: d.email, coupon: d.coupon, via: 'email' });
-    const devLink = await sendSignInLink(user.email, {
+    await db.User.updateOne({ _id: user._id }, { passwordHash: await hashPassword(d.password) });
+    // A welcome email when email is set up; signing in never waits for it
+    await sendMail({
+      template: 'workspace_ready',
+      to: user.email,
+      subject: `Your Vellaire workspace for ${d.company} is ready`,
       heading: `Welcome to Vellaire, ${d.firstName}`,
-      line: `Your workspace for ${d.company} is ready. Use the button to sign in and finish setting up.`,
+      lines: [`Your workspace for ${d.company} is ready. Sign in with this email and your password to finish setting up.`],
+      button: { label: 'Open Vellaire', url: `${config.webUrl}/signin` },
     });
-    return { sent: true, ...(devLink ? { devLink } : {}) };
+    return startSession(res, user);
   }
 }
 

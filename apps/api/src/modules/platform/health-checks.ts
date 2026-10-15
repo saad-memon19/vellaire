@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { config } from '../../config';
+import { mailReady } from '../../common/mail';
 import { responseTime } from '../../common/context';
 import { daysAgo } from '../../common/util';
 import { db } from '../../db/db';
@@ -88,8 +89,8 @@ export async function checkServices(): Promise<ServiceCheck[]> {
       id: 'email',
       name: 'Email delivery',
       desc: 'Transactional email',
-      status: !config.mail.resendKey ? 'off' : mailDay && mailFailed / mailDay > 0.1 ? 'degraded' : 'healthy',
-      note: !config.mail.resendKey ? 'No email key yet · emails print to the API log' : `${mailDay - mailFailed} of ${mailDay} delivered today`,
+      status: !mailReady() ? 'off' : mailDay && mailFailed / mailDay > 0.1 ? 'degraded' : 'healthy',
+      note: !mailReady() ? 'No email provider yet · emails print to the API log' : `${mailDay - mailFailed} of ${mailDay} delivered today`,
     },
     {
       id: 'ai',

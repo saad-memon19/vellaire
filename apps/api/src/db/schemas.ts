@@ -92,6 +92,11 @@ export const UserSchema = new Schema(
     employeeId: { type: ObjectId, ref: 'Employee' },
     status: { type: String, enum: ['active', 'invited', 'disabled'], default: 'active' },
     lastLoginAt: Date,
+    // Hashed with scrypt (common/password.ts); never sent to the browser
+    passwordHash: { type: String, select: false },
+    // Wrong passwords in a row; after 5 the account waits until lockedUntil
+    failedLogins: { type: Number, default: 0 },
+    lockedUntil: Date,
   },
   opts,
 );
@@ -103,6 +108,8 @@ export const MagicTokenSchema = new Schema(
     // The same sign-in as a 6-digit code, for installed apps where the email link opens in another browser
     codeHash: String,
     attempts: { type: Number, default: 0 },
+    // 'signin' (link and code) or 'reset' (set a new password)
+    purpose: { type: String, default: 'signin' },
     expiresAt: { type: Date, index: { expires: 0 } },
     used: { type: Boolean, default: false },
   },
