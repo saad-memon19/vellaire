@@ -1,10 +1,11 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Res } from '@nestjs/common';
+import type { Response } from 'express';
 import { resolveTxt } from 'dns/promises';
 import { z } from 'zod';
 import { config, PLANS, PlanId } from '../../config';
 import { ADMINS, CurrentUser, MANAGERS, Roles, SessionUser } from '../../common/auth';
 import { sendMail } from '../../common/mail';
-import { found, initials, logActivity, parse, relTime, requireId, shortId } from '../../common/util';
+import { found, initials, logActivity, parse, relTime, requireId, shortId, toCsv } from '../../common/util';
 import { db } from '../../db/db';
 import { oid } from '../../db/schemas';
 import { createResetLink } from '../auth/signin-link';
@@ -17,9 +18,10 @@ export class SettingsController {
   @Get('settings')
   async get(@CurrentUser() u: SessionUser) {
     const c = found(await db.Company.findById(u.companyId).lean<any>(), 'Company');
-    const [liveCards, hr] = await Promise.all([
+    const [liveCards, hr, scim] = await Promise.all([
       db.Card.countDocuments({ companyId: c._id, status: 'live' }),
       db.Integration.findOne({ companyId: c._id, status: 'connected' }).select('provider').lean<any>(),
+      c.settings?.scimTokenHash ? db.Activity.findOne({ companyId: c._id, action: 'scim.token' }).sort({ createdAt: -1 }).lean<any>() : null,
     ]);
     return {
       name: c.name,
@@ -43,6 +45,7 @@ export class SettingsController {
         },
         sso: c.settings?.sso || {},
         scimConfigured: !!c.settings?.scimTokenHash,
+        scimCreated: scim ? { at: scim.createdAt, by: scim.actor } : null,
       },
       domain: {
         host: c.domain?.host || '',
@@ -53,6 +56,20 @@ export class SettingsController {
         defaultUrl: `${config.webUrl}/c/${c.slug}/`,
       },
     };
+  }
+
+  /** Security → Download audit log: the company's activity log for the last year. */
+  @Roles(...ADMINS)
+  @Get('settings/audit.csv')
+  async audit(@CurrentUser() u: SessionUser, @Res() res: Response) {
+    const since = new Date(Date.now() - 365 * 24 * 3600 * 1000);
+    const rows = await db.Activity.find({ companyId: oid(u.companyId!), createdAt: { $gte: since } })
+      .sort({ createdAt: -1 })
+      .limit(50_000)
+      .lean<any[]>();
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="audit-log.csv"');
+    res.send(toCsv(rows.map((r) => ({ when: r.createdAt, who: r.actor || '', action: r.action || '', what: r.text || '', ip: r.ip || '' }))) || 'when,who,action,what,ip');
   }
 
   @Roles(...ADMINS)
