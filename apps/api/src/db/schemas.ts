@@ -59,6 +59,7 @@ export const CompanySchema = new Schema(
       defaultTheme: { type: String, default: 'obsidian_gold' },
       autoOrderNfc: { type: Boolean, default: false },
       teamPage: { type: Boolean, default: false }, // public directory of live cards, opt-in
+      leaverUrl: String, // where a switched-off card sends visitors; falls back to the company website
       autoOrderMaterial: { type: String, default: 'pvc_black' },
       crm: { provider: String, token: String, webhookUrl: String },
       sso: { provider: String, connectionId: String },

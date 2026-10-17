@@ -8,6 +8,7 @@ import { found, initials, logActivity, parse, relTime, requireId, shortId } from
 import { db } from '../../db/db';
 import { oid } from '../../db/schemas';
 import { createResetLink } from '../auth/signin-link';
+import { PROVIDERS } from '../integrations/fetchers';
 
 const CNAME_TARGET = process.env.CARD_CNAME_TARGET || 'cards.vellaire.app';
 
@@ -16,16 +17,24 @@ export class SettingsController {
   @Get('settings')
   async get(@CurrentUser() u: SessionUser) {
     const c = found(await db.Company.findById(u.companyId).lean<any>(), 'Company');
+    const [liveCards, hr] = await Promise.all([
+      db.Card.countDocuments({ companyId: c._id, status: 'live' }),
+      db.Integration.findOne({ companyId: c._id, status: 'connected' }).select('provider').lean<any>(),
+    ]);
     return {
       name: c.name,
       slug: c.slug,
       country: c.country,
       city: c.city,
       dataRegion: c.dataRegion,
+      website: c.brand?.website || '',
+      liveCards,
+      hrProvider: hr ? PROVIDERS.find((p) => p.id === hr.provider)?.name || hr.provider : null,
       settings: {
         approvalRequired: !!c.settings?.approvalRequired,
         photoApproval: c.settings?.photoApproval !== false,
         teamPage: !!c.settings?.teamPage,
+        leaverUrl: c.settings?.leaverUrl || '',
         languages: c.settings?.languages || ['en'],
         crm: {
           provider: c.settings?.crm?.provider || '',
@@ -58,11 +67,17 @@ export class SettingsController {
         photoApproval: z.boolean().optional(),
         teamPage: z.boolean().optional(),
         languages: z.array(z.string().min(2).max(5)).min(1).max(10).optional(),
+        website: z.string().trim().max(300).optional(),
+        leaverUrl: z.string().trim().max(300).optional(),
       }),
       body,
     );
+    // Links are stored with https:// so the public pages can use them as they are
+    const url = (v: string) => (!v ? '' : /^https?:\/\//i.test(v) ? v : `https://${v}`);
     const set: any = {};
     if (d.name) set.name = d.name;
+    if (d.website !== undefined) set['brand.website'] = url(d.website);
+    if (d.leaverUrl !== undefined) set['settings.leaverUrl'] = url(d.leaverUrl);
     if (d.country !== undefined) set.country = d.country;
     if (d.city !== undefined) set.city = d.city;
     if (d.approvalRequired !== undefined) set['settings.approvalRequired'] = d.approvalRequired;

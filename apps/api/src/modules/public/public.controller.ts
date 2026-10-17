@@ -73,7 +73,8 @@ export class PublicController {
         status: 'deactivated',
         companyName: company.name,
         companySlug: company.slug,
-        website,
+        // "Send visitors to" from Company settings, else the company website
+        website: company?.settings?.leaverUrl || website,
         logo,
         teamPage,
         brand: brandOf(company),
@@ -277,7 +278,7 @@ export class PublicController {
     if (d.status !== 'active' || !card || card.status !== 'live') {
       const flags = company ? await flagsFor(company) : [];
       const teamPage = Boolean(company?.settings?.teamPage && flags.includes('public.team_page'));
-      const website = company?.brand?.website || (company?.domain?.verified && company.domain.host ? `https://${company.domain.host}` : undefined) || null;
+      const website = company?.settings?.leaverUrl || company?.brand?.website || (company?.domain?.verified && company.domain.host ? `https://${company.domain.host}` : undefined) || null;
       const logo = company?.brand?.logos?.icon || company?.brand?.logos?.light || null;
       return { active: false, companyName: company?.name, companySlug: company?.slug, website, logo, teamPage };
     }

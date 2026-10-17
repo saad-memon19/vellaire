@@ -16,24 +16,15 @@ export default function CompanySettingsPage() {
   const toast = useToast();
 
   const [companyName, setCompanyName] = useState('');
-  const [website, setWebsite] = useState('https://meridian.com');
-  const [languages, setLanguages] = useState<string[]>(['en', 'ar']);
+  const [website, setWebsite] = useState('');
+  const [languages, setLanguages] = useState<string[]>(['en']);
   const [showLangPicker, setShowLangPicker] = useState(false);
+  const [teamPage, setTeamPage] = useState(false);
 
-  // Offboarding settings
-  const [switchOffCard, setSwitchOffCard] = useState(true);
-  const [redirectUrl, setRedirectUrl] = useState('meridian.com/contact');
-  const [disableNfcWallet, setDisableNfcWallet] = useState(true);
-  const [keepLeads, setKeepLeads] = useState(true);
-  const [dataRetention, setDataRetention] = useState('30 days');
-
-  // Security settings
-  const [require2fa, setRequire2fa] = useState(true);
-  const [sessionLength, setSessionLength] = useState('12 hours');
-  const [aiFeatures, setAiFeatures] = useState(true);
+  // Where a leaver's switched-off card sends visitors (empty = the company website)
+  const [redirectUrl, setRedirectUrl] = useState('');
 
   const [busy, setBusy] = useState(false);
-  const [deleteModal, setDeleteModal] = useState(false);
 
   useEffect(() => {
     if (data) {
@@ -41,9 +32,9 @@ export default function CompanySettingsPage() {
       if (data.settings?.languages?.length) {
         setLanguages(data.settings.languages);
       }
-      if (data.domain?.host) {
-        setWebsite(`https://${data.domain.host.replace(/^cards\./, '')}`);
-      }
+      setWebsite(data.website || '');
+      setRedirectUrl(data.settings?.leaverUrl || '');
+      setTeamPage(!!data.settings?.teamPage);
     }
   }, [data]);
 
@@ -58,6 +49,9 @@ export default function CompanySettingsPage() {
       await api.patch('/settings/company', {
         name: companyName,
         languages,
+        website,
+        leaverUrl: redirectUrl,
+        teamPage,
       });
       toast('Changes saved successfully', 'ok');
       mutate();
@@ -78,8 +72,10 @@ export default function CompanySettingsPage() {
     }
   };
 
-  const domainHost = data.domain?.host || 'cards.meridian.com';
-  const totalCards = 1248;
+  const domainHost = data.domain?.host || data.domain?.defaultUrl?.replace(/^https?:\/\//, '') || '';
+  const totalCards = data.liveCards || 0;
+  const sso: string | null = data.settings?.sso?.provider || null;
+  const teamPageFlag = !!me?.company?.flags?.includes('public.team_page');
 
   return (
     <div className="flex w-full max-w-[1100px] flex-col gap-6">
@@ -229,15 +225,21 @@ export default function CompanySettingsPage() {
         <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] items-center gap-4 border-t border-[#F0EBE2] py-3.5">
           <span className="flex flex-col gap-0.5">
             <span className="font-medium text-[#17171B]">Custom domain</span>
-            <span className="text-[12.5px] text-[#6E685F]">DNS record checked 2 days ago</span>
+            <Link href="/app/settings/domain" className="text-[12.5px] text-[#6E685F] hover:text-[#17171B] hover:underline">
+              {!data.domain?.host ? 'Not set up · cards use the Vellaire address' : data.domain.verified ? 'DNS record verified' : 'Waiting for the DNS record'}
+            </Link>
           </span>
           <span className="flex flex-wrap items-center gap-2.5">
             <span className="rounded-lg border border-[#E6E0D5] bg-[#F7F5F0] px-3 py-2 font-mono text-[13.5px] text-[#17171B]">
               {domainHost}
             </span>
-            <span className="rounded-full bg-[#E5F2EB] px-2.5 py-0.5 text-[12px] font-medium text-[#1F7A55]">
-              Verified
-            </span>
+            {data.domain?.host && (
+              <span
+                className={`rounded-full px-2.5 py-0.5 text-[12px] font-medium ${data.domain.verified ? 'bg-[#E5F2EB] text-[#1F7A55]' : 'bg-[#F6EFE1] text-[#876A33]'}`}
+              >
+                {data.domain.verified ? 'Verified' : 'Not verified'}
+              </span>
+            )}
           </span>
         </div>
 
@@ -248,103 +250,81 @@ export default function CompanySettingsPage() {
           </span>
           <span className="font-mono text-[13.5px] text-[#4E4A44]">/first-last · e.g. /sara-khan</span>
         </div>
+
+        {/* Team page */}
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] items-center gap-4 border-t border-[#F0EBE2] py-3.5">
+          <span className="flex flex-col gap-0.5">
+            <span className="font-medium text-[#17171B]">Team page</span>
+            <span className="text-[12.5px] text-[#6E685F]">
+              {teamPageFlag ? 'A public page listing everyone with a live card' : 'Vellaire switches this on for your workspace first'}
+            </span>
+          </span>
+          <Switch on={teamPage} disabled={!admin || !teamPageFlag} onClick={() => setTeamPage(!teamPage)} />
+        </div>
       </section>
 
       {/* Section 3: When Someone Leaves */}
       <section className="flex flex-col rounded-[14px] border border-[#E6E0D5] bg-white px-6 pb-2 pt-[22px]">
         <div className="flex flex-col gap-0.5 pb-3.5">
           <h2 className="m-0 text-[17px] font-semibold text-[#17171B]">When someone leaves</h2>
-          <span className="text-[13px] text-[#6E685F]">Triggered by Workday on their last day</span>
+          <span className="text-[13px] text-[#6E685F]">
+            {data.hrProvider ? `Triggered by ${data.hrProvider} on their last day` : 'When you mark someone as a leaver in Employees'}
+          </span>
         </div>
 
-        {/* Switch off the card */}
+        {/* Switch off the card: always happens when someone leaves */}
         <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] items-center gap-4 border-t border-[#F0EBE2] py-3.5">
           <span className="flex flex-col gap-0.5">
             <span className="font-medium text-[#17171B]">Switch off the card</span>
-            <span className="text-[12.5px] text-[#6E685F]">The link shows a polite page instead</span>
+            <span className="text-[12.5px] text-[#6E685F]">The link shows a polite page instead · always on</span>
           </span>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={switchOffCard}
-            onClick={() => setSwitchOffCard(!switchOffCard)}
-            className="relative h-7 w-[46px] justify-self-start rounded-full border-none transition-colors"
-            style={{ backgroundColor: switchOffCard ? '#17171B' : '#D9D2C4' }}
-          >
-            <span
-              className="absolute top-1 h-5 w-5 rounded-full transition-all"
-              style={{
-                left: switchOffCard ? '22px' : '4px',
-                backgroundColor: switchOffCard ? '#E6D3A3' : '#FFFFFF',
-              }}
-            />
-          </button>
+          <Switch on disabled />
         </div>
 
         {/* Send visitors to */}
         <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] items-center gap-4 border-t border-[#F0EBE2] py-3.5">
           <span className="flex flex-col gap-0.5">
             <span className="font-medium text-[#17171B]">Send visitors to</span>
+            <span className="text-[12.5px] text-[#6E685F]">Empty: your website</span>
           </span>
-          <span className="font-mono text-[13.5px] text-[#17171B]">{redirectUrl}</span>
+          <input
+            type="text"
+            value={redirectUrl}
+            onChange={(e) => setRedirectUrl(e.target.value)}
+            disabled={!admin}
+            placeholder={website || 'yourcompany.com/contact'}
+            className="h-[42px] min-w-0 rounded-lg border border-[#E0D9CC] px-3 font-mono text-[13.5px] text-[#17171B] outline-none focus:border-[#B08D4F] disabled:bg-[#F7F5F0]"
+          />
         </div>
 
-        {/* Disable NFC card and wallet passes */}
+        {/* Disable NFC card and wallet passes: always happens */}
         <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] items-center gap-4 border-t border-[#F0EBE2] py-3.5">
           <span className="flex flex-col gap-0.5">
             <span className="font-medium text-[#17171B]">Disable NFC card and wallet passes</span>
+            <span className="text-[12.5px] text-[#6E685F]">Always on</span>
           </span>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={disableNfcWallet}
-            onClick={() => setDisableNfcWallet(!disableNfcWallet)}
-            className="relative h-7 w-[46px] justify-self-start rounded-full border-none transition-colors"
-            style={{ backgroundColor: disableNfcWallet ? '#17171B' : '#D9D2C4' }}
-          >
-            <span
-              className="absolute top-1 h-5 w-5 rounded-full transition-all"
-              style={{
-                left: disableNfcWallet ? '22px' : '4px',
-                backgroundColor: disableNfcWallet ? '#E6D3A3' : '#FFFFFF',
-              }}
-            />
-          </button>
+          <Switch on disabled />
         </div>
 
-        {/* Keep their leads for the company */}
+        {/* Keep their leads for the company: leads are never deleted with a card */}
         <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] items-center gap-4 border-t border-[#F0EBE2] py-3.5">
           <span className="flex flex-col gap-0.5">
             <span className="font-medium text-[#17171B]">Keep their leads for the company</span>
+            <span className="text-[12.5px] text-[#6E685F]">Always on</span>
           </span>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={keepLeads}
-            onClick={() => setKeepLeads(!keepLeads)}
-            className="relative h-7 w-[46px] justify-self-start rounded-full border-none transition-colors"
-            style={{ backgroundColor: keepLeads ? '#17171B' : '#D9D2C4' }}
-          >
-            <span
-              className="absolute top-1 h-5 w-5 rounded-full transition-all"
-              style={{
-                left: keepLeads ? '22px' : '4px',
-                backgroundColor: keepLeads ? '#E6D3A3' : '#FFFFFF',
-              }}
-            />
-          </button>
+          <Switch on disabled />
         </div>
 
         {/* Delete personal data after */}
         <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] items-center gap-4 border-t border-[#F0EBE2] py-3.5">
           <span className="flex flex-col gap-0.5">
             <span className="font-medium text-[#17171B]">Delete personal data after</span>
+            <span className="text-[12.5px] text-[#6E685F]">Coming soon · kept until you delete it</span>
           </span>
           <input
             type="text"
-            value={dataRetention}
-            onChange={(e) => setDataRetention(e.target.value)}
-            disabled={!admin}
+            value="Never"
+            disabled
             className="h-[42px] min-w-0 rounded-lg border border-[#E0D9CC] px-3 text-[14px] text-[#17171B] outline-none focus:border-[#B08D4F] disabled:bg-[#F7F5F0]"
           />
         </div>
@@ -362,73 +342,49 @@ export default function CompanySettingsPage() {
           <span className="flex flex-col gap-0.5">
             <span className="font-medium text-[#17171B]">Single sign-on</span>
           </span>
-          <span className="flex items-center gap-2.5">
-            <span className="text-[14px] text-[#17171B]">Microsoft Entra ID</span>
-            <span className="rounded-full bg-[#E5F2EB] px-2.5 py-0.5 text-[12px] font-medium text-[#1F7A55]">
-              On
+          {sso ? (
+            <span className="flex items-center gap-2.5">
+              <span className="text-[14px] text-[#17171B]">{sso}</span>
+              <span className="rounded-full bg-[#E5F2EB] px-2.5 py-0.5 text-[12px] font-medium text-[#1F7A55]">On</span>
             </span>
-          </span>
+          ) : (
+            <Link href="/app/settings/security" className="text-[14px] text-[#17171B] hover:underline">
+              Not set up
+            </Link>
+          )}
         </div>
 
-        {/* Require two-step sign-in */}
+        {/* Require two-step sign-in: there is no two-step sign-in yet */}
         <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] items-center gap-4 border-t border-[#F0EBE2] py-3.5">
           <span className="flex flex-col gap-0.5">
             <span className="font-medium text-[#17171B]">Require two-step sign-in</span>
+            <span className="text-[12.5px] text-[#6E685F]">Coming soon</span>
           </span>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={require2fa}
-            onClick={() => setRequire2fa(!require2fa)}
-            className="relative h-7 w-[46px] justify-self-start rounded-full border-none transition-colors"
-            style={{ backgroundColor: require2fa ? '#17171B' : '#D9D2C4' }}
-          >
-            <span
-              className="absolute top-1 h-5 w-5 rounded-full transition-all"
-              style={{
-                left: require2fa ? '22px' : '4px',
-                backgroundColor: require2fa ? '#E6D3A3' : '#FFFFFF',
-              }}
-            />
-          </button>
+          <Switch on={false} disabled />
         </div>
 
-        {/* Session length */}
+        {/* Session length: fixed at 30 days (common/auth.ts) */}
         <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] items-center gap-4 border-t border-[#F0EBE2] py-3.5">
           <span className="flex flex-col gap-0.5">
             <span className="font-medium text-[#17171B]">Session length</span>
+            <span className="text-[12.5px] text-[#6E685F]">Coming soon · changing it</span>
           </span>
           <input
             type="text"
-            value={sessionLength}
-            onChange={(e) => setSessionLength(e.target.value)}
-            disabled={!admin}
+            value="30 days"
+            disabled
             className="h-[42px] min-w-0 rounded-lg border border-[#E0D9CC] px-3 text-[14px] text-[#17171B] outline-none focus:border-[#B08D4F] disabled:bg-[#F7F5F0]"
           />
         </div>
 
-        {/* AI features */}
+        {/* AI features: switched on and off by Vellaire for now */}
         <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] items-center gap-4 border-t border-[#F0EBE2] py-3.5">
           <span className="flex flex-col gap-0.5">
             <span className="font-medium text-[#17171B]">AI features</span>
+            <span className="text-[12.5px] text-[#6E685F]">Coming soon · your own switch</span>
           </span>
           <div className="flex flex-col gap-1">
-            <button
-              type="button"
-              role="switch"
-              aria-checked={aiFeatures}
-              onClick={() => setAiFeatures(!aiFeatures)}
-              className="relative h-7 w-[46px] justify-self-start rounded-full border-none transition-colors"
-              style={{ backgroundColor: aiFeatures ? '#17171B' : '#D9D2C4' }}
-            >
-              <span
-                className="absolute top-1 h-5 w-5 rounded-full transition-all"
-                style={{
-                  left: aiFeatures ? '22px' : '4px',
-                  backgroundColor: aiFeatures ? '#E6D3A3' : '#FFFFFF',
-                }}
-              />
-            </button>
+            <Switch on={!!me?.features?.ai} disabled />
             <span className="text-[12.5px] text-[#6E685F]">Your data is never used to train AI</span>
           </div>
         </div>
@@ -439,48 +395,34 @@ export default function CompanySettingsPage() {
         <div className="flex flex-col gap-0.5">
           <span className="text-[14px] font-semibold text-[#A3283A]">Delete workspace</span>
           <span className="text-[13px] text-[#5E5952]">
-            Switches off all {totalCards.toLocaleString()} cards. Only the owner can do this.
+            Switches off all {totalCards.toLocaleString()} cards. Coming soon here · until then the owner asks Vellaire support.
           </span>
         </div>
         <button
           type="button"
-          onClick={() => setDeleteModal(true)}
-          className="h-[42px] cursor-pointer rounded-lg border border-[#E9B9C0] bg-white px-4 text-[14px] text-[#A3283A] transition-colors hover:bg-[#FDF2F4]"
+          disabled
+          className="h-[42px] cursor-not-allowed rounded-lg border border-[#E9B9C0] bg-white px-4 text-[14px] text-[#A3283A] opacity-50"
         >
           Delete workspace
         </button>
       </section>
-
-      {/* Delete Confirmation Modal */}
-      {deleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="flex w-full max-w-md flex-col gap-4 rounded-xl bg-white p-6 shadow-xl">
-            <h3 className="m-0 text-[18px] font-semibold text-[#A3283A]">Delete Workspace</h3>
-            <p className="m-0 text-[14px] text-[#5E5952]">
-              Are you sure you want to delete this workspace? This will immediately switch off all cards and cannot be undone.
-            </p>
-            <div className="mt-2 flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setDeleteModal(false)}
-                className="h-10 cursor-pointer rounded-lg border border-[#D9D2C4] px-4 text-[14px] text-[#17171B] hover:bg-[#F7F5F0]"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  toast('Workspace deletion requires owner email confirmation', 'err');
-                  setDeleteModal(false);
-                }}
-                className="h-10 cursor-pointer rounded-lg bg-[#A3283A] px-4 text-[14px] font-semibold text-white hover:bg-[#8A2130]"
-              >
-                Confirm Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
+  );
+}
+
+/** The page's on/off switch, as drawn in the design. */
+function Switch({ on, disabled, onClick }: { on: boolean; disabled?: boolean; onClick?: () => void }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      disabled={disabled}
+      onClick={onClick}
+      className="relative h-7 w-[46px] justify-self-start rounded-full border-none transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+      style={{ backgroundColor: on ? '#17171B' : '#D9D2C4' }}
+    >
+      <span className="absolute top-1 h-5 w-5 rounded-full transition-all" style={{ left: on ? '22px' : '4px', backgroundColor: on ? '#E6D3A3' : '#FFFFFF' }} />
+    </button>
   );
 }
