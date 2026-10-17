@@ -1,7 +1,7 @@
 # Vellaire — handoff for the next developer or AI agent
 
 Read this first, then `README.md` (setup, accounts, environment variables).
-Last updated: 13 October 2026.
+Last updated: 18 October 2026. The latest work and the reasons things are still open are in §7 and §8.
 
 Vellaire is a digital business card product for companies. It has five parts, all in this repo:
 
@@ -83,21 +83,21 @@ tools/design-check/          screenshot design vs built page, and crawl all rout
 
 ---
 
-## 4. Status (13 October 2026)
+## 4. Status (18 October 2026)
 
 **Everything in this table is built and connected to the database.** Do not rebuild it or treat it as pending. All routes were last crawled without errors on 9 October; pages changed after that are marked.
 
 | Area | Routes | Status |
 |---|---|---|
-| Website, sign in, sign up | `/`, `/signin`, `/signup` | ✅ done 15 Oct: email + password (12+ characters, a number, a symbol), forgot/reset password, email link and 6-digit code, Google/Microsoft. See §6 |
+| Website, sign in, sign up, forgot and reset password | `/`, `/signin`, `/signup`, `/forgot-password`, `/reset-password` | ✅ done 15 Oct: email + password (12+ characters, a number, a symbol), forgot/reset password, email link and 6-digit code, Google/Microsoft. See §6 |
 | Setup wizard (5 steps) | `/setup` | ✅ done and tested end to end |
 | Company dashboard | `/app/*` | ✅ done |
 | Employee app | `/m`, `/m/share`, `/m/leads`, `/m/insights`, `/m/edit`, `/m/settings` | ✅ done |
 | Public card, Save contact (vCard), Share your details, team page, inactive card | `/c/:company/:slug`, `/c/:company` | ✅ done |
 | NFC tap link | `/t/:uid` → the live card, tap counted | ✅ done (software side; see §5C for real chips) |
 | Owner console (17 pages) | `/console/*` | ✅ done |
-| Installable app (PWA) | manifest, PNG icons, `public/sw.js` offline page, iPhone home-screen settings | ✅ done 13 Oct. Signed-out app goes to `/signin` instead of a blank screen. Sign-in emails carry a 6-digit code (`/auth/verify-code`) because on iPhone the email link opens Safari, not the installed app. An "Install the app" banner (dashboard and employee app, `components/pwa.tsx`) and a Settings row offer installing; on iPhone they show Add to Home Screen steps. The app starts at `/open`, which sends each person to their own home |
-| Vercel production setup | `apps/api/vercel.json`, `DEPLOY.md` | ✅ code ready; projects are linked; live status unknown |
+| Installable app (PWA) | manifest, PNG icons, `public/sw.js` offline page, iPhone home-screen settings | ✅ done 13 Oct. Signed-out app goes to `/signin` instead of a blank screen. Sign-in emails carry a 6-digit code (`/auth/verify-code`) because on iPhone the email link opens Safari, not the installed app. An "Install the app" banner (dashboard and employee app, `components/pwa.tsx`) and a Settings row offer installing; on iPhone they show Add to Home Screen steps. The app starts at `/open`. Inside the installed app everyone gets the employee app only (`/m`); the dashboard and the console redirect there and open only in a browser. Owner accounts with no card see "The app is for card holders" |
+| Vercel production setup | `apps/api/vercel.json`, `DEPLOY.md` | ✅ live at https://vellaire.vercel.app (web project `vellaire`, API project `vellaire-api`). The web project still deploys pushes as **Preview**: see §8 |
 
 Design alignment done by Antigravity on 10–12 October: Approvals, Sync activity, Edit my card, Team and roles, Inactive card, QR codes, Company settings, Billing, Security, Wallet passes, Email signatures, Employees, Leads, Analytics, HR integrations. **Some of these pages look finished but have buttons that do nothing yet: see §5A.**
 
@@ -119,9 +119,9 @@ These buttons show a success message without saving or sending anything. Either 
 | Billing | `apps/web/src/app/app/settings/billing/page.tsx` | "Card ending 4021" and "finance@meridian.com" are hard-coded for every company; invoice "Download" and "update payment method" only show a message |
 | Company settings | `apps/web/src/app/app/settings/company/page.tsx` | Leaver redirect is hard-coded to `meridian.com/contact`; unused `setRedirectUrl` |
 | Security | `apps/web/src/app/app/settings/security/page.tsx` | "Save changes" sends an empty request; certificate upload and "Download audit log" only show a message |
+| Team and roles | `apps/api/src/modules/settings/settings.controller.ts` (team list) | "Last active" is hard-coded per demo email ("Now", "Today", "2 days ago"...) instead of `lastLoginAt` |
 
 ### B. Small clean-ups
-- Add `apps/web/tsconfig.tsbuildinfo` to `.gitignore`.
 - `npx tsc --noEmit -p . --noUnusedLocals` in `apps/web` must pass (2 unused variables above).
 - Departments: managers and offices from the design. Compare Create card steps 2–4.
 
@@ -156,3 +156,50 @@ Signature deployment to Outlook and Gmail, two-step sign-in and network rules, c
 - Users directory has Suspend/Reactivate instead of "Reset 2FA" (there is no 2FA yet). A suspended user cannot sign in.
 - Email "open rate" is shown as "Delivered" (opens are not tracked). Without an email key, emails print to the API log.
 - Deleting a company workspace keeps its invoices and the staff audit trail.
+
+---
+
+## 7. Work log: what was done last (13–15 October 2026)
+
+Newest first. Each item is live on https://vellaire.vercel.app and was tested there or locally.
+
+### 15 October: password sign-in, and email that is ready but optional (commit `396c417`)
+Why: the sign-in form had been hidden behind demo buttons, and with no email service nobody could sign in for real. The owner asked for sign-in, sign-up and forgot password to work without email, with email switched on later only through `.env`.
+
+- **Sign-in page** (`apps/web/src/app/signin/page.tsx`): email + password again, "Forgot password?" link, Google/Microsoft, and "Email me a sign-in link" only once email works. Demo buttons moved into a small "Demo access" box that shows only while demo access is on.
+- **Sign-up** (`signup/page.tsx`): password field with the strength bar from the design (12+ characters, a number, a symbol). The account is signed in straight away and goes to `/setup`; no email needed.
+- **New pages:** `/forgot-password`, `/reset-password?token=...`.
+- **API** (`apps/api/src/modules/auth/auth.controller.ts`): `POST /auth/password` (sign in), `/auth/forgot`, `/auth/reset`, `/auth/change-password`, `GET /auth/password` (has a password?), `POST /auth/reset-link/:userId` and `/auth/reset-link/employee/:employeeId` (admin password links). `startSession()` is shared by every way of signing in.
+- **Passwords** (`apps/api/src/common/password.ts`): scrypt hashes, `User.passwordHash` (never sent to the browser), `failedLogins` + `lockedUntil` (5 wrong → 15-minute lock). `MagicToken.purpose` is `signin` or `reset`; a reset link can never be used as a sign-in link.
+- **Password links for people without email:** Employees (select one → Password link), Settings → Team (edit → Make a password link), console Users (Password link). The modal copies the message or opens WhatsApp (`components/password-link.tsx`). Owners: `npm run password-link -w apps/api -- you@email`.
+- **Set or change password:** dashboard avatar menu → Password, console sidebar → Password, app Settings → Password (`components/change-password.tsx`).
+- **Email** (`apps/api/src/common/mail.ts`): sends through Resend (`RESEND_API_KEY`) or any SMTP server (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`), from `MAIL_FROM`. Without them nothing is sent, the email is printed in the API log, and no flow breaks. `mailReady()` tells the rest of the code. Invite and welcome emails now carry a 7-day "Choose a password" link.
+- **Security fix:** before this, the live API had no email key, so `/auth/start` returned the sign-in link on screen in production: anyone could type someone else's email and get into their account. Now links are shown on screen only in local development (`showLinksOnScreen()` in `signin-link.ts`).
+- Tested: weak password refused, sign-up, wrong and right password, lockout after 5, forgot → reset → old password refused, reused link refused, change password, admin links, and a member being refused an admin link. On the live site: no link is returned and "Forgot password" says to ask an admin.
+
+### 13–14 October: installable app (PWA) (commits `56c9255` to `bf61d72`)
+- The installed app opened blank: layouts returned nothing when `/auth/me` failed. Now a signed-out app goes to `/signin`, and other errors show a retry screen (`ScreenError`).
+- On iPhone the installed app keeps its own sign-in, separate from Safari, so the email link signed in Safari instead. Sign-in emails now carry a 6-digit code (`/auth/verify-code`, 5 tries per code, 5 emails per 15 minutes).
+- "Install the Vellaire app" banner in the dashboard and the employee app, plus a Settings row, with step-by-step help for iPhone, Android and computers (`components/pwa.tsx`).
+- The installed app is the employee card app only (My card, Share, Leads, Insights, Settings), matching section 5 of the design. The dashboard and the console redirect to `/m` inside the app; on a phone `/open` goes to `/m`.
+- The employee app screens were compared with design artboards E1–E5 side by side and match.
+
+---
+
+## 8. Still open, and why
+
+| What | Why it is not done | Who or what unblocks it |
+|---|---|---|
+| Real emails (sign-in link, reset, invites, lead alerts) | No email account or domain yet. The code is finished | Owner: add `RESEND_API_KEY` or `SMTP_*` and `MAIL_FROM` to the **vellaire-api** project in Vercel |
+| Web pushes reaching the live site by themselves | The Vercel web project's Production Branch is not `master`, so pushes become Preview builds. Each release so far was promoted by hand (`vercel promote <url>`). The API project already deploys `master` to production | Owner: Vercel → project `vellaire` → Settings → Git → Production Branch = `master` |
+| Owner password on the live site | Without email the owner cannot use "Forgot password" | Owner: sign in with the demo "Owner console" button, then sidebar → Password. Or run `npm run password-link` |
+| Turning off demo access | `DEMO_LOGIN` is set on Vercel, so anyone can open the demo accounts | Owner: remove `DEMO_LOGIN` from **vellaire-api**, after setting their own password |
+| Test company "PW Test Co" (`pwtest…@example.com`) in the database | Left from the 15 October sign-up test; deleting from the database was not permitted in that session | Owner: delete it, or allow the agent to |
+| Fake buttons (§5A) | Built by Antigravity as design copies; saving was never wired | Next coding task, in the §5A order |
+| Wallet passes | Code done; Apple and Google accounts and certificates are needed | Client: Apple Developer Program and a Google Wallet issuer account (§5C) |
+| NFC chips | Software done; the chip-link export for the supplier is not built, and no chips have been written or tap-tested | Next coding task (export), then the client's supplier |
+| Google / Microsoft sign-in | Needs apps in Google Cloud and Microsoft Entra | Owner: create them and add the keys |
+| Payments (Stripe), Terms and Privacy pages | Not started | Owner decides prices and legal text first |
+| Rotating the MongoDB password | It was shared in a screenshot | Owner, in MongoDB Atlas; then update `MONGODB_URI` in Vercel and `apps/api/.env` |
+| 2 unused variables in `apps/web` | Antigravity's code (`setRedirectUrl`, `analytics`); to be fixed together with §5A | Next coding task |
+| No real company data on the live site | Demo data is only for local development; seeding the live database is forbidden | Create a real company through sign-up |
