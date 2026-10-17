@@ -24,7 +24,8 @@ interface SyncRunItem {
 }
 
 interface ActivityPayload {
-  provider: string;
+  provider: string | null;
+  providerId: string | null;
   guardPct: number;
   issues: SyncIssue[];
   runs: SyncRunItem[];
@@ -87,21 +88,9 @@ export default function SyncActivity() {
     }
   };
 
-  const handleFix = (issue: SyncIssue) => {
-    if (issue.fix === 'Map department') {
-      window.location.href = '/app/departments';
-    } else {
-      const email = window.prompt(`Enter work email for ${issue.who}:`);
-      if (email) {
-        api
-          .post('/integrations/activity/fix-issue', { id: issue.id, email })
-          .then(() => {
-            toast('Email added', 'ok');
-            mutate();
-          })
-          .catch((e: any) => toast(e.message, 'err'));
-      }
-    }
+  // Issues are messages from the last sync; they are fixed in the HR connection settings
+  const handleFix = () => {
+    if (data.providerId) window.location.href = `/app/integrations/${data.providerId}`;
   };
 
   return (
@@ -111,7 +100,7 @@ export default function SyncActivity() {
         <div className="flex flex-col gap-1.5">
           <div className="text-[12px] font-medium tracking-[0.2em] text-[#876A33]">AUTOMATION</div>
           <h1 className="m-0 font-display text-[42px] font-normal leading-[1.05] text-[#17171B]">Sync activity</h1>
-          <p className="m-0 text-[15px] text-[#5E5952]">What {data.provider || 'Workday'} changed, when, and anything that needs you.</p>
+          <p className="m-0 text-[15px] text-[#5E5952]">What {data.provider || 'your HR system'} changed, when, and anything that needs you.</p>
         </div>
         <div className="flex flex-wrap gap-2.5">
           <button
@@ -140,7 +129,7 @@ export default function SyncActivity() {
               <path d="M12 4l9 16H3zM12 10v4M12 17h.01" />
             </svg>
             <h2 className="m-0 text-[16px] font-semibold text-[#17171B]">
-              {issues.length} {issues.length === 1 ? 'person needs' : 'people need'} your help
+              {issues.length} {issues.length === 1 ? 'thing needs' : 'things need'} your help
             </h2>
           </div>
           {issues.map((issue) => (
@@ -156,13 +145,15 @@ export default function SyncActivity() {
               >
                 Skip
               </button>
-              <button
-                type="button"
-                onClick={() => handleFix(issue)}
-                className="h-9 cursor-pointer rounded-lg bg-[#17171B] px-3 text-[13px] text-white hover:bg-[#2E2E35]"
-              >
-                {issue.fix}
-              </button>
+              {issue.fix && (
+                <button
+                  type="button"
+                  onClick={handleFix}
+                  className="h-9 cursor-pointer rounded-lg bg-[#17171B] px-3 text-[13px] text-white hover:bg-[#2E2E35]"
+                >
+                  {issue.fix}
+                </button>
+              )}
             </div>
           ))}
         </section>
@@ -171,6 +162,11 @@ export default function SyncActivity() {
       {/* Recent syncs */}
       <section className="overflow-hidden rounded-[14px] border border-[#E6E0D5] bg-white">
         <div className="px-5 py-[18px] text-[16px] font-semibold text-[#17171B]">Recent syncs</div>
+        {!runs.length && (
+          <div className="border-t border-[#F0EBE2] px-5 py-[13px] text-[14px] text-[#6E685F]">
+            No syncs yet. Connect an HR system in Integrations to start.
+          </div>
+        )}
         {runs.map((r) => {
           const style = STATUS_STYLES[r.status] || { bg: '#EFEBE3', color: '#4E4A44' };
           return (

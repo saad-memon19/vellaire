@@ -405,7 +405,7 @@ export class AuthController {
             : 0,
         sync:
           u.companyId && u.role !== 'member'
-            ? ((await db.Integration.findOne({ companyId: requireId(u.companyId) }).lean<any>())?.issues?.length ?? 2)
+            ? ((await db.SyncRun.findOne({ companyId: requireId(u.companyId), status: { $ne: 'running' } }).sort({ createdAt: -1 }).select('issues').lean<any>())?.issues?.length ?? 0)
             : 0,
       },
       features: { ai: this.ai.enabled },
