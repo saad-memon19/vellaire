@@ -1,10 +1,12 @@
 import { BadRequestException, Body, Controller, Get, HttpException, NotFoundException, Param, Post, Query, Req, Res } from '@nestjs/common';
 import type { Request, Response } from 'express';
+import QRCode from 'qrcode';
 import { z } from 'zod';
 import { config } from '../../config';
 import { Public } from '../../common/auth';
 import { brandOf, cardUrl, displayUrl } from '../../common/cards';
 import { sendMail } from '../../common/mail';
+import { savedQrStyle } from '../../common/qr';
 import { parse } from '../../common/util';
 import { db } from '../../db/db';
 import { isOid } from '../../db/schemas';
@@ -284,6 +286,17 @@ export class PublicController {
     }
     await db.NfcDevice.updateOne({ _id: d._id }, { lastTapAt: new Date() });
     return { active: true, url: `${cardUrl(company, card.slug)}?src=nfc` };
+  }
+
+  /** A live card's QR as a PNG for email signatures, which can only show hosted images. */
+  @Get('cards/:id/qr.png')
+  async qrPng(@Param('id') id: string, @Res() res: Response) {
+    const { card, company } = await this.byId(id);
+    const style = savedQrStyle(company);
+    const buf = await QRCode.toBuffer(`${cardUrl(company, card.slug)}?src=signature`, { width: 256, margin: 1, errorCorrectionLevel: 'H', color: { dark: style?.fg || '#17171B', light: style?.bg || '#FFFFFF' } });
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.send(buf);
   }
 
   @Get('cards/:id/wallet/apple')

@@ -51,6 +51,8 @@ export const CompanySchema = new Schema(
       qr: { shape: String, fg: String, bg: String, centre: String, frameText: String },
       // Wallet pass design from the Wallet passes page (modules/public/wallet.ts); empty means brand colours
       wallet: { bg: String, fields: { name: Boolean, title: Boolean, office: Boolean, photo: Boolean } },
+      // Email signature design from Email signatures (modules/cards/signature.ts); empty means the original layout
+      signature: { style: String, photo: Boolean, qr: Boolean, phone: Boolean, social: Boolean, booking: Boolean, legal: String },
       publishedAt: Date,
     },
     settings: {

@@ -30,7 +30,18 @@ import { daysAgo, escapeRegex, found, logActivity, paging, parse, pct, relTime, 
 import { db } from '../../db/db';
 import { oid } from '../../db/schemas';
 import { appleReady, googleReady, PASS_BACKGROUNDS, passDesign } from '../public/wallet';
-import { signatureHtml } from './signature';
+import { savedSignature, signatureHtml, type SignatureDesign } from './signature';
+
+const DEFAULT_SIGNATURE: SignatureDesign = { style: 'Classic', photo: true, qr: true, phone: true, social: false, booking: false, legal: '' };
+const signatureSchema = z.object({
+  style: z.enum(['Classic', 'Compact', 'With banner']),
+  photo: z.boolean(),
+  qr: z.boolean(),
+  phone: z.boolean(),
+  social: z.boolean(),
+  booking: z.boolean(),
+  legal: z.string().max(400),
+});
 
 const linkSchema = z.object({
   type: z.string().max(30),
@@ -269,6 +280,46 @@ export class CardsController {
     }
     await logActivity({ companyId: u.companyId, actor: u.name, action: 'wallet.reminders', text: `Wallet reminders emailed to ${sent} people` });
     return { sent };
+  }
+
+  /** Email signatures page: the saved design and the live card count. */
+  @Get('cards/signatures')
+  async signatures(@CurrentUser() u: SessionUser) {
+    const company = await this.company(u);
+    return { design: savedSignature(company) || DEFAULT_SIGNATURE, saved: !!savedSignature(company), live: await db.Card.countDocuments({ companyId: company._id, status: 'live' }) };
+  }
+
+  /** The signature for the viewer's own card (or any live card) in the given design, for the preview. */
+  @Post('cards/signatures/preview')
+  async signaturePreview(@Body() body: unknown, @CurrentUser() u: SessionUser) {
+    const d = parse(signatureSchema, body);
+    const company = await this.company(u);
+    const me = u.employeeId ? await db.Employee.findById(u.employeeId).select('cardId').lean<any>() : null;
+    const card =
+      (me?.cardId && (await db.Card.findOne({ _id: me.cardId, status: 'live' }).lean<any>())) ||
+      (await db.Card.findOne({ companyId: company._id, status: 'live' }).lean<any>());
+    return { html: card ? signatureHtml(card, company, d) : '' };
+  }
+
+  @Roles('owner', 'admin', 'brand_manager')
+  @Patch('cards/signatures')
+  async saveSignatures(@Body() body: unknown, @CurrentUser() u: SessionUser) {
+    const d = parse(signatureSchema, body);
+    await db.Company.updateOne({ _id: oid(u.companyId!) }, { 'brand.signature': d });
+    return { ok: true };
+  }
+
+  /** Every live card's signature as an .html file, for IT to install by hand until mailbox deployment exists. */
+  @Get('cards/signatures.zip')
+  async signaturesZip(@CurrentUser() u: SessionUser, @Res() res: Response) {
+    const company = await this.company(u);
+    const cards = await db.Card.find({ companyId: company._id, status: 'live' }).lean<any[]>();
+    const zip = new JSZip();
+    for (const c of cards) zip.file(`${c.slug}.html`, `<!doctype html><meta charset="utf-8">\n${signatureHtml(c, company)}`);
+    const buf = await zip.generateAsync({ type: 'nodebuffer' });
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', `attachment; filename="${company.slug}-signatures.zip"`);
+    res.send(buf);
   }
 
   @Get('cards/qr-codes.zip')
