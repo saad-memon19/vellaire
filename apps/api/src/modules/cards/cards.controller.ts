@@ -24,6 +24,7 @@ import {
   publishCard,
   serializeCard,
 } from '../../common/cards';
+import { companyQrSvg, logoData, qrStyleOf, savedQrStyle } from '../../common/qr';
 import { daysAgo, escapeRegex, found, logActivity, paging, parse, pct, relTime, requireId, slugify, initials } from '../../common/util';
 import { db } from '../../db/db';
 import { oid } from '../../db/schemas';
@@ -161,15 +162,45 @@ export class CardsController {
     return { slug: clean, available: clean.length >= 2 && !(await db.Card.exists(q)) };
   }
 
+  /** QR studio: the saved company style, a real card link for the preview, and this month's QR scans. */
+  @Get('cards/qr-studio')
+  async qrStudio(@CurrentUser() u: SessionUser) {
+    const company = await this.company(u);
+    const [live, sample, scans, before] = await Promise.all([
+      db.Card.countDocuments({ companyId: company._id, status: 'live' }),
+      db.Card.findOne({ companyId: company._id, status: 'live' }).select('slug').lean<any>(),
+      db.Event.countDocuments({ companyId: company._id, type: 'view', channel: 'qr', ts: { $gte: daysAgo(30) } }),
+      db.Event.countDocuments({ companyId: company._id, type: 'view', channel: 'qr', ts: { $gte: daysAgo(60), $lt: daysAgo(30) } }),
+    ]);
+    return {
+      style: qrStyleOf(company),
+      liveCards: live,
+      sampleUrl: sample ? `${cardUrl(company, sample.slug)}?src=qr` : `${cardUrl(company, 'your-name')}?src=qr`,
+      scans,
+      scansChange: before ? pct(scans, before) : null,
+    };
+  }
+
+  @Roles('owner', 'admin', 'brand_manager')
+  @Patch('cards/qr-style')
+  async saveQrStyle(@Body() body: unknown, @CurrentUser() u: SessionUser) {
+    const hex = z.string().regex(/^#[0-9A-Fa-f]{6}$/);
+    const d = parse(
+      z.object({ shape: z.enum(['rounded', 'square', 'dots']), fg: hex, bg: hex, centre: z.enum(['logo', 'seal', 'none']), frameText: z.string().max(40) }),
+      body,
+    );
+    await db.Company.updateOne({ _id: oid(u.companyId!) }, { 'brand.qr': d });
+    await logActivity({ companyId: u.companyId, actor: u.name, action: 'brand.qr', text: 'Company QR style updated' });
+    return { style: d };
+  }
+
   @Get('cards/qr-codes.zip')
   async allQr(@CurrentUser() u: SessionUser, @Res() res: Response) {
     const company = await this.company(u);
     const cards = await db.Card.find({ companyId: company._id, status: 'live' }).select('slug').lean<any[]>();
+    const logo = await logoData(company);
     const zip = new JSZip();
-    for (const c of cards) {
-      const svg = await QRCode.toString(`${cardUrl(company, c.slug)}?src=qr`, { type: 'svg', margin: 1, errorCorrectionLevel: 'H', color: { dark: '#17171B', light: '#FFFFFF' } });
-      zip.file(`${c.slug}.svg`, svg);
-    }
+    for (const c of cards) zip.file(`${c.slug}.svg`, await companyQrSvg(company, `${cardUrl(company, c.slug)}?src=qr`, logo));
     const buf = await zip.generateAsync({ type: 'nodebuffer' });
     res.setHeader('Content-Type', 'application/zip');
     res.setHeader('Content-Disposition', `attachment; filename="${company.slug}-qr-codes.zip"`);
@@ -264,12 +295,14 @@ export class CardsController {
     const company = await this.company(u);
     const url = `${cardUrl(company, card.slug)}?src=qr`;
     if (format === 'png') {
-      const buf = await QRCode.toBuffer(url, { width: 1024, margin: 2, errorCorrectionLevel: 'H', color: { dark: '#17171B', light: '#FFFFFF' } });
+      // PNG keeps plain square dots; a saved company style still sets the colours
+      const style = savedQrStyle(company);
+      const buf = await QRCode.toBuffer(url, { width: 1024, margin: 2, errorCorrectionLevel: 'H', color: { dark: style?.fg || '#17171B', light: style?.bg || '#FFFFFF' } });
       res.setHeader('Content-Type', 'image/png');
       res.setHeader('Content-Disposition', `attachment; filename="${card.slug}-qr.png"`);
       return res.send(buf);
     }
-    const svg = await QRCode.toString(url, { type: 'svg', margin: 1, errorCorrectionLevel: 'H', color: { dark: '#17171B', light: '#FFFFFF' } });
+    const svg = await companyQrSvg(company, url);
     res.setHeader('Content-Type', 'image/svg+xml');
     if (format === 'download') res.setHeader('Content-Disposition', `attachment; filename="${card.slug}-qr.svg"`);
     return res.send(svg);

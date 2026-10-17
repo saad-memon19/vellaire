@@ -1,10 +1,10 @@
 import { BadRequestException, Body, Controller, Get, NotFoundException, Patch, Query, Res } from '@nestjs/common';
 import type { Response } from 'express';
-import QRCode from 'qrcode';
 import { z } from 'zod';
 import { AllowMember, CurrentUser, SessionUser } from '../../common/auth';
 import { cardUrl, serializeCard } from '../../common/cards';
 import { materialName } from '../../common/catalog';
+import { companyQrSvg } from '../../common/qr';
 import { daysAgo, initials, logActivity, parse, pct, rangeDays, relTime } from '../../common/util';
 import { db } from '../../db/db';
 import { analyticsFor, fmtDelta } from '../analytics/analytics.controller';
@@ -56,7 +56,7 @@ export class MeController {
   @Get('qr')
   async qr(@CurrentUser() u: SessionUser, @Res() res: Response) {
     const { card, company } = await this.mine(u);
-    const svg = await QRCode.toString(`${cardUrl(company, card.slug)}?src=qr`, { type: 'svg', margin: 1, errorCorrectionLevel: 'H', color: { dark: '#17171B', light: '#FFFFFF' } });
+    const svg = await companyQrSvg(company, `${cardUrl(company, card.slug)}?src=qr`);
     res.setHeader('Content-Type', 'image/svg+xml');
     res.send(svg);
   }

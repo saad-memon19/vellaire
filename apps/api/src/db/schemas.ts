@@ -47,6 +47,8 @@ export const CompanySchema = new Schema(
         languages: { type: Boolean, default: true },
       },
       subBrands: [{ name: String, field: String, value: String, theme: String, layout: String }],
+      // Company QR style from the QR studio (common/qr.ts); empty means the default style
+      qr: { shape: String, fg: String, bg: String, centre: String, frameText: String },
       publishedAt: Date,
     },
     settings: {

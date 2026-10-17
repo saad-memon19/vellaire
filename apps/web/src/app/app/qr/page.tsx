@@ -1,7 +1,9 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useToast } from '@/components/toast';
+import { api, useApi, useMe } from '@/lib/api';
+import { qrMatrix, qrSvg, svgToPng, toDataUri, type QrStyle } from '@/lib/qr';
 
 interface DotShape {
   id: string;
@@ -56,123 +58,78 @@ export default function QrStudio() {
   const [colorIdx, setColorIdx] = useState<number>(0);
   const [centerLogo, setCenterLogo] = useState<'logo' | 'seal' | 'none'>('logo');
   const [frameText, setFrameText] = useState<string>('Scan to connect');
+  const [saving, setSaving] = useState(false);
   const toast = useToast();
   const cardRef = useRef<HTMLDivElement>(null);
+  const { data: me } = useMe();
+  const { data: studio, mutate } = useApi<any>('/cards/qr-studio');
+
+  // Start from the style the company saved
+  useEffect(() => {
+    const s = studio?.style as QrStyle | undefined;
+    if (!s) return;
+    setDotShape(s.shape);
+    const i = COLORS.findIndex((c) => c.fg.toLowerCase() === s.fg.toLowerCase() && c.bg.toLowerCase() === s.bg.toLowerCase());
+    setColorIdx(i < 0 ? 0 : i);
+    setCenterLogo(s.centre);
+    setFrameText(s.frameText);
+  }, [studio?.style]);
 
   const selectedShape = DOT_SHAPES.find((s) => s.id === dotShape) || DOT_SHAPES[0];
   const selectedColor = COLORS[colorIdx] || COLORS[0];
+  const style: QrStyle = { shape: dotShape as QrStyle['shape'], fg: selectedColor.fg, bg: selectedColor.bg, centre: centerLogo, frameText };
+  // A real, scannable code: one of the company's live cards
+  const link = studio?.sampleUrl || 'https://vellaire.app';
+  const qr = useMemo(() => qrMatrix(link, centerLogo !== 'none'), [link, centerLogo]);
+  const cells = qr.cells;
+  const fileName = `${me?.company?.slug || 'vellaire'}-qr`;
 
-  // Deterministic QR cell pattern matching Claude design (25x25)
-  const cells = useMemo(() => {
-    const N = 25;
-    let seed = 11;
-    const rnd = () => {
-      seed = (seed * 1103515245 + 12345) % 2147483648;
-      return seed / 2147483648;
-    };
-    const finder = (r: number, c: number, r0: number, c0: number) => {
-      const y = r - r0;
-      const x = c - c0;
-      if (y < 0 || x < 0 || y > 6 || x > 6) return null;
-      if (y === 0 || y === 6 || x === 0 || x === 6) return true;
-      return y >= 2 && y <= 4 && x >= 2 && x <= 4;
-    };
-
-    const res: boolean[] = [];
-    for (let r = 0; r < N; r++) {
-      for (let c = 0; c < N; c++) {
-        let on = finder(r, c, 0, 0);
-        if (on === null) on = finder(r, c, 0, N - 7);
-        if (on === null) on = finder(r, c, N - 7, 0);
-        const near = (r <= 7 && c <= 7) || (r <= 7 && c >= N - 8) || (r >= N - 8 && c <= 7);
-        // Clear center area if a logo is chosen
-        const isCenter = centerLogo !== 'none' && r >= 10 && r <= 14 && c >= 10 && c <= 14;
-        if (isCenter) {
-          on = false;
-        } else {
-          if (on === null && near) on = false;
-          if (on === null) on = rnd() > 0.52;
-        }
-        res.push(!!on);
-      }
+  const handleSaveCompanyStyle = async () => {
+    setSaving(true);
+    try {
+      await api.patch('/cards/qr-style', style);
+      mutate();
+      toast('Saved as company QR style. Every card QR now uses it', 'ok');
+    } catch (e) {
+      toast((e as Error).message, 'err');
+    } finally {
+      setSaving(false);
     }
-    return res;
-  }, [centerLogo]);
-
-  const handleSaveCompanyStyle = () => {
-    toast('Saved as company QR style', 'ok');
   };
 
-  const handleDownloadPng = () => {
-    const canvas = document.createElement('canvas');
-    const size = 1000;
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+  const svgFile = async () => qrSvg(link, style, centerLogo === 'logo' ? await toDataUri(me?.company?.logo) : undefined);
 
-    ctx.fillStyle = selectedColor.bg;
-    ctx.fillRect(0, 0, size, size);
+  const download = (href: string, name: string) => {
+    const a = document.createElement('a');
+    a.download = name;
+    a.href = href;
+    a.click();
+  };
 
-    const N = 25;
-    const pad = 100;
-    const cellSize = (size - pad * 2) / N;
-    ctx.fillStyle = selectedColor.fg;
-
-    const rRadius = dotShape === 'rounded' ? cellSize * 0.3 : dotShape === 'dots' ? cellSize * 0.5 : 0;
-
-    cells.forEach((on, idx) => {
-      if (!on) return;
-      const r = Math.floor(idx / N);
-      const c = idx % N;
-      const x = pad + c * cellSize;
-      const y = pad + r * cellSize;
-      if (rRadius > 0) {
-        ctx.beginPath();
-        ctx.roundRect(x, y, cellSize * 0.92, cellSize * 0.92, rRadius);
-        ctx.fill();
-      } else {
-        ctx.fillRect(x, y, cellSize * 0.92, cellSize * 0.92);
-      }
-    });
-
-    const link = document.createElement('a');
-    link.download = `vellaire-qr-${dotShape}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
+  const handleDownloadPng = async () => {
+    download(await svgToPng(await svgFile(), 1000), `${fileName}.png`);
     toast('Downloaded QR code PNG', 'ok');
   };
 
-  const handleDownloadSvg = () => {
-    const N = 25;
-    const size = 500;
-    const cellSize = size / N;
-    const rRadius = dotShape === 'rounded' ? '2.5' : dotShape === 'dots' ? '4.5' : '0';
-
-    let rects = '';
-    cells.forEach((on, idx) => {
-      if (!on) return;
-      const r = Math.floor(idx / N);
-      const c = idx % N;
-      const x = (c * cellSize).toFixed(1);
-      const y = (r * cellSize).toFixed(1);
-      const w = (cellSize * 0.92).toFixed(1);
-      rects += `<rect x="${x}" y="${y}" width="${w}" height="${w}" rx="${rRadius}" fill="${selectedColor.fg}"/>`;
-    });
-
-    const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}"><rect width="100%" height="100%" fill="${selectedColor.bg}"/>${rects}</svg>`;
-    const blob = new Blob([svgContent], { type: 'image/svg+xml' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.download = `vellaire-qr-${dotShape}.svg`;
-    link.href = url;
-    link.click();
+  const handleDownloadSvg = async () => {
+    const url = URL.createObjectURL(new Blob([await svgFile()], { type: 'image/svg+xml' }));
+    download(url, `${fileName}.svg`);
     URL.revokeObjectURL(url);
     toast('Downloaded QR code SVG', 'ok');
   };
 
-  const handleDownloadPdf = () => {
-    window.print();
+  // Prints just the code and its frame text; "Save as PDF" in the print dialog gives the file
+  const handleDownloadPdf = async () => {
+    const w = window.open('', '_blank');
+    if (!w) return toast('Allow pop-ups to print the QR code', 'err');
+    const label = frameText ? `<p style="font:600 14px sans-serif;letter-spacing:.22em;color:#876A33">${frameText.toUpperCase().replace(/</g, '&lt;')}</p>` : '';
+    w.document.write(
+      `<title>${fileName}</title><body style="margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:${style.bg}"><div style="width:9cm">${await svgFile()}</div>${label}</body>`,
+    );
+    w.document.querySelector('svg')?.setAttribute('width', '100%');
+    w.document.querySelector('svg')?.removeAttribute('height');
+    w.document.close();
+    setTimeout(() => w.print(), 300);
   };
 
   return (
@@ -192,10 +149,11 @@ export default function QrStudio() {
             download
             className="flex h-11 items-center rounded-lg border border-[#D9D2C4] bg-white px-4 text-[14px] text-[#17171B] hover:border-[#17171B]"
           >
-            Download all · 1,248
+            Download all · {(studio?.liveCards ?? 0).toLocaleString()}
           </a>
           <button
             type="button"
+            disabled={saving || !studio}
             onClick={handleSaveCompanyStyle}
             className="h-11 cursor-pointer rounded-lg bg-[#17171B] px-5 text-[14px] font-semibold text-white hover:bg-[#2E2E35]"
           >
@@ -341,14 +299,14 @@ export default function QrStudio() {
             style={{ backgroundColor: selectedColor.bg }}
           >
             <div className="relative h-[250px] w-[250px]">
-              {/* 25x25 QR Grid */}
-              <div className="grid h-[250px] w-[250px] grid-cols-[repeat(25,minmax(0,1fr))]">
+              {/* Real QR grid; its size depends on the link length */}
+              <div className="grid h-[250px] w-[250px]" style={{ gridTemplateColumns: `repeat(${qr.n},minmax(0,1fr))` }}>
                 {cells.map((on, idx) => (
                   <span
                     key={idx}
                     style={{
                       backgroundColor: on ? selectedColor.fg : 'transparent',
-                      borderRadius: selectedShape.r,
+                      borderRadius: qr.finder(idx) ? 0 : selectedShape.r,
                     }}
                   />
                 ))}
@@ -357,9 +315,13 @@ export default function QrStudio() {
               {/* Centre Logo Overlay */}
               {centerLogo === 'logo' && (
                 <div className="absolute left-1/2 top-1/2 -ml-[29px] -mt-[29px] flex h-[58px] w-[58px] items-center justify-center rounded-[12px] bg-white shadow-sm">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-[10px] bg-[#17171B] font-display text-[22px] text-[#C9A96E]">
-                    M
-                  </span>
+                  {me?.company?.logo ? (
+                    <img src={me.company.logo} alt="" className="h-11 w-11 rounded-[10px] object-contain" />
+                  ) : (
+                    <span className="flex h-11 w-11 items-center justify-center rounded-[10px] bg-[#17171B] font-display text-[22px] text-[#C9A96E]">
+                      {(me?.company?.name || 'V').charAt(0).toUpperCase()}
+                    </span>
+                  )}
                 </div>
               )}
               {centerLogo === 'seal' && (
@@ -429,8 +391,11 @@ export default function QrStudio() {
 
           {/* Stats Box */}
           <div className="flex flex-col gap-1 border-t border-[#F0EBE2] pt-2.5">
-            <span className="font-display text-[32px] font-semibold leading-tight text-[#17171B]">4,812</span>
-            <span className="text-[12.5px] text-[#5E5952]">QR scans this month · +9%</span>
+            <span className="font-display text-[32px] font-semibold leading-tight text-[#17171B]">{(studio?.scans ?? 0).toLocaleString()}</span>
+            <span className="text-[12.5px] text-[#5E5952]">
+              QR scans in the last 30 days
+              {studio?.scansChange != null && ` · ${studio.scansChange >= 0 ? '+' : ''}${studio.scansChange}%`}
+            </span>
           </div>
         </section>
       </div>
