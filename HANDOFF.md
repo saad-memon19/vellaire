@@ -107,23 +107,13 @@ Still different from the design: Templates (🔒 locked, leave it), Departments,
 
 ## 5. What to do next (in this order)
 
-### A. Fix buttons that only pretend to work (before any customer sees them)
+### A. Buttons that only pretended to work: done 18 October (§7)
 
-These buttons show a success message without saving or sending anything. Either make them real, or disable them with a short "Coming soon" note. Never show success for something that did not happen.
-
-| Page | File | Problem |
-|---|---|---|
-| Email signatures | `apps/web/src/app/app/signatures/page.tsx` | "Deploy to all mailboxes" says "deployed to all 1,248 mailboxes"; Google Workspace "connect" does nothing. Design options (photo, QR, phone, legal line) are not saved |
-| Wallet passes | `apps/web/src/app/app/wallet/page.tsx` | "Save design" does not save; "Send to everyone without a pass" always says 232 employees. Unused `analytics` variable |
-| QR codes | `apps/web/src/app/app/qr/page.tsx` | "Save as company style" does not save |
-| Billing | `apps/web/src/app/app/settings/billing/page.tsx` | "Card ending 4021" and "finance@meridian.com" are hard-coded for every company; invoice "Download" and "update payment method" only show a message |
-| Company settings | `apps/web/src/app/app/settings/company/page.tsx` | Leaver redirect is hard-coded to `meridian.com/contact`; unused `setRedirectUrl` |
-| Security | `apps/web/src/app/app/settings/security/page.tsx` | "Save changes" sends an empty request; certificate upload and "Download audit log" only show a message |
-| Team and roles | `apps/api/src/modules/settings/settings.controller.ts` (team list) | "Last active" is hard-coded per demo email ("Now", "Today", "2 days ago"...) instead of `lastLoginAt` |
+QR codes, Company settings, Security, Wallet passes, Email signatures, Billing, Team and roles and Sync activity now save what they show, or say "Coming soon". Rule for new work: never show success for something that did not happen.
 
 ### B. Small clean-ups
-- `npx tsc --noEmit -p . --noUnusedLocals` in `apps/web` must pass (2 unused variables above).
 - Departments: managers and offices from the design. Compare Create card steps 2–4.
+- Before email is switched on: add a "Choose a password" link to the "card ready" email (§8).
 
 ### C. Real-world setup (needs the owner or the client)
 1. **NFC cards.** Software is done: ordering, production stages, the `/t/<uid>` tap link, lost / switch off. Missing:
@@ -162,6 +152,22 @@ Signature deployment to Outlook and Gmail, two-step sign-in and network rules, c
 ## 7. Work log: what was done last (13–18 October 2026)
 
 Newest first. Items up to 15 October are live on https://vellaire.vercel.app and were tested there or locally.
+
+### 18 October: every "pretend" button made real or marked "Coming soon" (commits `aab5ab3` to `2082ad4`)
+Why: §5A. Looking closer, most of these pages were fully made up (fixed numbers, Meridian text, fake QR patterns), not just one button. The design was kept; only data and actions changed. New company styles (QR, signature, wallet) change nothing until a company saves one, so the locked pages look the same.
+
+| Page | Now real | "Coming soon" (not built) |
+|---|---|---|
+| Team and roles | "Last active" from `lastLoginAt` | |
+| QR codes (`common/qr.ts`, `lib/qr.ts`) | Real scannable codes (were a random pattern); style saved as `brand.qr` and used by card QR, employee app QR and "Download all"; print; live card and scan counts. Tested: decoded at 200–2000 px for every shape, centre and colour | |
+| Company settings | Website, "Send visitors to" (`settings.leaverUrl`, shown on switched-off cards and NFC taps), Team page switch (was removed in the design pass), real domain / SSO / HR system / card count | Two-step sign-in, session length (fixed 30 days), data retention, AI switch, delete workspace. Switch-off card, disable NFC, keep leads always happen and are shown locked on |
+| Security | Audit log CSV (`GET /settings/audit.csv`), real SCIM token | SAML single sign-on, test, certificate, all five sign-in rules |
+| Wallet passes | Design saved as `brand.wallet` and used by Apple and Google passes; installed / Apple / Google / without counts (`Event.wallet` now records apple or google); reminders (`POST /cards/wallet/remind`, off until email and a wallet are set up) | "Updates delivered", the three automatic rules |
+| Email signatures (`cards/signature.ts`) | Design saved as `brand.signature` (auto-save, the design has no Save button) and used everywhere signatures are made; real preview; "Download HTML" zip; QR image `GET /public/cards/:id/qr.png` | Deploy to Outlook / Gmail |
+| Billing | Real invoices with printable download (`GET /settings/invoices/:id`), console prices, billing email, hiring pace; "Talk to Vellaire" opens Support (the account manager was invented) | Card payments (Stripe), tax number |
+| Sync activity | Stopped writing sample runs and two made-up people into the database; issues come from the latest real sync; removed `fix-issue`, which put a typed email on a random employee; sidebar badge is real | |
+
+Tested with read-only requests against the shared database. **Saving was not tried there** (QR style, company settings, wallet design, signature design, SCIM token), so try each once on a test workspace.
 
 ### 18 October: password links for many employees at once
 Why: without email, admins could make a password link for only one employee at a time. With a whole company that means hundreds of clicks.
@@ -202,12 +208,11 @@ Why: the sign-in form had been hidden behind demo buttons, and with no email ser
 | Web pushes reaching the live site by themselves | The Vercel web project's Production Branch is not `master`, so pushes become Preview builds. Each release so far was promoted by hand (`vercel promote <url>`). The API project already deploys `master` to production | Owner: Vercel → project `vellaire` → Settings → Git → Production Branch = `master` |
 | Owner password on the live site | Without email the owner cannot use "Forgot password" | Owner: sign in with the demo "Owner console" button, then sidebar → Password. Or run `npm run password-link` |
 | Turning off demo access | `DEMO_LOGIN` is set on Vercel, so anyone can open the demo accounts | Owner: remove `DEMO_LOGIN` from **vellaire-api**, after setting their own password |
+| Sample rows written by the old Sync activity code | Before 18 October, opening Sync activity wrote seven made-up sync runs (e.g. "Manual · Sara Khan", "Authentication token expired") into `SyncRun` and two made-up people into `Integration.issues` for every workspace without runs. They are no longer shown or written, but stay in the database | Owner: allow the agent to delete them (they cannot be told apart from real runs by a field, only by their fixed contents) |
 | Test company "PW Test Co" (`pwtest…@example.com`) in the database | Left from the 15 October sign-up test; deleting from the database was not permitted in that session | Owner: delete it, or allow the agent to |
-| Fake buttons (§5A) | Built by Antigravity as design copies; saving was never wired | Next coding task, in the §5A order |
 | Wallet passes | Code done; Apple and Google accounts and certificates are needed | Client: Apple Developer Program and a Google Wallet issuer account (§5C) |
 | NFC chips | Software done; the chip-link export for the supplier is not built, and no chips have been written or tap-tested | Next coding task (export), then the client's supplier |
 | Google / Microsoft sign-in | Needs apps in Google Cloud and Microsoft Entra | Owner: create them and add the keys |
 | Payments (Stripe), Terms and Privacy pages | Not started | Owner decides prices and legal text first |
 | Rotating the MongoDB password | It was shared in a screenshot | Owner, in MongoDB Atlas; then update `MONGODB_URI` in Vercel and `apps/api/.env` |
-| 2 unused variables in `apps/web` | Antigravity's code (`setRedirectUrl`, `analytics`); to be fixed together with §5A | Next coding task |
 | No real company data on the live site | Demo data is only for local development; seeding the live database is forbidden | Create a real company through sign-up |
