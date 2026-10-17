@@ -6,6 +6,7 @@ import { getSetting } from './platform';
 /** Every email Vellaire sends. The console lists these and can adjust their heading and add a note. */
 export const EMAIL_TEMPLATES = {
   card_ready: { name: 'Welcome to your card', when: 'A new card is published' },
+  wallet_reminder: { name: 'Add your card to Wallet', when: 'An admin reminds people without a wallet pass' },
   invite: { name: 'Invitation to join', when: 'An admin invites a colleague' },
   signin: { name: 'Sign-in link', when: 'Someone signs in with email' },
   password_reset: { name: 'Reset password', when: 'Someone forgets their password' },

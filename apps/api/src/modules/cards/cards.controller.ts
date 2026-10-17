@@ -24,10 +24,12 @@ import {
   publishCard,
   serializeCard,
 } from '../../common/cards';
+import { mailReady, sendMail } from '../../common/mail';
 import { companyQrSvg, logoData, qrStyleOf, savedQrStyle } from '../../common/qr';
 import { daysAgo, escapeRegex, found, logActivity, paging, parse, pct, relTime, requireId, slugify, initials } from '../../common/util';
 import { db } from '../../db/db';
 import { oid } from '../../db/schemas';
+import { appleReady, googleReady, PASS_BACKGROUNDS, passDesign } from '../public/wallet';
 import { signatureHtml } from './signature';
 
 const linkSchema = z.object({
@@ -192,6 +194,81 @@ export class CardsController {
     await db.Company.updateOne({ _id: oid(u.companyId!) }, { 'brand.qr': d });
     await logActivity({ companyId: u.companyId, actor: u.name, action: 'brand.qr', text: 'Company QR style updated' });
     return { style: d };
+  }
+
+  /** Wallet passes page: the saved design, who has a pass, and what is set up. */
+  @Get('cards/wallet')
+  async wallet(@CurrentUser() u: SessionUser) {
+    const company = await this.company(u);
+    const live = await db.Card.find({ companyId: company._id, status: 'live' }).select('_id').lean<any[]>();
+    const ids = live.map((c) => c._id);
+    const adds = await db.Event.aggregate([
+      { $match: { companyId: company._id, type: 'wallet_add', cardId: { $in: ids } } },
+      { $group: { _id: '$cardId', apple: { $max: { $cond: [{ $eq: ['$wallet', 'apple'] }, 1, 0] } }, google: { $max: { $cond: [{ $eq: ['$wallet', 'google'] }, 1, 0] } } } },
+    ]);
+    // The preview shows the viewer's own card when they have one
+    const me = u.employeeId ? await db.Employee.findById(u.employeeId).select('cardId').lean<any>() : null;
+    const sample =
+      (me?.cardId && (await db.Card.findOne({ _id: me.cardId, status: 'live' }).lean<any>())) ||
+      (await db.Card.findOne({ companyId: company._id, status: 'live' }).lean<any>());
+    return {
+      design: { bg: company.brand?.wallet?.bg || null, fields: passDesign(company).fields },
+      live: ids.length,
+      installed: adds.length,
+      apple: adds.filter((a) => a.apple).length,
+      google: adds.filter((a) => a.google).length,
+      ready: { apple: appleReady(), google: googleReady(), mail: mailReady() },
+      sample: sample ? { name: sample.fields?.name, title: sample.fields?.title, office: sample.fields?.office, url: `${cardUrl(company, sample.slug)}?src=wallet` } : null,
+    };
+  }
+
+  @Roles('owner', 'admin', 'brand_manager')
+  @Patch('cards/wallet')
+  async saveWallet(@Body() body: unknown, @CurrentUser() u: SessionUser) {
+    const d = parse(
+      z.object({
+        bg: z.string().refine((b) => b in PASS_BACKGROUNDS, 'Unknown background'),
+        fields: z.object({ name: z.boolean(), title: z.boolean(), office: z.boolean(), photo: z.boolean() }),
+      }),
+      body,
+    );
+    await db.Company.updateOne({ _id: oid(u.companyId!) }, { 'brand.wallet': d });
+    await logActivity({ companyId: u.companyId, actor: u.name, action: 'brand.wallet', text: 'Wallet pass design updated' });
+    return { ok: true };
+  }
+
+  /** Emails everyone with a live card and no wallet pass a link to their card, where the wallet buttons are. */
+  @Roles(...MANAGERS)
+  @Post('cards/wallet/remind')
+  async walletRemind(@CurrentUser() u: SessionUser) {
+    if (!mailReady()) throw new BadRequestException('Email is not set up yet, so reminders cannot be sent');
+    if (!appleReady() && !googleReady()) throw new BadRequestException('Apple and Google Wallet are not set up yet');
+    const company = await this.company(u);
+    const withPass = await db.Event.distinct('cardId', { companyId: company._id, type: 'wallet_add' });
+    const cards = await db.Card.find({ companyId: company._id, status: 'live', _id: { $nin: withPass } })
+      .select('slug employeeId fields.name')
+      .limit(5000)
+      .lean<any[]>();
+    const people = await db.Employee.find({ _id: { $in: cards.map((c) => c.employeeId).filter(Boolean) } })
+      .select('email')
+      .lean<any[]>();
+    const email = new Map(people.map((p) => [String(p._id), p.email]));
+    let sent = 0;
+    for (const c of cards) {
+      const to = email.get(String(c.employeeId));
+      if (!to) continue;
+      await sendMail({
+        template: 'wallet_reminder',
+        to,
+        subject: `Add your ${company.name} card to your wallet`,
+        heading: `Keep your card in your wallet, ${(c.fields?.name || '').split(' ')[0]}`,
+        lines: ['Open your card and tap Add to Apple Wallet or Add to Google Wallet. It takes a second, and the card is always one tap away.'],
+        button: { label: 'Open my card', url: `${cardUrl(company, c.slug)}?src=email` },
+      });
+      sent++;
+    }
+    await logActivity({ companyId: u.companyId, actor: u.name, action: 'wallet.reminders', text: `Wallet reminders emailed to ${sent} people` });
+    return { sent };
   }
 
   @Get('cards/qr-codes.zip')

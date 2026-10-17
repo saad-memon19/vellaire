@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useToast } from '@/components/toast';
 import { ErrorState, Loading } from '@/components/ui';
-import { useApi, useMe } from '@/lib/api';
+import { api, isManager, useApi, useMe } from '@/lib/api';
+import { qrSvg } from '@/lib/qr';
 
 /* Built to match design/WalletPasses.dc.html artboard 100% */
 
@@ -15,6 +16,7 @@ interface BackgroundOption {
   labelColor: string;
 }
 
+// Names match PASS_BACKGROUNDS in apps/api/src/modules/public/wallet.ts
 const BACKGROUNDS: BackgroundOption[] = [
   { n: 'Obsidian', c: '#17171B', gradient: 'linear-gradient(160deg, #1A1A1E, #0E0E10)', textColor: '#F6F1E7', labelColor: '#A9A49A' },
   { n: 'Navy', c: '#13203A', gradient: 'linear-gradient(160deg, #162646, #0D1628)', textColor: '#F6F1E7', labelColor: '#8E9BB2' },
@@ -23,8 +25,7 @@ const BACKGROUNDS: BackgroundOption[] = [
 ];
 
 export default function WalletPassesPage() {
-  const { data: meta, error, mutate } = useApi<any>('/meta');
-  const { data: analytics } = useApi<any>('/analytics?range=30');
+  const { data, error, mutate } = useApi<any>('/cards/wallet');
   const { data: me } = useMe();
   const toast = useToast();
 
@@ -32,45 +33,79 @@ export default function WalletPassesPage() {
   const [fields, setFields] = useState({
     name: true,
     title: true,
-    office: false,
+    office: true,
     photo: true,
   });
 
   const [reminderModal, setReminderModal] = useState(false);
   const [busy, setBusy] = useState(false);
 
+  // Start from the saved design
+  useEffect(() => {
+    if (!data?.design) return;
+    const i = BACKGROUNDS.findIndex((b) => b.n === data.design.bg);
+    setSelectedBgIdx(i < 0 ? 0 : i);
+    setFields(data.design.fields);
+  }, [data?.design]);
+
+  // The real code on the pass: the sample card's link
+  const qrSrc = useMemo(
+    () => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(qrSvg(data?.sample?.url || 'https://vellaire.app', { shape: 'square', fg: '#17171B', bg: '#F6F1E7', centre: 'none', frameText: '' }))}`,
+    [data?.sample?.url],
+  );
+
   if (error) return <ErrorState error={error} retry={() => mutate()} />;
-  if (!meta) return <Loading />;
+  if (!data) return <Loading />;
 
   const activeBg = BACKGROUNDS[selectedBgIdx];
-  const companyName = me?.company?.name || 'Meridian Capital';
+  const companyName = me?.company?.name || '';
   const companyWord = companyName.split(' ')[0].toUpperCase();
-  const employeeName = me?.user?.name || 'Sara Khan';
+  const employeeName = data.sample?.name || me?.user?.name || '';
+  const manager = isManager(me?.user?.role);
+  const walletReady = data.ready.apple || data.ready.google;
+  const without = Math.max(0, data.live - data.installed);
+  const share = data.live ? Math.round((data.installed / data.live) * 100) : 0;
+  // Why reminders cannot go out yet, if they cannot
+  const remindBlock = !walletReady ? 'Apple and Google Wallet are not set up yet' : !data.ready.mail ? 'Turns on once email is set up' : !without ? 'Everyone has a pass' : '';
 
   const kpis = [
-    { label: 'PASSES INSTALLED', value: '1,016', note: '81% of live cards', c: '#1F7A55' },
-    { label: 'APPLE · GOOGLE', value: '642 · 374', note: 'iPhone and Android', c: '#6E685F' },
-    { label: 'UPDATES DELIVERED', value: '99.7%', note: 'Last 30 days', c: '#1F7A55' },
-    { label: 'WITHOUT A PASS', value: '232', note: 'Send them a reminder', c: '#8A5A12' },
+    { label: 'PASSES INSTALLED', value: data.installed.toLocaleString(), note: `${share}% of live cards`, c: '#1F7A55' },
+    { label: 'APPLE · GOOGLE', value: `${data.apple.toLocaleString()} · ${data.google.toLocaleString()}`, note: data.installed > data.apple + data.google ? `${(data.installed - data.apple - data.google).toLocaleString()} added before this split was recorded` : 'iPhone and Android', c: '#6E685F' },
+    { label: 'UPDATES DELIVERED', value: '—', note: 'Coming soon', c: '#6E685F' },
+    { label: 'WITHOUT A PASS', value: without.toLocaleString(), note: remindBlock || 'Send them a reminder', c: '#8A5A12' },
   ];
 
+  // None of these run yet; shown as plans, not as done
   const rules = [
     'Send the pass in the welcome email for every new card',
-    'Update passes when a title, phone or office changes in Workday',
+    'Update passes when a title, phone or office changes in your HR system',
     "Void the pass on an employee's last day",
   ];
 
-  const handleSaveDesign = () => {
+  const handleSaveDesign = async () => {
     setBusy(true);
-    setTimeout(() => {
+    try {
+      await api.patch('/cards/wallet', { bg: activeBg.n, fields });
+      mutate();
+      toast('Pass design saved. New passes use it', 'ok');
+    } catch (e) {
+      toast((e as Error).message, 'err');
+    } finally {
       setBusy(false);
-      toast('Pass design saved for company', 'ok');
-    }, 400);
+    }
   };
 
-  const handleSendReminders = () => {
-    toast('Reminder emails sent to 232 employees', 'ok');
-    setReminderModal(false);
+  const handleSendReminders = async () => {
+    setBusy(true);
+    try {
+      const r = await api.post('/cards/wallet/remind');
+      toast(`Reminder emailed to ${r.sent.toLocaleString()} people`, 'ok');
+      setReminderModal(false);
+    } catch (e) {
+      toast((e as Error).message, 'err');
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -90,14 +125,16 @@ export default function WalletPassesPage() {
           <button
             type="button"
             onClick={() => setReminderModal(true)}
-            className="flex h-11 cursor-pointer items-center rounded-lg border border-[#D9D2C4] bg-white px-4 text-[14px] text-[#17171B] transition-colors hover:border-[#17171B]"
+            disabled={!!remindBlock || !manager}
+            title={remindBlock || undefined}
+            className="flex h-11 cursor-pointer items-center rounded-lg border border-[#D9D2C4] bg-white px-4 text-[14px] text-[#17171B] transition-colors hover:border-[#17171B] disabled:cursor-not-allowed disabled:opacity-50"
           >
             Send to everyone without a pass
           </button>
           <button
             type="button"
             onClick={handleSaveDesign}
-            disabled={busy}
+            disabled={busy || !['owner', 'admin', 'brand_manager'].includes(me?.user?.role || '')}
             className="flex h-11 cursor-pointer items-center rounded-lg bg-[#17171B] px-[18px] text-[14px] font-semibold text-white transition-colors hover:bg-[#2E2E35] disabled:opacity-50"
           >
             {busy ? 'Saving...' : 'Save design'}
@@ -254,7 +291,7 @@ export default function WalletPassesPage() {
                       <span className="text-[9px] tracking-[0.2em]" style={{ color: activeBg.labelColor }}>
                         TITLE
                       </span>
-                      <span className="text-[12.5px]">Head of Private Clients</span>
+                      <span className="text-[12.5px]">{data.sample?.title || 'Job title'}</span>
                     </div>
                   )}
                   {fields.office && (
@@ -262,7 +299,7 @@ export default function WalletPassesPage() {
                       <span className="text-[9px] tracking-[0.2em]" style={{ color: activeBg.labelColor }}>
                         OFFICE
                       </span>
-                      <span className="text-[12.5px]">London HQ</span>
+                      <span className="text-[12.5px]">{data.sample?.office || 'Office'}</span>
                     </div>
                   )}
                 </div>
@@ -270,13 +307,7 @@ export default function WalletPassesPage() {
 
               {/* QR Code */}
               <div className="flex h-[130px] w-[130px] self-center items-center justify-center rounded-[10px] bg-[#F6F1E7] p-[9px]">
-                <div
-                  className="h-full w-full rounded-[6px]"
-                  style={{
-                    background:
-                      'repeating-conic-gradient(#17171B 0 25%, #F6F1E7 0 50%) 0 0 / 12px 12px',
-                  }}
-                />
+                <img src={qrSrc} alt="" className="h-full w-full rounded-[6px]" />
               </div>
             </div>
             <span className="text-[13px] text-[#5E5952]">iPhone</span>
@@ -324,7 +355,7 @@ export default function WalletPassesPage() {
                       <span className="text-[9px] tracking-[0.2em]" style={{ color: activeBg.labelColor }}>
                         TITLE
                       </span>
-                      <span className="text-[12.5px]">Head of Private Clients</span>
+                      <span className="text-[12.5px]">{data.sample?.title || 'Job title'}</span>
                     </div>
                   )}
                   {fields.office && (
@@ -332,7 +363,7 @@ export default function WalletPassesPage() {
                       <span className="text-[9px] tracking-[0.2em]" style={{ color: activeBg.labelColor }}>
                         OFFICE
                       </span>
-                      <span className="text-[12.5px]">London HQ</span>
+                      <span className="text-[12.5px]">{data.sample?.office || 'Office'}</span>
                     </div>
                   )}
                 </div>
@@ -340,13 +371,7 @@ export default function WalletPassesPage() {
 
               {/* QR Code */}
               <div className="flex h-[130px] w-[130px] self-center items-center justify-center rounded-[10px] bg-[#F6F1E7] p-[9px]">
-                <div
-                  className="h-full w-full rounded-[6px]"
-                  style={{
-                    background:
-                      'repeating-conic-gradient(#17171B 0 25%, #F6F1E7 0 50%) 0 0 / 12px 12px',
-                  }}
-                />
+                <img src={qrSrc} alt="" className="h-full w-full rounded-[6px]" />
               </div>
             </div>
             <span className="text-[13px] text-[#5E5952]">Android</span>
@@ -360,7 +385,7 @@ export default function WalletPassesPage() {
         {rules.map((r, i) => (
           <div key={i} className="flex items-center gap-3 border-t border-[#F0EBE2] py-2.5">
             <svg
-              className="h-[18px] w-[18px] shrink-0 text-[#1F7A55]"
+              className="h-[18px] w-[18px] shrink-0 text-[#C9BFAD]"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -371,6 +396,7 @@ export default function WalletPassesPage() {
               <path d="M5 12.5l4.5 4.5L19 7.5" />
             </svg>
             <span className="flex-1 text-[14px] text-[#17171B]">{r}</span>
+            <span className="text-[13px] text-[#6E685F]">Coming soon</span>
           </div>
         ))}
       </section>
@@ -381,7 +407,7 @@ export default function WalletPassesPage() {
           <div className="flex w-full max-w-md flex-col gap-4 rounded-xl bg-white p-6 shadow-xl">
             <h3 className="m-0 text-[18px] font-semibold text-[#17171B]">Send Pass Reminders</h3>
             <p className="m-0 text-[14px] text-[#5E5952]">
-              232 employees do not have their card installed in Apple Wallet or Google Wallet yet. Send an email with a 1-tap install link?
+              {without.toLocaleString()} people with a live card have not added it to Apple Wallet or Google Wallet yet. Email each of them a link to their card, where the wallet buttons are?
             </p>
             <div className="mt-2 flex justify-end gap-3">
               <button
@@ -394,7 +420,8 @@ export default function WalletPassesPage() {
               <button
                 type="button"
                 onClick={handleSendReminders}
-                className="h-10 cursor-pointer rounded-lg bg-[#17171B] px-4 text-[14px] font-semibold text-white hover:bg-[#2E2E35]"
+                disabled={busy}
+                className="h-10 cursor-pointer rounded-lg bg-[#17171B] px-4 text-[14px] font-semibold text-white hover:bg-[#2E2E35] disabled:opacity-50"
               >
                 Send Reminders
               </button>

@@ -296,6 +296,7 @@ export class PublicController {
       cardId: card._id,
       type: 'wallet_add',
       channel: 'wallet',
+      wallet: 'apple',
       ...geo(req),
     });
     res.setHeader('Content-Type', 'application/vnd.apple.pkpass');
@@ -312,6 +313,7 @@ export class PublicController {
       cardId: card._id,
       type: 'wallet_add',
       channel: 'wallet',
+      wallet: 'google',
       ...geo(req),
     });
     res.redirect(googleSaveUrl(card, company));

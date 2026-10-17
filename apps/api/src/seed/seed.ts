@@ -277,7 +277,7 @@ async function seedMeridian() {
         events.push({ ...base, type: 'lead' });
         leadEvents.push(base);
       }
-      if (channel === 'wallet' && rnd() < 0.1) events.push({ ...base, type: 'wallet_add' });
+      if (channel === 'wallet' && rnd() < 0.1) events.push({ ...base, type: 'wallet_add', wallet: events.length % 5 < 3 ? 'apple' : 'google' });
     }
   }
   for (let i = 0; i < events.length; i += 5000) await db.Event.insertMany(events.slice(i, i + 5000), { ordered: false });

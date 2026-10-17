@@ -49,6 +49,8 @@ export const CompanySchema = new Schema(
       subBrands: [{ name: String, field: String, value: String, theme: String, layout: String }],
       // Company QR style from the QR studio (common/qr.ts); empty means the default style
       qr: { shape: String, fg: String, bg: String, centre: String, frameText: String },
+      // Wallet pass design from the Wallet passes page (modules/public/wallet.ts); empty means brand colours
+      wallet: { bg: String, fields: { name: Boolean, title: Boolean, office: Boolean, photo: Boolean } },
       publishedAt: Date,
     },
     settings: {
@@ -258,6 +260,7 @@ export const EventSchema = new Schema(
     cardId: { type: ObjectId, required: true },
     type: { type: String, enum: ['view', 'save', 'lead', 'click', 'wallet_add'], required: true },
     channel: { type: String, default: 'link' }, // nfc | qr | link | wallet | email | signature
+    wallet: String, // apple | google, on wallet_add events
     city: String,
     country: String,
     device: String,
