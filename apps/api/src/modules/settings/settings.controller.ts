@@ -330,8 +330,16 @@ export class SettingsController {
       status: { $in: ['live', 'scheduled', 'pending_approval'] },
     });
     const plan = PLANS[c.plan as PlanId] || PLANS.starter;
-    const invoices = await db.Invoice.find({ companyId: c._id }).sort({ periodStart: -1 }).limit(12).lean<any[]>();
+    const [invoices, owner, addedLast30] = await Promise.all([
+      db.Invoice.find({ companyId: c._id }).sort({ periodStart: -1 }).limit(12).lean<any[]>(),
+      db.User.findOne({ companyId: c._id, role: 'owner' }).select('email').lean<any>(),
+      // Hiring pace for "seats left": cards made in the last 30 days
+      db.Card.countDocuments({ companyId: c._id, createdAt: { $gte: new Date(Date.now() - 30 * 24 * 3600 * 1000) } }),
+    ]);
     return {
+      companyName: c.name,
+      billingEmail: owner?.email || '',
+      addedLast30,
       plan: c.plan,
       planName: plan.name,
       pricePerSeat: plan.pricePerSeat,
@@ -351,9 +359,33 @@ export class SettingsController {
         currency: i.currency,
         status: i.status,
         period: `${new Date(i.periodStart).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}`,
+        date: i.createdAt || i.periodStart,
+        plan: PLANS[i.plan as PlanId]?.name || i.plan || plan.name,
         seats: i.seats,
       })),
     };
+  }
+
+  /** One invoice as a printable page (Print → Save as PDF). There is no payment provider yet, so this is the record. */
+  @Roles('owner', 'admin')
+  @Get('settings/invoices/:id')
+  async invoice(@Param('id') id: string, @CurrentUser() u: SessionUser, @Res() res: Response) {
+    const i = found(await db.Invoice.findOne({ _id: requireId(id), companyId: oid(u.companyId!) }).lean<any>(), 'Invoice');
+    const c = await db.Company.findById(u.companyId).select('name').lean<any>();
+    const esc = (s: unknown) => String(s ?? '').replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]!);
+    const day = (d: Date) => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+    const money = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: i.currency || 'USD' }).format(n || 0);
+    const what = `${PLANS[i.plan as PlanId]?.name || i.plan || 'Vellaire'} plan · ${i.seats || 0} seats`;
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(`<!doctype html><meta charset="utf-8"><title>${esc(i.number)}</title>
+<body style="font-family:Helvetica,Arial,sans-serif;color:#17171B;max-width:640px;margin:48px auto;padding:0 24px">
+<div style="font-size:12px;letter-spacing:3px;color:#876A33">VELLAIRE</div>
+<h1 style="font-weight:400;font-size:32px;margin:8px 0 24px">Invoice ${esc(i.number)}</h1>
+<p>Billed to <b>${esc(c?.name)}</b><br>Date ${day(i.createdAt || i.periodStart)}<br>Period ${day(i.periodStart)} – ${i.periodEnd ? day(i.periodEnd) : ''}<br>Status ${esc(i.status)}</p>
+<table style="width:100%;border-collapse:collapse;margin-top:24px"><tr style="text-align:left;border-bottom:1px solid #E6E0D5"><th style="padding:8px 0">For</th><th style="text-align:right">Amount</th></tr>
+<tr><td style="padding:12px 0">${esc(what)}</td><td style="text-align:right">${money(i.amount)}</td></tr>
+<tr style="border-top:1px solid #E6E0D5;font-weight:600"><td style="padding:12px 0">Total</td><td style="text-align:right">${money(i.amount)}</td></tr></table>
+<script>window.onload=()=>window.print()</script></body>`);
   }
 
   @Roles('owner', 'admin')

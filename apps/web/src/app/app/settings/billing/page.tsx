@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import { useToast } from '@/components/toast';
 import { ErrorState, Loading } from '@/components/ui';
@@ -7,24 +8,14 @@ import { api, useApi, useMe } from '@/lib/api';
 
 /* Built to match design/Billing.dc.html artboard 100% */
 
-interface InvoiceRow {
-  id: string;
-  date: string;
-  what: string;
-  amount: string;
-  status: string;
-  sb: string;
-  sf: string;
-}
+const STATUS: Record<string, { label: string; sb: string; sf: string }> = {
+  paid: { label: 'Paid', sb: '#E5F2EB', sf: '#1F7A55' },
+  open: { label: 'Open', sb: '#F6EFE1', sf: '#876A33' },
+  failed: { label: 'Failed', sb: '#FBE9EC', sf: '#A3283A' },
+};
 
-const DEFAULT_INVOICES: InvoiceRow[] = [
-  { id: 'INV-1092', date: '1 Oct 2026', what: 'Enterprise · October seats', amount: '$5,616.00', status: 'Paid', sb: '#E5F2EB', sf: '#1F7A55' },
-  { id: 'INV-1087', date: '28 Sep 2026', what: 'NFC order ORD-2041 · 9 Obsidian Metal cards', amount: '$720.00', status: 'Paid', sb: '#E5F2EB', sf: '#1F7A55' },
-  { id: 'INV-1071', date: '1 Sep 2026', what: 'Enterprise · September seats', amount: '$5,616.00', status: 'Paid', sb: '#E5F2EB', sf: '#1F7A55' },
-  { id: 'INV-1063', date: '22 Aug 2026', what: 'NFC order ORD-2033 · 14 Brushed Steel cards', amount: '$980.00', status: 'Paid', sb: '#E5F2EB', sf: '#1F7A55' },
-  { id: 'INV-1050', date: '1 Aug 2026', what: 'Enterprise · August seats', amount: '$5,616.00', status: 'Paid', sb: '#E5F2EB', sf: '#1F7A55' },
-  { id: 'INV-1032', date: '15 Jul 2026', what: 'Seat true-up · 64 seats', amount: '$288.00', status: 'Paid', sb: '#E5F2EB', sf: '#1F7A55' },
-];
+const day = (d?: string) => (d ? new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '—');
+const money = (n: number, currency = 'USD') => new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(n || 0);
 
 export default function BillingPage() {
   const { data, error, mutate } = useApi<any>('/settings/billing');
@@ -41,15 +32,15 @@ export default function BillingPage() {
   if (!data) return <Loading />;
 
   const canBill = me?.user?.role === 'owner' || me?.user?.role === 'admin';
-  const seatsUsed = data.used || 1248;
-  const totalSeats = data.seats || 1320;
-  const pct = Math.min(Math.round((seatsUsed / totalSeats) * 100), 100);
+  const seatsUsed = data.used || 0;
+  const totalSeats = data.seats || 0;
+  const pct = totalSeats ? Math.min(Math.round((seatsUsed / totalSeats) * 100), 100) : 0;
   const seatsLeft = Math.max(0, totalSeats - seatsUsed);
-  const pricePerSeat = data.pricePerSeat ? `$${data.pricePerSeat}` : '$4.50';
+  const pricePerSeat = money(data.pricePerSeat || 0).replace(/\.00$/, '');
+  // Weeks until seats run out at the last 30 days' pace of new cards
+  const weeksLeft = data.addedLast30 > 0 ? Math.round(seatsLeft / ((data.addedLast30 / 30) * 7)) : null;
 
-  const renewsDate = data.renewsAt
-    ? new Date(data.renewsAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
-    : '14 January 2027';
+  const renewsDate = day(data.renewsAt);
 
   const handleAddSeats = async (count: number) => {
     setBusy(true);
@@ -65,10 +56,6 @@ export default function BillingPage() {
     } finally {
       setBusy(false);
     }
-  };
-
-  const handleDownloadInvoice = (invId: string) => {
-    toast(`Downloading ${invId}...`, 'ok');
   };
 
   return (
@@ -139,7 +126,8 @@ export default function BillingPage() {
               />
             </div>
             <span className="text-[12.5px] text-[#E6D3A3]">
-              {seatsLeft} seats left · about 5 weeks at your hiring pace
+              {seatsLeft.toLocaleString()} seats left
+              {weeksLeft != null && seatsLeft > 0 && ` · about ${weeksLeft.toLocaleString()} ${weeksLeft === 1 ? 'week' : 'weeks'} at your hiring pace`}
             </span>
           </div>
 
@@ -177,15 +165,12 @@ export default function BillingPage() {
             <span className="flex h-[30px] w-[46px] items-center justify-center rounded-[5px] bg-[#17171B] text-[10px] tracking-[0.1em] text-[#E6D3A3]">
               CARD
             </span>
+            {/* Card payments are not built yet (Stripe); invoices are settled by bank transfer */}
             <span className="flex flex-1 flex-col">
-              <span className="text-[14px] font-medium text-[#17171B]">Card ending 4021</span>
-              <span className="text-[12.5px] text-[#6E685F]">Expires 08/28</span>
+              <span className="text-[14px] font-medium text-[#17171B]">No card on file</span>
+              <span className="text-[12.5px] text-[#6E685F]">Card payments coming soon · invoices are paid by transfer</span>
             </span>
-            <button
-              type="button"
-              onClick={() => toast('Payment method update link sent to finance email', 'ok')}
-              className="cursor-pointer text-[13px] text-[#876A33] hover:text-[#17171B]"
-            >
+            <button type="button" disabled className="cursor-not-allowed text-[13px] text-[#876A33] opacity-50">
               Change
             </button>
           </div>
@@ -193,16 +178,16 @@ export default function BillingPage() {
           {/* 2-Column Info Grid */}
           <div className="grid grid-cols-[110px_1fr] gap-x-3 gap-y-2 text-[13.5px]">
             <span className="text-[#6E685F]">Billing email</span>
-            <span className="text-[#17171B]">finance@meridian.com</span>
+            <span className="text-[#17171B]">{data.billingEmail || '—'}</span>
 
             <span className="text-[#6E685F]">Company</span>
-            <span className="text-[#17171B]">Meridian Capital Ltd</span>
+            <span className="text-[#17171B]">{data.companyName}</span>
 
             <span className="text-[#6E685F]">Tax number</span>
-            <span className="text-[#17171B]">AE10029482910</span>
+            <span className="text-[#6E685F]">Coming soon</span>
 
             <span className="text-[#6E685F]">Next invoice</span>
-            <span className="text-[#17171B]">1 November 2026</span>
+            <span className="text-[#17171B]">{renewsDate}</span>
           </div>
         </section>
       </div>
@@ -226,34 +211,40 @@ export default function BillingPage() {
             </div>
 
             {/* Table Rows */}
-            {DEFAULT_INVOICES.map((r) => (
-              <div
-                key={r.id}
-                className="grid grid-cols-[1fr_1fr_2fr_1fr_0.9fr_110px] items-center gap-3.5 border-t border-[#F0EBE2] px-5 py-[13px] text-[14px] transition-colors hover:bg-[#FAF7F1]"
-              >
-                <span className="font-mono text-[12.5px] text-[#4E4A44]">{r.id}</span>
-                <span className="text-[#4E4A44]">{r.date}</span>
-                <span className="text-[#17171B]">{r.what}</span>
-                <span className="text-[#17171B]">{r.amount}</span>
-                <span>
-                  <span
-                    className="inline-block rounded-full px-2.5 py-[3px] text-[12px] font-medium"
-                    style={{ backgroundColor: r.sb, color: r.sf }}
-                  >
-                    {r.status}
+            {!data.invoices?.length && <div className="border-t border-[#F0EBE2] px-5 py-[13px] text-[14px] text-[#6E685F]">No invoices yet</div>}
+            {(data.invoices || []).map((r: any) => {
+              const s = STATUS[r.status] || STATUS.open;
+              return (
+                <div
+                  key={r.id}
+                  className="grid grid-cols-[1fr_1fr_2fr_1fr_0.9fr_110px] items-center gap-3.5 border-t border-[#F0EBE2] px-5 py-[13px] text-[14px] transition-colors hover:bg-[#FAF7F1]"
+                >
+                  <span className="font-mono text-[12.5px] text-[#4E4A44]">{r.number}</span>
+                  <span className="text-[#4E4A44]">{day(r.date)}</span>
+                  <span className="text-[#17171B]">
+                    {r.plan} · {r.period} · {(r.seats || 0).toLocaleString()} seats
                   </span>
-                </span>
-                <span className="justify-self-end">
-                  <button
-                    type="button"
-                    onClick={() => handleDownloadInvoice(r.id)}
-                    className="h-8 cursor-pointer rounded-lg border border-[#E0D9CC] bg-white px-2.5 text-[12.5px] text-[#17171B] transition-colors hover:border-[#17171B]"
-                  >
-                    Download
-                  </button>
-                </span>
-              </div>
-            ))}
+                  <span className="text-[#17171B]">{money(r.amount, r.currency)}</span>
+                  <span>
+                    <span className="inline-block rounded-full px-2.5 py-[3px] text-[12px] font-medium" style={{ backgroundColor: s.sb, color: s.sf }}>
+                      {s.label}
+                    </span>
+                  </span>
+                  <span className="justify-self-end">
+                    {canBill && (
+                      <a
+                        href={`/api/settings/invoices/${r.id}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex h-8 cursor-pointer items-center rounded-lg border border-[#E0D9CC] bg-white px-2.5 text-[12.5px] text-[#17171B] transition-colors hover:border-[#17171B]"
+                      >
+                        Download
+                      </a>
+                    )}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -306,22 +297,23 @@ export default function BillingPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="flex w-full max-w-lg flex-col gap-4 rounded-xl bg-white p-6 shadow-xl">
             <h3 className="m-0 text-[18px] font-semibold text-[#17171B]">Plan Comparison</h3>
+            {/* Prices come from the console, so they match what is billed */}
             <div className="grid grid-cols-3 gap-3 text-center text-[13px]">
-              <div className="flex flex-col gap-2 rounded-lg border border-[#E6E0D5] p-3">
-                <span className="font-semibold text-[#17171B]">Starter</span>
-                <span className="font-display text-[22px]">$2.50</span>
-                <span className="text-[#6E685F]">Basic card features</span>
-              </div>
-              <div className="flex flex-col gap-2 rounded-lg border border-[#E6E0D5] p-3">
-                <span className="font-semibold text-[#17171B]">Professional</span>
-                <span className="font-display text-[22px]">$3.50</span>
-                <span className="text-[#6E685F]">CRM & analytics</span>
-              </div>
-              <div className="flex flex-col gap-2 rounded-lg border-2 border-[#B08D4F] bg-[#FBF6EC] p-3">
-                <span className="font-semibold text-[#876A33]">Enterprise</span>
-                <span className="font-display text-[22px]">$4.50</span>
-                <span className="text-[#6E685F]">SSO, SCIM & VIP SLA</span>
-              </div>
+              {(data.plans || []).map((p: any) => {
+                const current = p.id === data.plan;
+                return (
+                  <div
+                    key={p.id}
+                    className={`flex flex-col gap-2 rounded-lg p-3 ${current ? 'border-2 border-[#B08D4F] bg-[#FBF6EC]' : 'border border-[#E6E0D5]'}`}
+                  >
+                    <span className={`font-semibold ${current ? 'text-[#876A33]' : 'text-[#17171B]'}`}>{p.name}</span>
+                    <span className="font-display text-[22px]">{money(p.pricePerSeat).replace(/\.00$/, '')}</span>
+                    <span className="text-[#6E685F]">
+                      per card / month · from {p.minSeats} seats{current ? ' · your plan' : ''}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
             <div className="mt-2 flex justify-end">
               <button
@@ -340,22 +332,24 @@ export default function BillingPage() {
       {managerModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="flex w-full max-w-md flex-col gap-4 rounded-xl bg-white p-6 shadow-xl">
-            <h3 className="m-0 text-[18px] font-semibold text-[#17171B]">Your Dedicated Account Manager</h3>
+            <h3 className="m-0 text-[18px] font-semibold text-[#17171B]">Talk to Vellaire</h3>
             <p className="m-0 text-[14px] text-[#5E5952]">
-              Need custom seat tiers, wire invoice arrangements, or SLA extensions? Contact Marcus directly:
+              Need custom seat tiers, invoice arrangements, or a different plan? Write to the Vellaire team in Support and we will answer there.
             </p>
-            <div className="flex flex-col gap-1 rounded-lg bg-[#F7F5F0] p-3 text-[13.5px]">
-              <span className="font-medium text-[#17171B]">Marcus Vance · Enterprise Director</span>
-              <span className="text-[#6E685F]">marcus@vellaire.com · +44 20 7946 0912</span>
-            </div>
-            <div className="mt-2 flex justify-end">
+            <div className="mt-2 flex justify-end gap-3">
               <button
                 type="button"
                 onClick={() => setManagerModal(false)}
-                className="h-10 cursor-pointer rounded-lg bg-[#17171B] px-4 text-[14px] font-semibold text-white hover:bg-[#2E2E35]"
+                className="h-10 cursor-pointer rounded-lg border border-[#D9D2C4] px-4 text-[14px] text-[#17171B] hover:bg-[#F7F5F0]"
               >
-                Got it
+                Close
               </button>
+              <Link
+                href="/app/support"
+                className="flex h-10 items-center rounded-lg bg-[#17171B] px-4 text-[14px] font-semibold text-white hover:bg-[#2E2E35]"
+              >
+                Open Support
+              </Link>
             </div>
           </div>
         </div>
