@@ -159,9 +159,17 @@ Signature deployment to Outlook and Gmail, two-step sign-in and network rules, c
 
 ---
 
-## 7. Work log: what was done last (13–15 October 2026)
+## 7. Work log: what was done last (13–18 October 2026)
 
-Newest first. Each item is live on https://vellaire.vercel.app and was tested there or locally.
+Newest first. Items up to 15 October are live on https://vellaire.vercel.app and were tested there or locally.
+
+### 18 October: password links for many employees at once
+Why: without email, admins could make a password link for only one employee at a time. With a whole company that means hundreds of clicks.
+
+- **Employees page** (`apps/web/src/app/app/employees/page.tsx`): select two or more people → **Password links** in the selection bar downloads `password-links.csv` (name, email, password_link, expires, note). One person selected still opens the single "Password link" modal.
+- **API** (`apps/api/src/modules/auth/auth.controller.ts`): `POST /auth/reset-link/employees` with `{ ids }`, for owner, admin and HR manager. It makes the app account first if needed (`ensureMemberUser`). Links last 7 days, like invites. People without an email, suspended, outside the company, or an owner (when the admin is not an owner) stay in the file with the reason in `note`. One audit line: "Password links made for N people".
+- Type-checked; the route answers 401 when signed out. **Not yet tried with real data or pushed**: the local `.env` points at the shared Atlas database.
+- Tell admins the file is sensitive: anyone holding a row's link can set that person's password until it is used or expires.
 
 ### 15 October: password sign-in, and email that is ready but optional (commit `396c417`)
 Why: the sign-in form had been hidden behind demo buttons, and with no email service nobody could sign in for real. The owner asked for sign-in, sign-up and forgot password to work without email, with email switched on later only through `.env`.
@@ -190,7 +198,7 @@ Why: the sign-in form had been hidden behind demo buttons, and with no email ser
 
 | What | Why it is not done | Who or what unblocks it |
 |---|---|---|
-| Real emails (sign-in link, reset, invites, lead alerts) | No email account or domain yet. The code is finished | Owner: add `RESEND_API_KEY` or `SMTP_*` and `MAIL_FROM` to the **vellaire-api** project in Vercel |
+| Real emails (sign-in link, reset, invites, lead alerts) | No email account or domain yet. The code is finished | Owner: add `RESEND_API_KEY` or `SMTP_*` and `MAIL_FROM` to the **vellaire-api** project in Vercel. Before that, the "card ready" email (`publishCard` in `common/cards.ts`) needs a "Choose a password" link like the invite email; today it only has "Open my card" |
 | Web pushes reaching the live site by themselves | The Vercel web project's Production Branch is not `master`, so pushes become Preview builds. Each release so far was promoted by hand (`vercel promote <url>`). The API project already deploys `master` to production | Owner: Vercel → project `vellaire` → Settings → Git → Production Branch = `master` |
 | Owner password on the live site | Without email the owner cannot use "Forgot password" | Owner: sign in with the demo "Owner console" button, then sidebar → Password. Or run `npm run password-link` |
 | Turning off demo access | `DEMO_LOGIN` is set on Vercel, so anyone can open the demo accounts | Owner: remove `DEMO_LOGIN` from **vellaire-api**, after setting their own password |

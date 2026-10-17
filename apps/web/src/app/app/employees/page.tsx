@@ -114,6 +114,26 @@ function Employees() {
       return n;
     });
 
+  // Without email, admins hand these links out themselves (WhatsApp, print, chat)
+  const passwordLinks = async () => {
+    setBusy(true);
+    try {
+      const r = await api.post('/auth/reset-link/employees', { ids: [...sel] });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([r.csv], { type: 'text/csv' }));
+      a.download = 'password-links.csv';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      toast(`${r.made} password links downloaded${r.skipped ? ` · ${r.skipped} skipped, see the note column` : ''}`);
+      setSel(new Set());
+      mutate();
+    } catch (e) {
+      toast((e as Error).message, 'err');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const bulk = async (action: string, extra: any = {}) => {
     setBusy(true);
     try {
@@ -323,6 +343,16 @@ function Employees() {
                 className="text-[13.5px] text-white hover:underline"
               >
                 Password link
+              </button>
+            )}
+            {sel.size > 1 && ['owner', 'admin', 'hr_manager'].includes(me?.user.role || '') && (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={passwordLinks}
+                className="text-[13.5px] text-white hover:underline"
+              >
+                Password links
               </button>
             )}
             <a

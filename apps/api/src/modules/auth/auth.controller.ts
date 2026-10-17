@@ -9,7 +9,7 @@ import { createWorkspace } from '../onboarding/workspace';
 import { mailReady } from '../../common/mail';
 import { checkPassword, hashPassword, passwordSchema } from '../../common/password';
 import { codeHash, createResetLink, MAX_CODE_ATTEMPTS, sendResetLink, sendSignInLink, showLinksOnScreen } from './signin-link';
-import { logActivity, parse, requireId, sha256, token } from '../../common/util';
+import { logActivity, parse, requireId, sha256, toCsv, token } from '../../common/util';
 import { db } from '../../db/db';
 import { AiService } from '../ai/ai.service';
 
@@ -175,6 +175,43 @@ export class AuthController {
     const user = await db.User.findOne({ email: employee.email.toLowerCase() }).lean<any>();
     if (!user || String(user.companyId) !== u.companyId || user.platformRole) throw new ForbiddenException('This email belongs to an account outside your company');
     return this.resetLinkFor(String(user._id), u);
+  }
+
+  /**
+   * Password links for many employees at once, as a CSV the admin shares by hand (works without email).
+   * Links last 7 days, like invites, because handing out a whole list takes longer than one link.
+   * People who cannot get a link stay in the file with the reason.
+   */
+  @Roles('owner', 'admin', 'hr_manager')
+  @Post('reset-link/employees')
+  async resetLinksForEmployees(@Body() body: unknown, @CurrentUser() u: SessionUser) {
+    const { ids } = parse(z.object({ ids: z.array(z.string()).min(1).max(2000) }), body);
+    const company = await db.Company.findById(u.companyId).lean<any>();
+    const employees = await db.Employee.find({ companyId: u.companyId, _id: { $in: ids.map(requireId) } })
+      .sort({ name: 1 })
+      .lean<any[]>();
+    const expires = new Date(Date.now() + 7 * 24 * 60 * 60_000);
+    const rows: { name: string; email: string; password_link: string; expires: string; note: string }[] = [];
+    for (const e of employees) {
+      const row = { name: e.name, email: e.email || '', password_link: '', expires: '', note: '' };
+      rows.push(row);
+      if (!e.email) {
+        row.note = 'No email: add one first';
+        continue;
+      }
+      await ensureMemberUser(company, e);
+      const user = await db.User.findOne({ email: e.email.toLowerCase() }).lean<any>();
+      if (!user || String(user.companyId) !== u.companyId || user.platformRole) row.note = 'Email belongs to an account outside your company';
+      else if (user.status === 'disabled') row.note = 'Account suspended';
+      else if (user.role === 'owner' && u.role !== 'owner') row.note = 'Only an owner can make this link';
+      else {
+        row.password_link = await createResetLink(user.email, 7 * 24 * 60);
+        row.expires = expires.toISOString().slice(0, 10);
+      }
+    }
+    const made = rows.filter((r) => r.password_link).length;
+    if (made) await logActivity({ companyId: u.companyId, actor: u.name, action: 'user.reset_link', text: `Password links made for ${made} people` });
+    return { csv: toCsv(rows), made, skipped: rows.length - made };
   }
 
   /**
