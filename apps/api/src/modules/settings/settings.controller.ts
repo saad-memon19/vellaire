@@ -162,26 +162,18 @@ export class SettingsController {
     return {
       members,
       users: users.map((x) => {
+        // The person looking at the list is online right now
         let last = 'Never';
-        if (x.email === 'sara.khan@meridian.com') {
+        if (String(x._id) === u.id) {
           last = 'Now';
-        } else if (x.email === 'david.asante@meridian.com') {
-          last = 'Today';
-        } else if (x.email === 'nour.hamdan@meridian.com') {
-          last = 'Yesterday';
-        } else if (x.email === 'priya.shah@meridian.com') {
-          last = '2 days ago';
-        } else if (x.email === 'tom.allerton@meridian.com') {
-          last = '3 days ago';
-        } else if (x.email === 'hana.qureshi@meridian.com') {
-          last = 'Last week';
         } else if (x.lastLoginAt) {
           const d = new Date(x.lastLoginAt);
           const diffDays = Math.floor((Date.now() - d.getTime()) / 86400000);
           if (diffDays === 0) last = 'Today';
           else if (diffDays === 1) last = 'Yesterday';
           else if (diffDays <= 6) last = `${diffDays} days ago`;
-          else last = 'Last week';
+          else if (diffDays <= 13) last = 'Last week';
+          else last = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
         }
         return {
           id: String(x._id),
