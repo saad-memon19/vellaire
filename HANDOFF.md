@@ -1,7 +1,12 @@
 # Vellaire — handoff for the next developer or AI agent
 
 Read this first, then `README.md` (setup, accounts, environment variables).
-Last updated: 18 October 2026. The latest work and the reasons things are still open are in §7 and §8.
+Last updated: 19 October 2026. The latest work and the reasons things are still open are in §7 and §8.
+
+## Start here (next session)
+1. Set up the laptop: §2 "New laptop". The repo is on GitHub `saad-memon19/vellaire`, branch `master`; everything is pushed and live (last app commit `3f2ec38`).
+2. What is left, in order: §5 "Next coding tasks", then §8 for what waits on the owner or the client.
+3. Deploying: push to `master` → the API goes live by itself; the web becomes a Preview that must be promoted (§2 "Deploy").
 
 Vellaire is a digital business card product for companies. It has five parts, all in this repo:
 
@@ -33,7 +38,27 @@ npm run dev             # API on :4000, web on :3000
 ```
 
 The local `.env` points at the **live** database (there is no separate dev database). Create test companies through `/signup` and delete them afterwards.
-Sign in at `/signin` with email and password. Vellaire staff: `owner@vellaire.app`; without email, get a password link with `npm run password-link -w apps/api -- owner@vellaire.app`.
+Sign in at `/signin` with email and password. Without email, anyone's password link comes from `npm run password-link -w apps/api -- <email>` or, for employees, the dashboard (Employees → select → Password link). There is no console login yet (§8).
+
+**What is in the database (19 October):** one company, `cognidak` (owner `razasaad3445@gmail.com`, member `rayyan.dakhni@gmail.com`), plus system rows the API makes itself (3 plans, 5 library templates, health samples). No demo data anywhere.
+
+### New laptop
+```bash
+git clone https://github.com/saad-memon19/vellaire.git && cd vellaire
+npm install
+# apps/api/.env is not in git: copy it from the other laptop (never through chat), or pull it from Vercel:
+npm i -g vercel && vercel login            # approve the device code in the browser (account saad-memon19)
+cd apps/api && vercel link --yes --project vellaire-api && cd ../..
+vercel link --yes --project vellaire        # at the repo root: the web project (Root Directory apps/web)
+# vercel link may add ".env*" to the root .gitignore: undo that line, it would hide .env.example files
+npm run dev
+```
+The local `PLATFORM_ADMIN_EMAILS` must stay empty until the owner gives a real admin email: the API creates an account for every address in it at start-up.
+
+### Deploy
+- `git push origin master`. **API** (`vellaire-api`) deploys `master` to production by itself.
+- **Web** (`vellaire`) builds a Preview. Wait until `vercel ls vellaire` shows it `Ready`, then `vercel promote <preview url> --yes`; promoting rebuilds it as Production (about a minute). Check `https://vellaire.vercel.app/version`: it returns the live commit.
+- Docs-only commits need no promote.
 
 Type-check before you finish any change:
 
@@ -80,7 +105,7 @@ tools/design-check/          screenshot design vs built page, and crawl all rout
 
 ---
 
-## 4. Status (18 October 2026)
+## 4. Status (19 October 2026)
 
 **Everything in this table is built and connected to the database.** Do not rebuild it or treat it as pending. All routes were last crawled without errors on 9 October; pages changed after that are marked.
 
@@ -89,16 +114,18 @@ tools/design-check/          screenshot design vs built page, and crawl all rout
 | Website, sign in, sign up, forgot and reset password | `/`, `/signin`, `/signup`, `/forgot-password`, `/reset-password` | ✅ done 15 Oct: email + password (12+ characters, a number, a symbol), forgot/reset password, email link and 6-digit code, Google/Microsoft. See §6 |
 | Setup wizard (5 steps) | `/setup` | ✅ done and tested end to end |
 | Company dashboard | `/app/*` | ✅ done |
-| Employee app | `/m`, `/m/share`, `/m/leads`, `/m/insights`, `/m/edit`, `/m/settings` | ✅ done |
+| Employee app | `/m` and 22 more screens (§7, 18–19 October) | ✅ all 31 phone screens of the owner's design are built, on real data. Not tried signed in on a real phone yet |
 | Public card, Save contact (vCard), Share your details, team page, inactive card | `/c/:company/:slug`, `/c/:company` | ✅ done |
 | NFC tap link | `/t/:uid` → the live card, tap counted | ✅ done (software side; see §5C for real chips) |
 | Owner console (17 pages) | `/console/*` | ✅ done |
 | Installable app (PWA) | manifest, PNG icons, `public/sw.js` offline page, iPhone home-screen settings | ✅ done 13 Oct. Signed-out app goes to `/signin` instead of a blank screen. Sign-in emails carry a 6-digit code (`/auth/verify-code`) because on iPhone the email link opens Safari, not the installed app. An "Install the app" banner (dashboard and employee app, `components/pwa.tsx`) and a Settings row offer installing; on iPhone they show Add to Home Screen steps. The app starts at `/open`. Inside the installed app everyone gets the employee app only (`/m`); the dashboard and the console redirect there and open only in a browser. Owner accounts with no card see "The app is for card holders" |
 | Vercel production setup | `apps/api/vercel.json`, `DEPLOY.md` | ✅ live at https://vellaire.vercel.app (web project `vellaire`, API project `vellaire-api`). The web project still deploys pushes as **Preview**: see §8 |
 
-Design alignment done by Antigravity on 10–12 October: Approvals, Sync activity, Edit my card, Team and roles, Inactive card, QR codes, Company settings, Billing, Security, Wallet passes, Email signatures, Employees, Leads, Analytics, HR integrations. **Some of these pages look finished but have buttons that do nothing yet: see §5A.**
+Design alignment done by Antigravity on 10–12 October: Approvals, Sync activity, Edit my card, Team and roles, Inactive card, QR codes, Company settings, Billing, Security, Wallet passes, Email signatures, Employees, Leads, Analytics, HR integrations. Their pretend buttons were made real or "Coming soon" on 18 October (§7).
 
 Still different from the design: Templates (🔒 locked, leave it), Departments, Console "Subscriptions & invoices". Create card steps 2–4 were never compared.
+
+**The design** is the owner's claude.ai canvas "Vellaire — Product UI/UX Design" (https://claude.ai/artifact/JcHKHnAeeBdXA89jJoUXKf). It is newer than `design/` in this repo: section 9 and 10 phone screens exist only there. Its names and numbers (Sara Khan, Meridian, 214 views) are sample copy: never put them in the product.
 
 ---
 
@@ -108,9 +135,13 @@ Still different from the design: Templates (🔒 locked, leave it), Departments,
 
 QR codes, Company settings, Security, Wallet passes, Email signatures, Billing, Team and roles and Sync activity now save what they show, or say "Coming soon". Rule for new work: never show success for something that did not happen.
 
-### B. Small clean-ups
-- Departments: managers and offices from the design. Compare Create card steps 2–4.
-- Before email is switched on: add a "Choose a password" link to the "card ready" email (§8).
+### B. Next coding tasks (in this order)
+1. **Try everything signed in.** On a phone, as `rayyan.dakhni@gmail.com` (a member), go through every `/m` screen; in the dashboard, as the owner, try each save that was never tried on data: QR style, Company settings, Wallet design, Signature design, SCIM token, bulk password links.
+2. **"Card ready" email:** add a "Choose a password" link (as in the invite email) before email is switched on (`publishCard` in `common/cards.ts`).
+3. **NFC chip-link export** for the supplier in the console NFC board: one row per chip, `https://<web domain>/t/<uid>`.
+4. **Departments** page: managers and offices from the design.
+5. **Create card steps 2–4:** compare with the design and align.
+6. Optional, ask first: push notifications (the in-app list exists), the photo "Match team style" AI, Face ID sign-in (WebAuthn).
 
 ### C. Real-world setup (needs the owner or the client)
 1. **NFC cards.** Software is done: ordering, production stages, the `/t/<uid>` tap link, lost / switch off. Missing:
@@ -145,7 +176,7 @@ Signature deployment to Outlook and Gmail, two-step sign-in and network rules, c
 
 ---
 
-## 7. Work log: what was done last (13–18 October 2026)
+## 7. Work log: what was done last (13–19 October 2026)
 
 Newest first. Items up to 15 October are live on https://vellaire.vercel.app and were tested there or locally.
 
@@ -158,7 +189,8 @@ Design: the owner's canvas "Vellaire — Product UI/UX Design" (claude.ai artifa
 - **Still "Coming soon" or left out:** "Match team style" photo AI, Face ID, "installed in your Outlook", pass updates, push notifications (the list is in-app; emails need an email service).
 
 ### 18 October: demo data and demo sign-in removed
-- **Database:** every company except the owner's own `cognidak` deleted (12 demo companies, Mahaarib & Cognidak, PW Test Co), with their users, cards, employees, leads, events, NFC, invoices, sync runs (including the sample ones), and the console demo partners, coupons, announcements, releases, data requests and AI usage. Kept: `cognidak`, `owner@vellaire.app`, plans, feature flags, settings, email copy. A JSON backup of every deleted row is outside the repo in `vellaire-backups/` next to it.
+- **Database:** every company except the owner's own `cognidak` deleted (12 demo companies, Mahaarib & Cognidak, PW Test Co), with their users, cards, employees, leads, events, NFC, invoices, sync runs (including the sample ones), and the console demo partners, coupons, announcements, releases, data requests and AI usage. Then also the seeded console login `owner@vellaire.app`, its 18 activity rows, the 5 seeded feature flags and 79 email-log rows to demo users. Kept: `cognidak` and the rows the API makes itself (plans, library templates, health samples). A JSON backup of every deleted row is outside the repo in `vellaire-backups/` next to it, on the owner's home laptop only.
+- **Vercel:** `DEMO_LOGIN` and `PLATFORM_ADMIN_EMAILS` deleted from `vellaire-api`.
 - **Code:** `/auth/demo` and the sign-in "Demo access" box removed; `DEMO_LOGIN` is no longer read. `npm run seed` and `seed:platform` removed.
 
 ### 18 October: every "pretend" button made real or marked "Coming soon" (commits `aab5ab3` to `2082ad4`)
@@ -219,4 +251,6 @@ Why: the sign-in form had been hidden behind demo buttons, and with no email ser
 | NFC chips | Software done; the chip-link export for the supplier is not built, and no chips have been written or tap-tested | Next coding task (export), then the client's supplier |
 | Google / Microsoft sign-in | Needs apps in Google Cloud and Microsoft Entra | Owner: create them and add the keys |
 | Payments (Stripe), Terms and Privacy pages | Not started | Owner decides prices and legal text first |
-| Rotating the MongoDB password | It was shared in a screenshot | Owner, in MongoDB Atlas; then update `MONGODB_URI` in Vercel and `apps/api/.env` |
+| Rotating the MongoDB password | It was shared in a screenshot and pasted in an AI chat on 18 October (with `JWT_SECRET`) | Owner, in MongoDB Atlas; then update `MONGODB_URI` in Vercel **vellaire-api** and `apps/api/.env` on every laptop. Changing `JWT_SECRET` too signs everyone out once |
+| Push notifications on the phone | Notifications are an in-app list (`/m/notifications`); phone push needs web-push keys and a sending job | Owner decides; then a coding task |
+| Terms, Privacy and a real support address | The sign-in page links `support@vellaire.app`, which is not a real mailbox yet | Owner |
