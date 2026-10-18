@@ -27,6 +27,8 @@ interface Props {
   onLink?: () => void;
   onWallet?: (kind: 'apple' | 'google') => void;
   className?: string;
+  /** The language to open in: ?lang= on the link, else the holder's choice in the card switcher */
+  initialLang?: string;
 }
 
 const tel = (s?: string) => (s ? `tel:${s.replace(/[^\d+]/g, '')}` : undefined);
@@ -37,10 +39,10 @@ const hexA = (hex: string, a: number) => {
 };
 
 /** The online card a client sees after a tap, scan or link (built to the "Public card" artboard). */
-export function OnlineCard({ card, preview, onSave, onShare, onLink, onWallet, className = '' }: Props) {
+export function OnlineCard({ card, preview, onSave, onShare, onLink, onWallet, className = '', initialLang }: Props) {
   useBrandFonts(card.brand);
   const langs = ['en', ...Object.keys(card.translations || {}).filter((l) => card.translations?.[l]?.name || card.translations?.[l]?.bio)];
-  const [lang, setLang] = useState('en');
+  const [lang, setLang] = useState(initialLang && langs.includes(initialLang) ? initialLang : 'en');
   const t = resolveTheme(card.theme || 'obsidian_gold', card.brand);
   // Light themes use their own accent; dark themes keep the brand gold so the cover stays soft
   const accent = t.accent.startsWith('#') && !t.dark ? t.accent : card.brand?.colors?.[1]?.hex || '#B08D4F';

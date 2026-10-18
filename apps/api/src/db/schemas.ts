@@ -99,6 +99,9 @@ export const UserSchema = new Schema(
     employeeId: { type: ObjectId, ref: 'Employee' },
     status: { type: String, enum: ['active', 'invited', 'disabled'], default: 'active' },
     lastLoginAt: Date,
+    // Employee app notifications: what was seen, and whether new leads are also emailed
+    notificationsReadAt: Date,
+    notifyLeads: { type: Boolean, default: true },
     // Hashed with scrypt (common/password.ts); never sent to the browser
     passwordHash: { type: String, select: false },
     // Wrong passwords in a row; after 5 the account waits until lockedUntil
@@ -214,7 +217,8 @@ export const CardSchema = new Schema(
     links: [LinkSchema],
     syncedFields: { type: [String], default: [] },
     delivery: { type: [String], default: ['email', 'wallet'] }, // email | wallet | signature | nfc
-    hideMobile: { type: Boolean, default: false }, // the holder's "Show my mobile number" switch, off = hidden from the public card
+    hideMobile: { type: Boolean, default: false },
+    defaultLang: { type: String, default: 'en' }, // the language the card opens in from QR, NFC and plain links (card switcher) // the holder's "Show my mobile number" switch, off = hidden from the public card
     approval: {
       requestedBy: String,
       requestedAt: Date,
@@ -288,6 +292,7 @@ export const NfcDeviceSchema = new Schema(
     material: String,
     status: { type: String, enum: ['active', 'disabled', 'lost'], default: 'active' },
     lastTapAt: Date,
+    activatedAt: Date, // first real tap, or the holder's phone reading the chip in "Activate your card"
     orderId: ObjectId,
   },
   opts,

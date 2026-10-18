@@ -7,7 +7,7 @@ import { CardFace } from '@/components/card/card-face';
 import { OnlineCard } from '@/components/card/online-card';
 import { Icon } from '@/components/icons';
 import { Avatar, Button, LinkButton } from '@/components/ui';
-import { useMe } from '@/lib/api';
+import { useApi, useMe } from '@/lib/api';
 import { NoCard } from './no-card';
 import { useMyCard } from './use-my-card';
 import { AccessEnded, AppLoading } from './system';
@@ -16,6 +16,7 @@ import { welcomeKey } from './welcome-key';
 export default function MyCard() {
   const { data, error } = useMyCard();
   const { data: me } = useMe();
+  const { data: notes } = useApi<{ unread: number }>('/me/notifications', { shouldRetryOnError: false });
   const router = useRouter();
 
   // First visit on this phone: the welcome screen once
@@ -40,12 +41,21 @@ export default function MyCard() {
           <div className="text-[14px] text-stone">{data.greeting}</div>
           <h1 className="font-display text-[34px] leading-tight">{data.firstName}</h1>
         </div>
-        <Link href="/m/settings" aria-label="Settings">
-          <Avatar name={c.fields.name} src={c.fields.photoUrl} size={44} />
-        </Link>
+        <span className="flex items-center gap-2.5">
+          <Link href="/m/notifications" aria-label={notes?.unread ? `Notifications, ${notes.unread} new` : 'Notifications'} className="relative flex h-11 w-11 items-center justify-center rounded-full border border-linen bg-white text-ink">
+            <Icon name="bell" size={20} />
+            {!!notes?.unread && <span className="absolute right-[11px] top-2.5 h-2 w-2 rounded-full border-2 border-white bg-gold" />}
+          </Link>
+          <Link href="/m/settings" aria-label="Profile and settings">
+            <Avatar name={c.fields.name} src={c.fields.photoUrl} size={44} />
+          </Link>
+        </span>
       </header>
 
-      <CardFace layout={c.layout} theme={c.theme} fields={c.fields} translations={c.translations} brand={c.brand} width="100%" />
+      {/* Tapping the card opens the card switcher (languages and which one QR and NFC open) */}
+      <Link href="/m/cards" aria-label="My cards">
+        <CardFace layout={c.layout} theme={c.theme} fields={c.fields} translations={c.translations} brand={c.brand} width="100%" />
+      </Link>
 
       <div className="-mt-2 flex items-center justify-center gap-2 text-[13px] text-stone">
         <span className={`h-2 w-2 rounded-full ${c.status === 'live' ? 'bg-ok' : 'bg-warn'}`} />

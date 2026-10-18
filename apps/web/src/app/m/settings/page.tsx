@@ -7,13 +7,14 @@ import { Icon, IconName } from '@/components/icons';
 import { useInstallApp } from '@/components/pwa';
 import { useToast } from '@/components/toast';
 import { Avatar, cx, Loading, Modal } from '@/components/ui';
-import { api, useMe } from '@/lib/api';
+import { api, useApi, useMe } from '@/lib/api';
 import { useMyCard } from '../use-my-card';
 
 /** Settings (E6): profile, card switches, NFC and wallet, signature, help and sign out. */
 export default function MobileSettings() {
   const { data: me } = useMe();
   const { data, mutate } = useMyCard();
+  const { data: prefs, mutate: reloadPrefs } = useApi<{ notifyLeads: boolean }>('/me/notifications', { shouldRetryOnError: false });
   const [pwOpen, setPwOpen] = useState(false);
   const [help, setHelp] = useState(false);
   const [lost, setLost] = useState(false);
@@ -32,6 +33,15 @@ export default function MobileSettings() {
       await api.patch('/me/card', { showMobile: !data.showMobile });
       await mutate();
       toast(data.showMobile ? 'Your mobile number is hidden from your card' : 'Your mobile number shows on your card');
+    } catch (e) {
+      toast((e as Error).message, 'err');
+    }
+  };
+  const toggleLeads = async () => {
+    try {
+      await api.patch('/me/preferences', { notifyLeads: !prefs!.notifyLeads });
+      await reloadPrefs();
+      toast(prefs!.notifyLeads ? 'Lead emails off. New leads still show in the app.' : 'You will get an email for each new lead');
     } catch (e) {
       toast((e as Error).message, 'err');
     }
@@ -65,7 +75,14 @@ export default function MobileSettings() {
       </div>
 
       <Section>
-        <Row icon="bell" label="Notifications" sub="Coming soon · new leads, approvals, card updates" right={<Switch on={false} disabled label="Notifications" />} />
+        <Row
+          icon="bell"
+          label="Notifications"
+          sub={prefs ? (prefs.notifyLeads ? 'Email me about new leads · all updates in the app' : 'Only in the app') : 'New leads, approvals, card updates'}
+          onClick={prefs ? toggleLeads : undefined}
+          right={<Switch on={!!prefs?.notifyLeads} disabled={!prefs} label="Email me about new leads" />}
+        />
+        <Row icon="eye" label="See notifications" href="/m/notifications" />
         {data && (
           <Row
             icon="phone"
@@ -84,6 +101,7 @@ export default function MobileSettings() {
             icon="nfc"
             label="My NFC card"
             sub={nfc ? `${nfc.name} · ${nfc.status === 'active' ? `active${nfc.lastTap ? `, last tap ${nfc.lastTap}` : ''}` : nfc.status}` : 'No NFC card yet. Your company orders them.'}
+            href="/m/nfc"
             right={nfc && <span className={cx('rounded-full px-2.5 py-[3px] text-[12px]', nfc.status === 'active' ? 'bg-ok-bg text-ok' : 'bg-[#EFEBE3] text-stone')}>{nfc.status === 'active' ? 'Active' : nfc.status === 'lost' ? 'Lost' : 'Off'}</span>}
           />
           <Row icon="wallet" label="Wallet pass" sub={data.wallet.apple || data.wallet.google ? 'Add your card to Apple or Google Wallet' : 'Not set up by your company yet'} href={data.wallet.apple || data.wallet.google ? '/m/share' : undefined} />

@@ -93,6 +93,7 @@ export class PublicController {
       cover: card.cover,
       fields: card.hideMobile ? { ...card.fields, mobile: undefined } : card.fields || {},
       translations: card.translations || {},
+      defaultLang: card.defaultLang || 'en',
       links: card.links || [],
       url,
       displayUrl: displayUrl(url),
@@ -227,7 +228,9 @@ export class PublicController {
       ...geo(req),
     });
     const to = employee?.email || card.fields?.email;
-    if (to) {
+    // The holder can switch lead emails off in the app's Settings
+    const holder = employee ? await db.User.findOne({ employeeId: employee._id }).select('notifyLeads').lean<any>() : null;
+    if (to && holder?.notifyLeads !== false) {
       await sendMail({
         template: 'new_lead',
         to,
@@ -285,7 +288,9 @@ export class PublicController {
       const logo = company?.brand?.logos?.icon || company?.brand?.logos?.light || null;
       return { active: false, companyName: company?.name, companySlug: company?.slug, website, logo, teamPage };
     }
-    await db.NfcDevice.updateOne({ _id: d._id }, { lastTapAt: new Date() });
+    // The first real tap activates the chip
+    const now = new Date();
+    await db.NfcDevice.updateOne({ _id: d._id }, d.activatedAt ? { lastTapAt: now } : { lastTapAt: now, activatedAt: now });
     return { active: true, url: `${cardUrl(company, card.slug)}?src=nfc` };
   }
 

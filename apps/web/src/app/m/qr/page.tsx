@@ -52,7 +52,7 @@ export default function ShowQr() {
         <span aria-current="page" className="flex h-11 items-center justify-center rounded-[10px] bg-white text-[13.5px] font-semibold shadow-[0_1px_2px_rgba(23,23,27,0.08)]">
           QR code
         </span>
-        <Link href="/m/share" className="flex h-11 items-center justify-center rounded-[10px] text-[13.5px] text-[#4E4A44]">
+        <Link href="/m/nfc" className="flex h-11 items-center justify-center rounded-[10px] text-[13.5px] text-[#4E4A44]">
           NFC tap
         </Link>
         <Link href="/m/share" className="flex h-11 items-center justify-center rounded-[10px] text-[13.5px] text-[#4E4A44]">

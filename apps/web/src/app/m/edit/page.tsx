@@ -178,7 +178,9 @@ export default function EditMyCard() {
           onChange={(e) => setF({ ...f, bio: e.target.value })}
           className="w-full resize-none border-none bg-transparent p-0 font-sans text-[13.5px] leading-[1.55] text-[#2A2A30] outline-none"
         />
-        <span className="text-[12px] text-[#5E5952]">{languages}</span>
+        <Link href="/m/cards" className="text-[12px] text-[#5E5952] hover:underline">
+          {languages}
+        </Link>
       </section>
 
       {/* 5. Save changes button */}

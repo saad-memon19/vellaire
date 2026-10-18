@@ -11,6 +11,7 @@ import { useToast } from '@/components/toast';
 export interface PublicCard extends OnlineCardData {
   status: string;
   id: string;
+  defaultLang?: string;
   companyName: string;
   companySlug?: string;
   website?: string | null;
@@ -86,6 +87,7 @@ export function PublicCardView({ card }: { card: PublicCard }) {
           onShare={() => setOpen(true)}
           onLink={() => track(card.id, 'click', channel)}
           onWallet={wallet}
+          initialLang={params.get('lang') || card.defaultLang}
         />
       </div>
 

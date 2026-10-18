@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Icon, Seal } from '@/components/icons';
 import { useToast } from '@/components/toast';
 import { copyText, Loading, StatusBadge } from '@/components/ui';
@@ -93,7 +94,7 @@ export default function Share() {
         </button>
       </div>
       {data.devices.map((d: any) => (
-        <div key={d.id} className="flex items-center gap-3.5 rounded-2xl border border-linen bg-white p-4">
+        <Link key={d.id} href="/m/nfc" className="flex items-center gap-3.5 rounded-2xl border border-linen bg-white p-4">
           <span
             className="h-9.5 w-15 shrink-0 rounded-md shadow-[0_4px_10px_rgba(23,23,27,0.18)]"
             style={{
@@ -108,7 +109,7 @@ export default function Share() {
             </span>
           </span>
           <Icon name="nfc" className="text-gold" />
-        </div>
+        </Link>
       ))}
     </div>
   );

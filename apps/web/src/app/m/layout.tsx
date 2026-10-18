@@ -20,7 +20,7 @@ const TABS: { href: string; label: string; icon: IconName }[] = [
 ];
 
 // Full-screen steps from the design: no tab bar, no install banner
-const FULL_SCREEN = ['/m/qr', '/m/leads/scan', '/m/edit/photo', '/m/edit/bio', '/m/welcome', '/m/wallet'];
+const FULL_SCREEN = ['/m/qr', '/m/leads/scan', '/m/edit/photo', '/m/edit/bio', '/m/welcome', '/m/wallet', '/m/cards', '/m/nfc'];
 
 /** The employee app: mobile first, installable (PWA), centred on larger screens. */
 export default function EmployeeLayout({ children }: { children: React.ReactNode }) {
