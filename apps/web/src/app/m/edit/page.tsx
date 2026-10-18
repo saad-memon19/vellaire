@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/components/toast';
 import { Loading } from '@/components/ui';
-import { api } from '@/lib/api';
+import { api, useMe } from '@/lib/api';
+import { LANGS } from '@/lib/catalog';
 import { NoCard } from '../no-card';
 import { useMyCard } from '../use-my-card';
 
@@ -14,23 +15,19 @@ export default function EditMyCard() {
     mobile: string;
     linkedin: string;
     bio: string;
-    photoUrl?: string;
   } | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const toast = useToast();
+  const { data: me } = useMe();
 
   useEffect(() => {
     if (data && !f) {
       const c = data.card;
       const linkedinLink = c.links?.find((l: any) => l.type === 'linkedin');
-      const linkedinVal = linkedinLink?.url
-        ? linkedinLink.url.replace(/^https?:\/\/(www\.)?/, '')
-        : 'linkedin.com/in/sarakhan';
       setF({
-        mobile: c.fields.mobile || '+971 50 000 0000',
-        linkedin: linkedinVal,
-        bio: c.fields.bio || 'Sara leads Private Clients across the Gulf, advising families and founders on long-term wealth.',
-        photoUrl: undefined,
+        mobile: c.fields.mobile || '',
+        linkedin: linkedinLink?.url ? linkedinLink.url.replace(/^https?:\/\/(www\.)?/, '') : '',
+        bio: c.fields.bio || '',
       });
     }
   }, [data, f]);
@@ -39,40 +36,7 @@ export default function EditMyCard() {
   if (!data || !f) return <Loading />;
 
   const c = data.card;
-
-  const upload = async (file?: File) => {
-    if (!file) return;
-    setBusy('photo');
-    try {
-      const r = await api.upload(file);
-      setF((prev) => (prev ? { ...prev, photoUrl: r.url } : prev));
-      const res = await api.patch<{ message: string }>('/me/card', { photoUrl: r.url });
-      toast(res.message, 'ok');
-      await mutate();
-    } catch (e: any) {
-      toast(e.message || 'Upload failed', 'err');
-    } finally {
-      setBusy(null);
-    }
-  };
-
-  const writeBio = async () => {
-    setBusy('bio');
-    try {
-      const r = await api.post<{ bio: string }>('/ai/bio', {
-        name: c.fields.name,
-        title: c.fields.title,
-        department: c.fields.department,
-        office: c.fields.office,
-      });
-      setF((prev) => (prev ? { ...prev, bio: r.bio } : prev));
-      toast('Bio generated with AI', 'ok');
-    } catch (e: any) {
-      toast(e.message || 'AI request failed', 'err');
-    } finally {
-      setBusy(null);
-    }
-  };
+  const languages = (data.languages as string[]).map((l) => LANGS[l] || l.toUpperCase()).join(' · ');
 
   const save = async () => {
     setBusy('save');
@@ -92,9 +56,6 @@ export default function EditMyCard() {
         bio: f.bio,
         links,
       };
-      if (f.photoUrl !== undefined) {
-        body.photoUrl = f.photoUrl;
-      }
       const r = await api.patch<{ message: string }>('/me/card', body);
       toast(r.message || 'Saved', 'ok');
       await mutate();
@@ -105,7 +66,7 @@ export default function EditMyCard() {
     }
   };
 
-  const hasPendingPhoto = data.pendingPhoto || busy === 'photo';
+  const hasPendingPhoto = data.pendingPhoto;
 
   return (
     <>
@@ -126,9 +87,13 @@ export default function EditMyCard() {
       {/* 2. Profile photo row */}
       <div className="flex items-center gap-3.5 rounded-[16px] border border-[#E6E0D5] bg-white p-3.5">
         <span className="box-border flex h-16 w-16 shrink-0 items-center justify-center rounded-full p-0.5" style={{ background: 'linear-gradient(140deg, #E6D3A3, #9C7A44)' }}>
-          <span className="box-border flex h-full w-full items-center justify-center rounded-full border-2 border-white bg-[#F2EEE6] font-display text-[22px] font-semibold text-[#876A33]">
-            {data.initials || 'SK'}
-          </span>
+          {c.fields.photoUrl ? (
+            <img src={c.fields.photoUrl} alt="" className="box-border h-full w-full rounded-full border-2 border-white object-cover" />
+          ) : (
+            <span className="box-border flex h-full w-full items-center justify-center rounded-full border-2 border-white bg-[#F2EEE6] font-display text-[22px] font-semibold text-[#876A33]">
+              {data.initials}
+            </span>
+          )}
         </span>
         <span className="flex flex-1 flex-col gap-0.5">
           <span className="font-semibold text-[#17171B]">Profile photo</span>
@@ -136,10 +101,9 @@ export default function EditMyCard() {
             {hasPendingPhoto ? 'New photo waiting for approval' : 'Shown on your digital card'}
           </span>
         </span>
-        <label className="cursor-pointer text-[13px] font-semibold text-[#876A33] hover:underline">
+        <Link href="/m/edit/photo" className="text-[13px] font-semibold text-[#876A33] hover:underline">
           Change
-          <input type="file" accept="image/*" className="sr-only" onChange={(e) => upload(e.target.files?.[0])} />
-        </label>
+        </Link>
       </div>
 
       {/* 3. Fields Section */}
@@ -151,7 +115,7 @@ export default function EditMyCard() {
             <span className="text-[#6E685F]">From HR</span>
           </span>
           <span className="flex h-11 items-center rounded-[10px] border border-[#E0D9CC] bg-[#F7F5F0] px-3 text-[14px] text-[#5E5952]">
-            {c.fields.name || 'Sara Khan'}
+            {c.fields.name}
           </span>
         </div>
 
@@ -162,7 +126,7 @@ export default function EditMyCard() {
             <span className="text-[#6E685F]">From HR</span>
           </span>
           <span className="flex h-11 items-center rounded-[10px] border border-[#E0D9CC] bg-[#F7F5F0] px-3 text-[14px] text-[#5E5952]">
-            {c.fields.title || 'Head of Private Clients'}
+            {c.fields.title || '—'}
           </span>
         </div>
 
@@ -175,6 +139,7 @@ export default function EditMyCard() {
           <input
             type="tel"
             value={f.mobile}
+            placeholder="Your mobile number"
             onChange={(e) => setF({ ...f, mobile: e.target.value })}
             className="h-11 rounded-[10px] border border-[#E0D9CC] bg-white px-3 font-sans text-[14px] text-[#17171B] outline-none focus:border-ink"
           />
@@ -189,6 +154,7 @@ export default function EditMyCard() {
           <input
             type="text"
             value={f.linkedin}
+            placeholder="linkedin.com/in/your-name"
             onChange={(e) => setF({ ...f, linkedin: e.target.value })}
             className="h-11 rounded-[10px] border border-[#E0D9CC] bg-white px-3 font-sans text-[14px] text-[#17171B] outline-none focus:border-ink"
           />
@@ -199,22 +165,20 @@ export default function EditMyCard() {
       <section className="flex flex-col gap-2.5 rounded-[16px] border border-[#EBDDC0] bg-[#FBF6EC] p-4">
         <span className="flex items-center justify-between">
           <span className="font-semibold text-[#17171B]">About</span>
-          <button
-            type="button"
-            onClick={writeBio}
-            disabled={busy === 'bio'}
-            className="cursor-pointer font-sans text-[12.5px] font-semibold text-[#876A33] hover:underline disabled:opacity-50"
-          >
-            {busy === 'bio' ? 'Writing...' : 'Write with AI'}
-          </button>
+          {me?.features.ai && (
+            <Link href="/m/edit/bio" className="font-sans text-[12.5px] font-semibold text-[#876A33] hover:underline">
+              Write with AI
+            </Link>
+          )}
         </span>
         <textarea
           rows={2}
           value={f.bio}
+          placeholder="A line or two about your work"
           onChange={(e) => setF({ ...f, bio: e.target.value })}
           className="w-full resize-none border-none bg-transparent p-0 font-sans text-[13.5px] leading-[1.55] text-[#2A2A30] outline-none"
         />
-        <span className="text-[12px] text-[#5E5952]">English · العربية</span>
+        <span className="text-[12px] text-[#5E5952]">{languages}</span>
       </section>
 
       {/* 5. Save changes button */}

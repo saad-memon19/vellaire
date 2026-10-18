@@ -16,6 +16,9 @@ const TABS: { href: string; label: string; icon: IconName }[] = [
   { href: '/m/settings', label: 'Settings', icon: 'dGear' },
 ];
 
+// Full-screen steps from the design: no tab bar, no install banner
+const FULL_SCREEN = ['/m/qr', '/m/leads/scan', '/m/edit/photo', '/m/edit/bio', '/m/welcome', '/m/wallet'];
+
 /** The employee app: mobile first, installable (PWA), centred on larger screens. */
 export default function EmployeeLayout({ children }: { children: React.ReactNode }) {
   const path = usePathname();
@@ -25,6 +28,12 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
   if (!me.company) return <NoCompany />;
   const active = (h: string) => (h === '/m' ? path === '/m' || path === '/m/edit' : path.startsWith(h));
   const isEdit = path === '/m/edit';
+  if (FULL_SCREEN.some((p) => path.startsWith(p)))
+    return (
+      <div className="min-h-screen bg-pearl">
+        <div className="relative mx-auto flex min-h-screen max-w-[440px] flex-col sm:border-x sm:border-line">{children}</div>
+      </div>
+    );
   return (
     <div className="min-h-screen bg-pearl">
       <div className={cx('relative mx-auto flex max-w-[440px] flex-col bg-pearl sm:border-x sm:border-line', isEdit ? 'h-[844px] overflow-hidden' : 'min-h-screen')}>

@@ -250,6 +250,8 @@ export const LeadSchema = new Schema(
     status: { type: String, enum: ['new', 'followed_up', 'in_crm'], default: 'new' },
     crm: { provider: String, id: String, pushedAt: Date },
     draft: String,
+    // The card holder's own private note ("My notes" in the app); `note` is what the lead wrote or where they met
+    myNote: String,
   },
   opts,
 );

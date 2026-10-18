@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { AllowMember, CurrentUser, SessionUser } from '../../common/auth';
 import { cardUrl, serializeCard } from '../../common/cards';
 import { materialName } from '../../common/catalog';
+import { mailReady } from '../../common/mail';
 import { companyQrSvg } from '../../common/qr';
 import { daysAgo, initials, logActivity, parse, pct, rangeDays, relTime } from '../../common/util';
 import { db } from '../../db/db';
@@ -50,6 +51,8 @@ export class MeController {
       wallet: { apple: appleReady(), google: googleReady() },
       permissions: company.brand?.permissions || {},
       pendingPhoto: !!card.approval?.pendingPhoto,
+      photoApproval: company.settings?.photoApproval !== false,
+      languages: company.settings?.languages || ['en'],
     };
   }
 
@@ -131,7 +134,7 @@ export class MeController {
     return {
       tabs: { followUp: toFollow, all },
       rows: rows.map((l) => ({ id: String(l._id), ini: initials(l.name), name: l.name, co: [l.jobTitle, l.company].filter(Boolean).join(' · '), via: channelName(l.via), when: relTime(l.createdAt), status: l.status })),
-      draft: draft ? { id: String(draft._id), name: draft.name.split(' ')[0], text: draft.draft } : null,
+      draft: draft ? { id: String(draft._id), name: draft.name.split(' ')[0], text: draft.draft, email: draft.consent ? draft.email : '', mailReady: mailReady() } : null,
     };
   }
 

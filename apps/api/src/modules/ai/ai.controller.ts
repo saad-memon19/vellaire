@@ -20,7 +20,14 @@ export class AiController {
   @Post('bio')
   async bio(@Body() body: unknown, @CurrentUser() u: SessionUser) {
     const d = parse(
-      z.object({ name: z.string().min(1), title: z.string().optional(), department: z.string().optional(), office: z.string().optional(), keywords: z.string().max(200).optional() }),
+      z.object({
+        name: z.string().min(1),
+        title: z.string().optional(),
+        department: z.string().optional(),
+        office: z.string().optional(),
+        keywords: z.string().max(200).optional(),
+        tone: z.enum(['formal', 'warm', 'short']).optional(),
+      }),
       body,
     );
     const company = await db.Company.findById(u.companyId).select('name').lean<any>();

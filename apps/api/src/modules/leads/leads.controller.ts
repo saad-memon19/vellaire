@@ -2,7 +2,7 @@ import { BadRequestException, Body, Controller, Get, Param, Patch, Post, Query, 
 import type { Response } from 'express';
 import { z } from 'zod';
 import { AllowMember, CurrentUser, SessionUser } from '../../common/auth';
-import { sendMail } from '../../common/mail';
+import { mailReady, sendMail } from '../../common/mail';
 import { escapeRegex, found, initials, logActivity, paging, parse, relTime, requireId, toCsv } from '../../common/util';
 import { db } from '../../db/db';
 import { oid } from '../../db/schemas';
@@ -125,6 +125,12 @@ export class LeadsController {
       status: l.status,
       crm: l.crm,
       draft: l.draft || '',
+      myNote: l.myNote || '',
+      // Without an email service the app opens the phone's mail app instead of sending from Vellaire
+      mailReady: mailReady(),
+      via: channelName(l.via),
+      paper: l.via === 'paper',
+      createdAt: l.createdAt,
       met: `${l.ownerName || 'Unknown'} · ${channelName(l.via)} · ${new Date(l.createdAt).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}`,
       ownerName: l.ownerName,
     };
@@ -181,6 +187,7 @@ export class LeadsController {
         status: z.enum(['new', 'followed_up', 'in_crm']).optional(),
         draft: z.string().max(4000).optional(),
         note: z.string().max(1000).optional(),
+        myNote: z.string().max(2000).optional(),
       }),
       body,
     );
@@ -226,6 +233,7 @@ export class LeadsController {
   @Post(':id/send')
   async send(@Param('id') id: string, @Body() body: unknown, @CurrentUser() u: SessionUser) {
     const { text } = parse(z.object({ text: z.string().min(10).max(4000) }), body);
+    if (!mailReady()) throw new BadRequestException('Email is not set up yet. Send it from your own mail app.');
     const lead = await this.own(u, id);
     if (!lead.email) throw new BadRequestException('This lead has no email address');
     if (!lead.consent) throw new BadRequestException('This person did not agree to be contacted');

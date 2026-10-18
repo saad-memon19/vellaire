@@ -84,10 +84,11 @@ export class AiService {
     return db.AiUsage.create({ ...u, provider: this.providerName, costUsd: costOf(u.inputChars, u.outputChars) }).catch(() => undefined);
   }
 
-  bio(input: { name: string; title?: string; department?: string; office?: string; company: string; keywords?: string }) {
+  bio(input: { name: string; title?: string; department?: string; office?: string; company: string; keywords?: string; tone?: 'formal' | 'warm' | 'short' }) {
+    const tone = { formal: 'Formal and precise.', warm: 'Warm and personable.', short: 'One short sentence, under 140 characters.' }[input.tone || 'formal'];
     return this.run(
       'bio',
-      'Write a 2–3 sentence professional bio in the third person for a business card. Maximum 300 characters.',
+      `Write a 2–3 sentence professional bio in the third person for a business card. Maximum 300 characters. Tone: ${tone} Give a different wording each time.`,
       `Name: ${input.name}\nTitle: ${input.title || ''}\nDepartment: ${input.department || ''}\nOffice: ${input.office || ''}\nCompany: ${input.company}\nKeywords: ${input.keywords || ''}`,
       400,
     );

@@ -5,13 +5,12 @@ import { useState } from 'react';
 import { CardFace } from '@/components/card/card-face';
 import { OnlineCard } from '@/components/card/online-card';
 import { Icon } from '@/components/icons';
-import { Avatar, Button, Loading, Modal } from '@/components/ui';
+import { Avatar, Button, LinkButton, Loading } from '@/components/ui';
 import { NoCard } from './no-card';
 import { useMyCard } from './use-my-card';
 
 export default function MyCard() {
   const { data, error } = useMyCard();
-  const [qr, setQr] = useState(false);
   const [preview, setPreview] = useState(false);
   if (error) return <NoCard message={(error as Error).message.includes('created') ? undefined : (error as Error).message} />;
   if (!data) return <Loading />;
@@ -37,9 +36,9 @@ export default function MyCard() {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <Button size="lg" variant="ink" icon="qr" onClick={() => setQr(true)}>
+        <LinkButton size="lg" variant="ink" icon="qr" href="/m/qr">
           Show QR
-        </Button>
+        </LinkButton>
         <Button size="lg" icon="eye" onClick={() => setPreview(true)}>
           Preview card
         </Button>
@@ -59,7 +58,7 @@ export default function MyCard() {
       </dl>
 
       {data.followUp && (
-        <Link href="/m/leads" className="flex items-center gap-3.5 rounded-2xl border border-gold-line bg-[#FBF6EC] p-4">
+        <Link href={`/m/leads/${data.followUp.id}`} className="flex items-center gap-3.5 rounded-2xl border border-gold-line bg-[#FBF6EC] p-4">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-ink text-[#E6D3A3]">
             <Icon name="sparkle" size={18} />
           </span>
@@ -82,12 +81,6 @@ export default function MyCard() {
         <Icon name="right" className="text-stone-2" />
       </Link>
 
-      <Modal open={qr} onClose={() => setQr(false)} title="Scan to open my card">
-        <div className="flex flex-col items-center gap-3 pb-2">
-          <img src="/api/me/qr" alt="QR code for my card" className="w-full max-w-[300px]" />
-          <div className="font-mono text-[13px] text-stone">{c.displayUrl}</div>
-        </div>
-      </Modal>
       {preview && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-ink/60 sm:p-6" onClick={(e) => e.target === e.currentTarget && setPreview(false)}>
           <div className="mx-auto max-w-[440px] overflow-hidden bg-white sm:rounded-2xl">
