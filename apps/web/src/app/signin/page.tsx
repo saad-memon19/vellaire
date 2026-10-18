@@ -134,57 +134,6 @@ function SignInForm() {
   );
 }
 
-/** One-click demo accounts, only while demo access is on (development, or DEMO_LOGIN=1 on the server). */
-function DemoAccess() {
-  const [enabled, setEnabled] = useState(false);
-  const [busy, setBusy] = useState<string | null>(null);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    api
-      .get<{ enabled: boolean }>('/auth/demo')
-      .then((r) => setEnabled(r.enabled))
-      .catch(() => {});
-  }, []);
-  if (!enabled) return null;
-
-  const enter = async (as: string) => {
-    setBusy(as);
-    setError('');
-    try {
-      const r = await api.post<{ redirect: string }>('/auth/demo', { as });
-      window.location.href = r.redirect;
-    } catch (e) {
-      setError((e as Error).message);
-      setBusy(null);
-    }
-  };
-
-  const options = [
-    { as: 'owner', title: 'Company dashboard' },
-    { as: 'employee', title: 'Employee app' },
-    { as: 'console', title: 'Owner console' },
-  ];
-  return (
-    <div className="mt-10 rounded-xl border border-dashed border-gold-line bg-gold-tint p-4">
-      <div className="text-[13px] font-medium text-gold-text">Demo access</div>
-      <p className="mt-0.5 text-[13px] text-stone">Open a demo account without a password. Turn this off before launch.</p>
-      <div className="mt-3 flex flex-wrap gap-2">
-        {options.map((o) => (
-          <Button key={o.as} size="sm" loading={busy === o.as} disabled={!!busy} onClick={() => enter(o.as)}>
-            {o.title}
-          </Button>
-        ))}
-      </div>
-      {error && (
-        <p role="alert" className="mt-2 text-[13px] text-err">
-          {error}
-        </p>
-      )}
-    </div>
-  );
-}
-
 export default function SignInPage() {
   return (
     <AuthLayout cardText="Welcome back" quote="Your identity, impeccably shared.">
@@ -192,7 +141,6 @@ export default function SignInPage() {
         <Suspense>
           <SignInForm />
         </Suspense>
-        <DemoAccess />
       </div>
     </AuthLayout>
   );

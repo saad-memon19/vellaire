@@ -23,7 +23,6 @@ const homeFor = (u: { platformRole?: string | null; companyId?: unknown; role?: 
 const setupPending = async (u: { companyId?: unknown; role?: string }) =>
   !!u.companyId && u.role !== 'member' && !!(await db.Company.exists({ _id: u.companyId, 'setup.done': false }));
 
-const demoEnabled = () => !config.isProd || process.env.DEMO_LOGIN === '1';
 const SIGNUP_COOKIE = 'vl_signup';
 const MAX_PASSWORD_TRIES = 5;
 
@@ -214,43 +213,6 @@ export class AuthController {
     return { csv: toCsv(rows), made, skipped: rows.length - made };
   }
 
-  /**
-   * Demo access: one-click sign-in as a demo user, so the product can be seen without the email form.
-   * On in development; in production only when DEMO_LOGIN=1.
-   */
-  @Public()
-  @Get('demo')
-  demoInfo() {
-    return { enabled: demoEnabled() };
-  }
-
-  @Public()
-  @Post('demo')
-  async demo(@Body() body: unknown, @Res({ passthrough: true }) res: Response) {
-    if (!demoEnabled()) throw new BadRequestException('Demo access is turned off');
-    const { as } = parse(z.object({ as: z.enum(['owner', 'employee', 'console']) }), body);
-    let user: any;
-    if (as === 'employee') {
-      // An employee whose card is live, so the app has something to show
-      const members = await db.User.find({
-        role: 'member',
-        status: { $ne: 'disabled' },
-        employeeId: { $ne: null },
-      }).limit(50);
-      for (const m of members) {
-        const e = await db.Employee.findById(m.employeeId).select('cardId').lean<any>();
-        if (e?.cardId && (await db.Card.exists({ _id: e.cardId, status: 'live' }))) {
-          user = m;
-          break;
-        }
-      }
-    } else {
-      const email = as === 'owner' ? 'sara.khan@meridian.com' : config.platformAdmins[0] || 'owner@vellaire.app';
-      user = await db.User.findOne({ email });
-    }
-    if (!user) throw new BadRequestException('Demo data is missing. Run npm run seed first.');
-    return this.login(res, user);
-  }
 
   @Public()
   @Post('start')

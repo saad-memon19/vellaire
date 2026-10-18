@@ -53,7 +53,7 @@ The browser only talks to the web domain. The web project forwards `/api/*` to t
 ## 4. After the first deploy
 
 - **First sign-in:** the API creates staff accounts for `PLATFORM_ADMIN_EMAILS` when it starts. Get a password link for yours with `npm run password-link -w apps/api -- you@email` (it uses the database in `apps/api/.env`), open it on the live address, choose a password, then sign in at `/signin`.
-- **Do not run `npm run seed` against the live database.** It wipes everything and loads demo data.
+- There is no seed or demo data; companies are created through sign-up.
 - **Google / Microsoft sign-in:** set the redirect URLs in their consoles to
   `https://app.vellaire.com/api/auth/oauth/google/callback` and `.../microsoft/callback`.
 - **Company card domains** (`cards.company.com`): add each domain to the **web** project in Vercel as well. The company also adds the DNS records shown in Company settings → Domain.
@@ -79,5 +79,5 @@ On Hobby a function can run for 60 seconds. A very large HR sync may need Pro, w
 
 - Uploads are limited to 4 MB (Vercel's request limit is 4.5 MB). Photos are shrunk in the browser before upload.
 - Uploaded files live in Vercel Blob on their own domain, not under `/files`.
-- Demo sign-in buttons are off in production unless `DEMO_LOGIN=1`.
+- There is no demo sign-in. `DEMO_LOGIN` is no longer read and can be deleted from Vercel.
 - Locally nothing changes: `npm run dev` still runs the API as a normal server with its timers and disk uploads.

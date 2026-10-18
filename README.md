@@ -24,23 +24,12 @@ Requirements: Node 20+ and a MongoDB database (Atlas works).
 ```bash
 npm install
 # 1. Put your MongoDB connection string in apps/api/.env (see apps/api/.env.example)
-# 2. Fill the database with demo data (wipes it first)
-npm run seed
-# 3. Start API and web together
+# 2. Start API and web together
 npm run dev
 ```
 
-Open http://localhost:3000/signin. Without an email provider the sign-in link is shown on screen.
-New companies can sign up themselves at http://localhost:3000/signup and are walked through five setup steps.
-
-To add only the owner-console demo data (partners, coupons, flags, announcements, AI usage) without wiping anything: `npm run seed:platform -w apps/api`.
-
-| Sign in as | Email | Lands on |
-|---|---|---|
-| Company owner | `sara.khan@meridian.com` | Company dashboard |
-| Brand manager | `layla.mansour@meridian.com` | Company dashboard |
-| Employee (no card yet) | `omar.haddad@meridian.com` | Employee app |
-| Vellaire staff | `owner@vellaire.app` (change with `PLATFORM_ADMIN_EMAILS`) | Console |
+There is no demo data and no demo sign-in. Create a company at http://localhost:3000/signup (five setup steps follow), then sign in at http://localhost:3000/signin.
+Vellaire staff sign in as `owner@vellaire.app` (change with `PLATFORM_ADMIN_EMAILS`) and land on the console. Without email, get a password link from the terminal: `npm run password-link -w apps/api -- owner@vellaire.app`.
 
 ## Configuration (`apps/api/.env`)
 

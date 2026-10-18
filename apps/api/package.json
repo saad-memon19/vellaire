@@ -6,9 +6,7 @@
     "dev": "nest start --watch",
     "build": "nest build",
     "start": "node dist/main.js",
-    "seed": "ts-node -r tsconfig-paths/register src/seed/seed.ts",
     "typecheck": "tsc --noEmit",
-    "seed:platform": "ts-node -r tsconfig-paths/register src/seed/platform.ts",
     "password-link": "ts-node -r tsconfig-paths/register src/scripts/password-link.ts"
   },
   "dependencies": {

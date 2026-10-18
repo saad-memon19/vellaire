@@ -21,7 +21,7 @@ Vellaire is a digital business card product for companies. It has five parts, al
 2. **Do not restyle finished pages** unless the owner asks for that page by name. When a design differs, report it and wait.
 3. **Secrets never go in chat or in git.** Keys live only in `apps/api/.env`, which is git-ignored. The owner adds keys themselves.
 4. The owner writes in Roman Urdu and prefers short, plain answers. Check before writing code, and make targeted edits rather than rewriting whole files. They care about not wasting tokens.
-5. Demo sign-in buttons only work in development or with `DEMO_LOGIN=1`. Seeding refuses to run in production without `--force`.
+5. **No demo data, no demo sign-in.** The owner removed both on 18 October; do not bring them back. Everything must work without email until the client provides one.
 
 ---
 
@@ -29,13 +29,11 @@ Vellaire is a digital business card product for companies. It has five parts, al
 
 ```bash
 npm install
-npm run seed            # wipes the database and loads demo data
 npm run dev             # API on :4000, web on :3000
-npm run seed:platform -w apps/api   # only the console demo data, nothing wiped
 ```
 
-Sign in at `/signin` with email and password. In local development without an email provider, sign-in and reset links are also shown on screen:
-`sara.khan@meridian.com` (company owner), `layla.mansour@meridian.com` (brand manager), `owner@vellaire.app` (Vellaire staff).
+The local `.env` points at the **live** database (there is no separate dev database). Create test companies through `/signup` and delete them afterwards.
+Sign in at `/signin` with email and password. Vellaire staff: `owner@vellaire.app`; without email, get a password link with `npm run password-link -w apps/api -- owner@vellaire.app`.
 
 Type-check before you finish any change:
 
@@ -60,7 +58,6 @@ apps/api   NestJS 11 + MongoDB (Mongoose)
   src/jobs.ts                 background jobs (publish, HR sync, trials, health checks every 5 min)
   src/modules/*               one folder per area; owner console pages live in modules/platform and modules/console
   src/modules/onboarding      self-serve sign-up and the five setup steps
-  src/seed/                   seed.ts (everything), platform.ts (console demo data only)
 
 apps/web   Next.js 15 App Router + Tailwind v4
   src/components/ui.tsx       Button, Input, Select, Panel, Stat, Tabs, PillTabs, Modal, Table, Pagination, FilterChip, ...
@@ -125,7 +122,6 @@ QR codes, Company settings, Security, Wallet passes, Email signatures, Billing, 
 3. **Before launch:**
    - Rotate the MongoDB password (it was shared in a screenshot).
    - Email: set `RESEND_API_KEY`, or `SMTP_HOST`/`SMTP_PORT`/`SMTP_USER`/`SMTP_PASS`, plus `MAIL_FROM` (see `apps/api/.env.example`). Nothing else changes in code. Add Google/Microsoft sign-in keys and optionally AI keys.
-   - Remove `DEMO_LOGIN` from Vercel before launch (it shows the demo buttons on `/signin`).
    - Write Terms and Privacy pages (TODO in `apps/web/src/app/signup/page.tsx`).
    - Payments (Stripe) for plans and NFC orders.
    - Backups and monitoring.
@@ -152,6 +148,10 @@ Signature deployment to Outlook and Gmail, two-step sign-in and network rules, c
 ## 7. Work log: what was done last (13–18 October 2026)
 
 Newest first. Items up to 15 October are live on https://vellaire.vercel.app and were tested there or locally.
+
+### 18 October: demo data and demo sign-in removed
+- **Database:** every company except the owner's own `cognidak` deleted (12 demo companies, Mahaarib & Cognidak, PW Test Co), with their users, cards, employees, leads, events, NFC, invoices, sync runs (including the sample ones), and the console demo partners, coupons, announcements, releases, data requests and AI usage. Kept: `cognidak`, `owner@vellaire.app`, plans, feature flags, settings, email copy. A JSON backup of every deleted row is outside the repo in `vellaire-backups/` next to it.
+- **Code:** `/auth/demo` and the sign-in "Demo access" box removed; `DEMO_LOGIN` is no longer read. `npm run seed` and `seed:platform` removed.
 
 ### 18 October: every "pretend" button made real or marked "Coming soon" (commits `aab5ab3` to `2082ad4`)
 Why: §5A. Looking closer, most of these pages were fully made up (fixed numbers, Meridian text, fake QR patterns), not just one button. The design was kept; only data and actions changed. New company styles (QR, signature, wallet) change nothing until a company saves one, so the locked pages look the same.
@@ -206,13 +206,9 @@ Why: the sign-in form had been hidden behind demo buttons, and with no email ser
 |---|---|---|
 | Real emails (sign-in link, reset, invites, lead alerts) | No email account or domain yet. The code is finished | Owner: add `RESEND_API_KEY` or `SMTP_*` and `MAIL_FROM` to the **vellaire-api** project in Vercel. Before that, the "card ready" email (`publishCard` in `common/cards.ts`) needs a "Choose a password" link like the invite email; today it only has "Open my card" |
 | Web pushes reaching the live site by themselves | The Vercel web project's Production Branch is not `master`, so pushes become Preview builds. Each release so far was promoted by hand (`vercel promote <url>`). The API project already deploys `master` to production | Owner: Vercel → project `vellaire` → Settings → Git → Production Branch = `master` |
-| Owner password on the live site | Without email the owner cannot use "Forgot password" | Owner: sign in with the demo "Owner console" button, then sidebar → Password. Or run `npm run password-link` |
-| Turning off demo access | `DEMO_LOGIN` is set on Vercel, so anyone can open the demo accounts | Owner: remove `DEMO_LOGIN` from **vellaire-api**, after setting their own password |
-| Sample rows written by the old Sync activity code | Before 18 October, opening Sync activity wrote seven made-up sync runs (e.g. "Manual · Sara Khan", "Authentication token expired") into `SyncRun` and two made-up people into `Integration.issues` for every workspace without runs. They are no longer shown or written, but stay in the database | Owner: allow the agent to delete them (they cannot be told apart from real runs by a field, only by their fixed contents) |
-| Test company "PW Test Co" (`pwtest…@example.com`) in the database | Left from the 15 October sign-up test; deleting from the database was not permitted in that session | Owner: delete it, or allow the agent to |
+| Console password on the live site | `owner@vellaire.app` has no password yet, and there is no demo sign-in or email to get in | Owner: run `npm run password-link -w apps/api -- owner@vellaire.app`, open the link on the live address, choose a password |
 | Wallet passes | Code done; Apple and Google accounts and certificates are needed | Client: Apple Developer Program and a Google Wallet issuer account (§5C) |
 | NFC chips | Software done; the chip-link export for the supplier is not built, and no chips have been written or tap-tested | Next coding task (export), then the client's supplier |
 | Google / Microsoft sign-in | Needs apps in Google Cloud and Microsoft Entra | Owner: create them and add the keys |
 | Payments (Stripe), Terms and Privacy pages | Not started | Owner decides prices and legal text first |
 | Rotating the MongoDB password | It was shared in a screenshot | Owner, in MongoDB Atlas; then update `MONGODB_URI` in Vercel and `apps/api/.env` |
-| No real company data on the live site | Demo data is only for local development; seeding the live database is forbidden | Create a real company through sign-up |

@@ -8,7 +8,6 @@
   "scripts": {
     "dev": "concurrently -n api,web -c yellow,cyan \"npm run dev -w apps/api\" \"npm run dev -w apps/web\"",
     "build": "npm run build -w apps/api && npm run build -w apps/web",
-    "seed": "npm run seed -w apps/api",
     "start": "concurrently -n api,web \"npm run start -w apps/api\" \"npm run start -w apps/web\""
   },
   "devDependencies": {
