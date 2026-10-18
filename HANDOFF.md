@@ -149,6 +149,13 @@ Signature deployment to Outlook and Gmail, two-step sign-in and network rules, c
 
 Newest first. Items up to 15 October are live on https://vellaire.vercel.app and were tested there or locally.
 
+### 18 October: employee app screens from the new design (commits `f31002e`, `2af3af4`, `1b90a26`, live)
+Design: the owner's canvas "Vellaire — Product UI/UX Design" (claude.ai artifact), sections 9 and 10. The nine older phone screens only gained links; 19 of the 22 new ones are built, on real data only (the design's Sara Khan / Meridian copy is never shown).
+- **Screens:** `/m/qr`, `/m/leads/[id]`, `/m/leads/scan` (camera + result), empty leads, `/m/edit/photo`, `/m/edit/bio`, Settings E6, `/m/settings/signature`, `/m/welcome` (once per person per phone), `/m/wallet`, and in `m/system.tsx`: splash, loading, offline, error (also `m/error.tsx`), `/m/signed-out`, update available, access ended; `/signin` has an app layout inside the installed app.
+- **New API:** `Lead.myNote`; lead detail returns `mailReady`; `/leads/:id/send` refuses without an email service and the app opens the phone's mail app instead; `Card.hideMobile` ("Show my mobile number", respected by the public card, vCard and signature); `POST /me/nfc/:id/lost`; `/me/card` adds `photoApproval`, `showMobile`, `languages`; `/ai/bio` takes a tone.
+- **Offline and updates:** the service worker keeps `/api/me/qr` for offline (cleared on sign-out); `/version` returns the live build id (`VERCEL_GIT_COMMIT_SHA`) and the app offers "Update now" when it differs.
+- **Not built (section C of the plan, ask the owner first):** Notifications (screen and switch say "Coming soon"), Card switcher (several cards per person), Activate NFC (Web NFC works only in Android Chrome). Also shown as "Coming soon" or left out: "Match team style" photo AI, Face ID, "installed in your Outlook", pass updates.
+
 ### 18 October: demo data and demo sign-in removed
 - **Database:** every company except the owner's own `cognidak` deleted (12 demo companies, Mahaarib & Cognidak, PW Test Co), with their users, cards, employees, leads, events, NFC, invoices, sync runs (including the sample ones), and the console demo partners, coupons, announcements, releases, data requests and AI usage. Kept: `cognidak`, `owner@vellaire.app`, plans, feature flags, settings, email copy. A JSON backup of every deleted row is outside the repo in `vellaire-backups/` next to it.
 - **Code:** `/auth/demo` and the sign-in "Demo access" box removed; `DEMO_LOGIN` is no longer read. `npm run seed` and `seed:platform` removed.
