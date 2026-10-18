@@ -79,5 +79,5 @@ On Hobby a function can run for 60 seconds. A very large HR sync may need Pro, w
 
 - Uploads are limited to 4 MB (Vercel's request limit is 4.5 MB). Photos are shrunk in the browser before upload.
 - Uploaded files live in Vercel Blob on their own domain, not under `/files`.
-- There is no demo sign-in. `DEMO_LOGIN` is no longer read and can be deleted from Vercel.
+- There is no demo sign-in. `DEMO_LOGIN` was deleted from Vercel on 18 October.
 - Locally nothing changes: `npm run dev` still runs the API as a normal server with its timers and disk uploads.
