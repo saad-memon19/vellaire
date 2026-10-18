@@ -148,8 +148,9 @@ function SignInForm({ app = false }: { app?: boolean }) {
 
 export default function SignInPage() {
   const installed = useInstalledApp();
-  // The installed app (on a phone) gets the design's app sign-in screen
-  if (installed)
+  const fromApp = useFromApp();
+  // The installed app, or a phone on its way into the app, gets the design's app sign-in screen
+  if (installed || fromApp)
     return (
       <main className="mx-auto flex min-h-screen max-w-[440px] flex-col gap-4 bg-pearl px-5 pb-[30px] pt-14">
         <div className="flex items-center gap-2.5">
@@ -172,4 +173,14 @@ export default function SignInPage() {
       </div>
     </AuthLayout>
   );
+}
+
+/** A phone heading into the employee app (next=/m… or /open): read after load, as the server cannot know the screen size. */
+function useFromApp() {
+  const [yes, setYes] = useState(false);
+  useEffect(() => {
+    const next = new URLSearchParams(window.location.search).get('next') || '';
+    setYes(window.matchMedia('(max-width: 767px)').matches && /^\/(m|open)(\/|\?|$)/.test(next));
+  }, []);
+  return yes;
 }
