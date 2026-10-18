@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, NotFoundException, Patch, Query, Res } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, NotFoundException, Param, Patch, Post, Query, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { z } from 'zod';
 import { AllowMember, CurrentUser, SessionUser } from '../../common/auth';
@@ -6,7 +6,7 @@ import { cardUrl, serializeCard } from '../../common/cards';
 import { materialName } from '../../common/catalog';
 import { mailReady } from '../../common/mail';
 import { companyQrSvg } from '../../common/qr';
-import { daysAgo, initials, logActivity, parse, pct, rangeDays, relTime } from '../../common/util';
+import { daysAgo, initials, logActivity, parse, pct, rangeDays, relTime, requireId } from '../../common/util';
 import { db } from '../../db/db';
 import { analyticsFor, fmtDelta } from '../analytics/analytics.controller';
 import { channelName } from '../cards/cards.controller';
@@ -52,6 +52,7 @@ export class MeController {
       permissions: company.brand?.permissions || {},
       pendingPhoto: !!card.approval?.pendingPhoto,
       photoApproval: company.settings?.photoApproval !== false,
+      showMobile: !card.hideMobile,
       languages: company.settings?.languages || ['en'],
     };
   }
@@ -83,10 +84,12 @@ export class MeController {
         links: z.array(z.object({ type: z.string(), label: z.string().max(80), url: z.string().max(500), sub: z.string().max(120).optional() })).max(12).optional(),
         translations: z.record(z.object({ name: z.string(), title: z.string(), bio: z.string() }).partial()).optional(),
         theme: z.string().optional(),
+        showMobile: z.boolean().optional(),
       }),
       body,
     );
     const { card, company } = await this.mine(u);
+    if (d.showMobile !== undefined) card.hideMobile = !d.showMobile;
     const p = company.brand?.permissions || {};
     const deny = (what: string) => {
       throw new BadRequestException(`Your company manages ${what} centrally`);
@@ -118,6 +121,16 @@ export class MeController {
     await card.save();
     await logActivity({ companyId: company._id, cardId: card._id, actor: u.name, action: 'card.self_edit', text: `${u.name} updated their card` });
     return { ok: true, message };
+  }
+
+  /** "Report lost card": the holder switches their own NFC card off at once; an admin can switch it back on. */
+  @Post('nfc/:id/lost')
+  async lostCard(@Param('id') id: string, @CurrentUser() u: SessionUser) {
+    const { card } = await this.mine(u);
+    const d = await db.NfcDevice.findOneAndUpdate({ _id: requireId(id), cardId: card._id }, { status: 'lost' }, { new: true });
+    if (!d) throw new NotFoundException('NFC card not found');
+    await logActivity({ companyId: card.companyId, cardId: card._id, actor: u.name, action: 'nfc.status', text: `${u.name} reported their NFC card lost; it is switched off` });
+    return { ok: true };
   }
 
   @Get('leads')

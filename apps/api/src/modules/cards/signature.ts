@@ -47,7 +47,7 @@ function designedSignature(card: any, company: any, d: SignatureDesign) {
   const compact = d.style === 'Compact';
   const size = compact ? 48 : 64;
   const links: { type: string; url: string }[] = card.links || [];
-  const phone = d.phone ? f.mobile || f.phone : '';
+  const phone = d.phone ? (card.hideMobile ? '' : f.mobile) || f.phone : '';
   const booking = d.booking ? links.find((l) => l.type === 'booking') : undefined;
   const social = d.social ? links.filter((l) => SOCIAL[l.type]) : [];
   const line = (html: string) => `<div style="font-size:${compact ? 12 : 12.5}px;color:#5E5952">${html}</div>`;

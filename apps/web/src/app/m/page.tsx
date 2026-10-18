@@ -1,16 +1,30 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { CardFace } from '@/components/card/card-face';
 import { OnlineCard } from '@/components/card/online-card';
 import { Icon } from '@/components/icons';
 import { Avatar, Button, LinkButton, Loading } from '@/components/ui';
+import { useMe } from '@/lib/api';
 import { NoCard } from './no-card';
 import { useMyCard } from './use-my-card';
+import { welcomeKey } from './welcome-key';
 
 export default function MyCard() {
   const { data, error } = useMyCard();
+  const { data: me } = useMe();
+  const router = useRouter();
+
+  // First visit on this phone: the welcome screen once
+  useEffect(() => {
+    if (!data || !me) return;
+    try {
+      if (!localStorage.getItem(welcomeKey(me.user.id))) router.replace('/m/welcome');
+    } catch {}
+  }, [data, me, router]);
+
   const [preview, setPreview] = useState(false);
   if (error) return <NoCard message={(error as Error).message.includes('created') ? undefined : (error as Error).message} />;
   if (!data) return <Loading />;

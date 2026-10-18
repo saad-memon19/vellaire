@@ -37,7 +37,8 @@ function geo(req: Request) {
 }
 
 function vcard(card: any, company: any) {
-  const f = card.fields || {};
+  // The holder can hide their mobile number from everything public
+  const f = card.hideMobile ? { ...card.fields, mobile: undefined } : card.fields || {};
   const esc = (s = '') =>
     String(s)
       .replace(/([,;\\])/g, '\\$1')
@@ -90,7 +91,7 @@ export class PublicController {
       layout: card.layout,
       theme: card.theme,
       cover: card.cover,
-      fields: card.fields || {},
+      fields: card.hideMobile ? { ...card.fields, mobile: undefined } : card.fields || {},
       translations: card.translations || {},
       links: card.links || [],
       url,

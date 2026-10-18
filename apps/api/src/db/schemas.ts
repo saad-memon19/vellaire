@@ -214,6 +214,7 @@ export const CardSchema = new Schema(
     links: [LinkSchema],
     syncedFields: { type: [String], default: [] },
     delivery: { type: [String], default: ['email', 'wallet'] }, // email | wallet | signature | nfc
+    hideMobile: { type: Boolean, default: false }, // the holder's "Show my mobile number" switch, off = hidden from the public card
     approval: {
       requestedBy: String,
       requestedAt: Date,

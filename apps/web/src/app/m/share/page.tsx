@@ -38,7 +38,7 @@ export default function Share() {
   };
   const wallet = (kind: 'apple' | 'google') => {
     if (!data.wallet[kind]) return toast(`${kind === 'apple' ? 'Apple' : 'Google'} Wallet is not set up by your company yet`, 'info');
-    window.location.href = `/api/public/cards/${c.id}/wallet/${kind}`;
+    window.location.href = `/m/wallet?kind=${kind}`;
   };
 
   return (
