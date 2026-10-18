@@ -6,10 +6,11 @@ import { useEffect, useState } from 'react';
 import { CardFace } from '@/components/card/card-face';
 import { OnlineCard } from '@/components/card/online-card';
 import { Icon } from '@/components/icons';
-import { Avatar, Button, LinkButton, Loading } from '@/components/ui';
+import { Avatar, Button, LinkButton } from '@/components/ui';
 import { useMe } from '@/lib/api';
 import { NoCard } from './no-card';
 import { useMyCard } from './use-my-card';
+import { AccessEnded, AppLoading } from './system';
 import { welcomeKey } from './welcome-key';
 
 export default function MyCard() {
@@ -27,8 +28,10 @@ export default function MyCard() {
 
   const [preview, setPreview] = useState(false);
   if (error) return <NoCard message={(error as Error).message.includes('created') ? undefined : (error as Error).message} />;
-  if (!data) return <Loading />;
+  if (!data) return <AppLoading />;
   const c = data.card;
+  // The company switched the card off: the person has left
+  if (c.status === 'deactivated') return <AccessEnded company={c.brand?.companyName} />;
 
   return (
     <div className="flex flex-col gap-6">

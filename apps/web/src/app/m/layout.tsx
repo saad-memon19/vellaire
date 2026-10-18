@@ -2,11 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { Icon, IconName } from '@/components/icons';
 import { InstallBanner } from '@/components/pwa';
-import { cx, Loading, ScreenError } from '@/components/ui';
+import { cx } from '@/components/ui';
 import { useMe } from '@/lib/api';
+import { useOnline } from '@/lib/online';
 import { NoCompany } from './no-card';
+import { AppError, AppOffline, AppSplash, AppUpdate, rememberUser } from './system';
 
 const TABS: { href: string; label: string; icon: IconName }[] = [
   { href: '/m', label: 'My card', icon: 'dCard' },
@@ -23,9 +26,30 @@ const FULL_SCREEN = ['/m/qr', '/m/leads/scan', '/m/edit/photo', '/m/edit/bio', '
 export default function EmployeeLayout({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const { data: me, error, mutate: reloadMe } = useMe();
-  if (error) return <ScreenError error={error} retry={() => reloadMe()} />;
-  if (!me) return <Loading className="min-h-screen" />;
+  const online = useOnline();
+  const [update, setUpdate] = useState(false);
+
+  useEffect(() => {
+    if (me) rememberUser({ name: me.user.name, email: me.user.email, company: me.company?.name });
+  }, [me]);
+  // The service worker took over with a new version of the app
+  useEffect(() => {
+    const show = () => setUpdate(true);
+    window.addEventListener('vellaire:update', show);
+    return () => window.removeEventListener('vellaire:update', show);
+  }, []);
+
+  // Signed out: no account to load
+  if (path === '/m/signed-out') return <>{children}</>;
+  if (error) {
+    const status = (error as { status?: number }).status;
+    if (status === 401) return <AppSplash />;
+    if (!online || status === 0) return <div className="mx-auto max-w-[440px] bg-pearl px-5 pt-6"><AppOffline retry={() => reloadMe()} /></div>;
+    return <AppError error={error} retry={() => reloadMe()} />;
+  }
+  if (!me) return <AppSplash />;
   if (!me.company) return <NoCompany />;
+  if (update) return <AppUpdate later={() => setUpdate(false)} />;
   const active = (h: string) => (h === '/m' ? path === '/m' || path === '/m/edit' : path.startsWith(h));
   const isEdit = path === '/m/edit';
   if (FULL_SCREEN.some((p) => path.startsWith(p)))

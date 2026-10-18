@@ -251,5 +251,32 @@ export function ServiceWorker() {
       // Not fatal: the app works the same, only without the offline page
     });
   }, []);
+  useNewVersionCheck();
   return null;
+}
+
+/**
+ * Tells the app when a newer build is live: on start, when the app comes back to the screen, and every 30 minutes.
+ * The employee app listens for "vellaire:update" and shows "A new version is ready".
+ */
+function useNewVersionCheck() {
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'production') return;
+    const mine = process.env.NEXT_PUBLIC_BUILD_ID;
+    const check = () =>
+      fetch('/version', { cache: 'no-store' })
+        .then((r) => r.json())
+        .then((v: { build?: string }) => {
+          if (v.build && mine && v.build !== mine) window.dispatchEvent(new Event('vellaire:update'));
+        })
+        .catch(() => {});
+    const onShow = () => document.visibilityState === 'visible' && check();
+    check();
+    document.addEventListener('visibilitychange', onShow);
+    const t = setInterval(check, 30 * 60_000);
+    return () => {
+      document.removeEventListener('visibilitychange', onShow);
+      clearInterval(t);
+    };
+  }, []);
 }

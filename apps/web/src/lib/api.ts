@@ -28,13 +28,29 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
     throw new ApiError('You are offline. Check your connection and try again.', 0);
   }
   if (res.status === 401 && typeof window !== 'undefined' && !isSignInCall(path)) {
-    window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+    const here = window.location.pathname;
+    // In the employee app, someone who was signed in on this phone sees "Please sign in again"
+    let known = false;
+    try {
+      known = !!localStorage.getItem('vellaire.lastUser');
+    } catch {}
+    if (here === '/m/signed-out') {
+      // Already there: stay
+    } else if (here.startsWith('/m') && known) window.location.href = '/m/signed-out';
+    else window.location.href = `/signin?next=${encodeURIComponent(here + window.location.search)}`;
   }
   const text = await res.text();
   const data = text ? (() => { try { return JSON.parse(text); } catch { return text; } })() : null;
   if (!res.ok) {
     const msg = Array.isArray(data?.message) ? data.message[0] : data?.message || `Something went wrong (${res.status})`;
     throw new ApiError(msg, res.status);
+  }
+  // Signing out forgets what this phone kept for offline use: the person's QR and their name
+  if (path === '/auth/logout' && typeof window !== 'undefined') {
+    try {
+      localStorage.removeItem('vellaire.lastUser');
+    } catch {}
+    if ('caches' in window) caches.keys().then((keys) => keys.forEach((k) => caches.open(k).then((c) => c.delete('/api/me/qr')))).catch(() => {});
   }
   return data as T;
 }

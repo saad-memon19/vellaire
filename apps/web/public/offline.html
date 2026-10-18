@@ -6,18 +6,27 @@
 <meta name="theme-color" content="#17171B">
 <title>Offline · Vellaire</title>
 <style>
-  body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #F7F5F0; color: #17171B; font-family: system-ui, -apple-system, sans-serif; text-align: center; padding: 24px; box-sizing: border-box; }
-  img { width: 64px; height: 64px; border-radius: 16px; }
-  h1 { font-family: Georgia, 'Times New Roman', serif; font-weight: 400; font-size: 30px; margin: 20px 0 8px; }
-  p { color: #5E5952; font-size: 15px; line-height: 1.5; margin: 0 0 24px; }
-  button { height: 48px; padding: 0 22px; border: 0; border-radius: 10px; background: #17171B; color: #fff; font-size: 15px; font-weight: 600; }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; background: #F7F5F0; color: #17171B; font-family: system-ui, -apple-system, sans-serif; }
+  main { max-width: 440px; min-height: 100vh; margin: 0 auto; padding: 56px 20px 26px; display: flex; flex-direction: column; gap: 16px; }
+  .bar { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 12px; background: #FBF0DC; color: #8A5A12; font-size: 13px; }
+  .mid { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 18px; text-align: center; }
+  h1 { margin: 0; font-family: Georgia, 'Times New Roman', serif; font-weight: 400; font-size: 34px; line-height: 1.1; }
+  p { margin: 0; color: #5E5952; font-size: 15px; line-height: 1.55; }
+  .qr { align-self: center; padding: 18px; border-radius: 24px; background: #FFFFFF; border: 1px solid #EEE8DD; box-shadow: 0 24px 60px rgba(23,23,27,0.12); }
+  .qr img { display: block; width: 240px; height: 240px; }
+  button { height: 52px; border-radius: 14px; border: 1px solid #D9D2C4; background: #FFFFFF; color: #17171B; font-size: 15px; font-family: inherit; }
 </style>
 </head>
 <body>
   <main>
-    <img src="/icon-192.png" alt="">
-    <h1>You are offline</h1>
-    <p>Vellaire needs the internet to open your card.<br>Check your connection and try again.</p>
+    <div class="bar">No internet connection</div>
+    <div class="mid">
+      <h1>You are offline</h1>
+      <p>Your card still works. Show your QR code or tap your NFC card as usual. New views and leads appear when you are back online.</p>
+      <!-- The service worker keeps the signed-in person's last QR; it hides itself if there is none -->
+      <div class="qr" id="qr"><img src="/api/me/qr" alt="QR code for my card" onerror="document.getElementById('qr').remove()"></div>
+    </div>
     <button type="button" onclick="location.reload()">Try again</button>
   </main>
 </body>

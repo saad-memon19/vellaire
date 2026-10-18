@@ -1,6 +1,8 @@
 // Vellaire service worker: makes the app installable and shows a friendly page when offline.
 // Pages and API calls always come from the network, so people never see stale data.
-const CACHE = 'vellaire-v1';
+const CACHE = 'vellaire-v2';
+// The signed-in person's QR, kept so it still shows without internet (the offline page and Show QR use it)
+const MY_QR = '/api/me/qr';
 const OFFLINE = '/offline.html';
 const PRECACHE = [OFFLINE, '/icon-192.png'];
 
@@ -20,6 +22,21 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (url.origin !== location.origin) return;
 
+  // My QR: network first, the last copy when offline
+  if (url.pathname === MY_QR) {
+    event.respondWith(
+      fetch(request)
+        .then((res) => {
+          if (res.ok) {
+            const copy = res.clone();
+            caches.open(CACHE).then((cache) => cache.put(MY_QR, copy));
+          }
+          return res;
+        })
+        .catch(() => caches.match(MY_QR)),
+    );
+    return;
+  }
   // Pages: network first, the offline page when there is no connection
   if (request.mode === 'navigate') {
     event.respondWith(fetch(request).catch(() => caches.match(OFFLINE)));

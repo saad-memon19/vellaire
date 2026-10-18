@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 import { AuthLayout, LinkSent } from '@/components/auth-layout';
-import { Icon } from '@/components/icons';
+import { Icon, Seal } from '@/components/icons';
+import { useInstalledApp } from '@/components/pwa';
 import { Button, Input } from '@/components/ui';
 import { api } from '@/lib/api';
 
@@ -21,7 +22,7 @@ const goNext = (redirect: string) => {
   window.location.href = next?.startsWith('/') && !next.startsWith('//') ? next : redirect;
 };
 
-function SignInForm() {
+function SignInForm({ app = false }: { app?: boolean }) {
   const params = useSearchParams();
   const [email, setEmail] = useState(params.get('email') || '');
   const [password, setPassword] = useState('');
@@ -73,7 +74,7 @@ function SignInForm() {
   return (
     <form onSubmit={submit} className="flex flex-col gap-6">
       <div className="flex flex-col gap-2.5">
-        <h1 className="font-display text-[44px] font-normal leading-[1.05]">Sign in</h1>
+        <h1 className={app ? 'font-display text-[40px] font-medium leading-[1.05]' : 'font-display text-[44px] font-normal leading-[1.05]'}>Sign in</h1>
         <p className="text-[15px] text-stone">Use your work email and password.</p>
       </div>
       <div className="flex flex-col gap-2">
@@ -101,40 +102,67 @@ function SignInForm() {
       <Button type="submit" variant="ink" size="lg" loading={busy === 'password'} className="h-12.5">
         Sign in <Icon name="arrow" size={18} className="text-gold-soft" />
       </Button>
-      <div className="flex items-center gap-4 text-[12px] tracking-[0.14em] text-[#8A857B]">
-        <div className="h-px flex-1 bg-[#E2DCD0]" />
-        OR
-        <div className="h-px flex-1 bg-[#E2DCD0]" />
-      </div>
+      {/* In the installed app only the ways that work are offered */}
+      {(!app || providers.google || providers.microsoft || providers.email) && (
+        <div className="flex items-center gap-4 text-[12px] tracking-[0.14em] text-[#8A857B]">
+          <div className="h-px flex-1 bg-[#E2DCD0]" />
+          OR
+          <div className="h-px flex-1 bg-[#E2DCD0]" />
+        </div>
+      )}
       <div className="flex flex-col gap-3">
-        <Button size="lg" onClick={() => oauth('google')}>
-          Continue with Google
-        </Button>
-        <Button size="lg" onClick={() => oauth('microsoft')}>
-          Continue with Microsoft
-        </Button>
+        {(!app || providers.google) && (
+          <Button size="lg" onClick={() => oauth('google')}>
+            Continue with Google
+          </Button>
+        )}
+        {(!app || providers.microsoft) && (
+          <Button size="lg" onClick={() => oauth('microsoft')}>
+            Continue with Microsoft
+          </Button>
+        )}
         {providers.email && (
           <Button size="lg" loading={busy === 'link'} onClick={emailLink}>
             Email me a sign-in link
           </Button>
         )}
       </div>
-      <div className="flex flex-wrap justify-between gap-2 text-[14px] text-stone">
-        <span>
-          New to Vellaire?{' '}
-          <Link href="/signup" className="text-gold-text hover:text-ink">
-            Create an account
-          </Link>
-        </span>
-        <a href="mailto:support@vellaire.app" className="text-gold-text hover:text-ink">
-          Trouble signing in
-        </a>
-      </div>
+      {app ? (
+        <p className="text-center text-[13px] text-stone-2">No account? Ask your company admin to invite you.</p>
+      ) : (
+        <div className="flex flex-wrap justify-between gap-2 text-[14px] text-stone">
+          <span>
+            New to Vellaire?{' '}
+            <Link href="/signup" className="text-gold-text hover:text-ink">
+              Create an account
+            </Link>
+          </span>
+          <a href="mailto:support@vellaire.app" className="text-gold-text hover:text-ink">
+            Trouble signing in
+          </a>
+        </div>
+      )}
     </form>
   );
 }
 
 export default function SignInPage() {
+  const installed = useInstalledApp();
+  // The installed app (on a phone) gets the design's app sign-in screen
+  if (installed)
+    return (
+      <main className="mx-auto flex min-h-screen max-w-[440px] flex-col gap-4 bg-pearl px-5 pb-[30px] pt-14">
+        <div className="flex items-center gap-2.5">
+          <Seal size={22} className="text-gold" />
+          <span className="font-display text-[15px] font-semibold tracking-[0.24em]">VELLAIRE</span>
+        </div>
+        <div className="flex flex-1 flex-col justify-center">
+          <Suspense>
+            <SignInForm app />
+          </Suspense>
+        </div>
+      </main>
+    );
   return (
     <AuthLayout cardText="Welcome back" quote="Your identity, impeccably shared.">
       <div className="w-full max-w-100">
